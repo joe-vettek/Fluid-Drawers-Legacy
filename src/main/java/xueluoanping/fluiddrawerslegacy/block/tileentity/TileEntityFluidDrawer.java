@@ -384,6 +384,15 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         protected void onContentsChanged() {
 
 
+            if(this.getFluid().getAmount()>0 &&getFluid()!=FluidStack.EMPTY &&getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
+            {
+                setCacheFluid(getFluid().getFluid());
+            }
+            else {
+//                setCacheFluid(Fluids.EMPTY);
+            }
+
+
             inventoryChanged();
 
             super.onContentsChanged();

@@ -1,6 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
 
 import com.jaquadro.minecraft.storagedrawers.inventory.ContainerDrawers;
@@ -12,6 +13,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.AtlasTexture;
@@ -87,7 +89,13 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
             int amount = fluidStackDown.getAmount();
             if (capacity < amount) amount = capacity;
             List<ITextComponent> list = new ArrayList<>();
-            list.add(new TranslationTextComponent(new FluidStack(fluidStackDown, amount).getTranslationKey()));
+            if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
+                TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
+                if (fluidStackDown.getAmount() <= 0 &&
+                        betterFluidHandler.getCacheFluid() !=Fluids.EMPTY) {
+                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);}
+            }
+            list.add(new TranslationTextComponent(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getTranslationKey()));
             renderComponentTooltip(stack, list, mouseX, mouseY);
 
         }

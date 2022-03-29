@@ -68,7 +68,9 @@ public class JadeCompact implements IWailaPlugin {
 
                                 event.getCurrentTip().add(tail);
                             } else {
+
                                 if(!tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))return;
+
                                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
                                 if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
                                     ITextComponent tail = event.getCurrentTip().get(event.getCurrentTip().size() - 1);
