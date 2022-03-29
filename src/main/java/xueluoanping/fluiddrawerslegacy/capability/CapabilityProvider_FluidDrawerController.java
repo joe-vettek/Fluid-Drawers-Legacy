@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api.capability;
+package xueluoanping.fluiddrawerslegacy.capability;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.*;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
@@ -20,8 +20,6 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.api.drawer.FluidDrawer;
-import xueluoanping.fluiddrawerslegacy.api.drawer.FluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
@@ -359,60 +357,60 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
     }
 
-    private static class FluidSlotRecord implements Comparable<FluidSlotRecord> {
-
-        private static final IDrawerAttributes EMPTY_ATTRS = new EmptyDrawerAttributes();
-        private static final int PRI_LOCKED = 0;
-        private static final int PRI_LOCKED_VOID = 1;
-        private static final int PRI_NORMAL = 2;
-        private static final int PRI_VOID = 3;
-        private static final int PRI_EMPTY = 4;
-        private static final int PRI_LOCKED_EMPTY = 5;
-
-        private final FluidDrawerGroup group;
-        private final int slot;
-        private final BlockPos pos;
-        private final int priority;
-
-        int index;
-
-        FluidSlotRecord(FluidDrawerGroup group, int slot, BlockPos pos) {
-            this.group = group;
-            this.slot = slot;
-            this.pos = pos;
-            this.priority = computePriority();
-        }
-
-        int computePriority() {
-            FluidDrawer drawer = group.getFluidDrawer(slot);
-            return 0;
-//            IDrawerAttributes attrs = group.hasCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null)
-//                    ? Objects.requireNonNull(group.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null))
-//                    : EMPTY_ATTRS;
-//            if (drawer.isEmpty()) {
-//                return attrs.isItemLocked(LockAttribute.LOCK_EMPTY) ? PRI_LOCKED_EMPTY : PRI_EMPTY;
-//            } else if (attrs.isVoid()) {
-//                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED_VOID : PRI_VOID;
-//            } else {
-//                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED : PRI_NORMAL;
-//            }
-        }
-
-        FluidDrawer getDrawer() {
-            return group.getFluidDrawer(slot);
-        }
-
-        boolean isDrawerValid() {
-            return group.isFluidDrawerGroupValid();
-        }
-
-        @Override
-        public int compareTo(FluidSlotRecord other) {
-            int diff = priority - other.priority;
-            return diff != 0 ? diff : pos.compareTo(other.pos);
-        }
-
-    }
+//    private static class FluidSlotRecord implements Comparable<FluidSlotRecord> {
+//
+//        private static final IDrawerAttributes EMPTY_ATTRS = new EmptyDrawerAttributes();
+//        private static final int PRI_LOCKED = 0;
+//        private static final int PRI_LOCKED_VOID = 1;
+//        private static final int PRI_NORMAL = 2;
+//        private static final int PRI_VOID = 3;
+//        private static final int PRI_EMPTY = 4;
+//        private static final int PRI_LOCKED_EMPTY = 5;
+//
+//        private final FluidDrawerGroup group;
+//        private final int slot;
+//        private final BlockPos pos;
+//        private final int priority;
+//
+//        int index;
+//
+//        FluidSlotRecord(FluidDrawerGroup group, int slot, BlockPos pos) {
+//            this.group = group;
+//            this.slot = slot;
+//            this.pos = pos;
+//            this.priority = computePriority();
+//        }
+//
+//        int computePriority() {
+//            FluidDrawer drawer = group.getFluidDrawer(slot);
+//            return 0;
+////            IDrawerAttributes attrs = group.hasCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null)
+////                    ? Objects.requireNonNull(group.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null))
+////                    : EMPTY_ATTRS;
+////            if (drawer.isEmpty()) {
+////                return attrs.isItemLocked(LockAttribute.LOCK_EMPTY) ? PRI_LOCKED_EMPTY : PRI_EMPTY;
+////            } else if (attrs.isVoid()) {
+////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED_VOID : PRI_VOID;
+////            } else {
+////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED : PRI_NORMAL;
+////            }
+//        }
+//
+//        FluidDrawer getDrawer() {
+//            return group.getFluidDrawer(slot);
+//        }
+//
+//        boolean isDrawerValid() {
+//            return group.isFluidDrawerGroupValid();
+//        }
+//
+//        @Override
+//        public int compareTo(FluidSlotRecord other) {
+//            int diff = priority - other.priority;
+//            return diff != 0 ? diff : pos.compareTo(other.pos);
+//        }
+//
+//    }
 
     @SubscribeEvent
     public static void StopForSave(WorldEvent.Unload event) {

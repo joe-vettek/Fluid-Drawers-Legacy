@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api.event;
+package xueluoanping.fluiddrawerslegacy.event;
 
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
@@ -17,20 +17,16 @@ import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidActionResult;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.EmptyFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.api.capability.CapabilityProvider_FluidControllerProxy;
-import xueluoanping.fluiddrawerslegacy.api.capability.CapabilityProvider_FluidDrawerController;
+import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidControllerProxy;
+import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
 
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ControllerFluidCapabilityHandler {

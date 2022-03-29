@@ -9,6 +9,7 @@ import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
+import com.jaquadro.minecraft.storagedrawers.item.ItemQuantifyKey;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -63,6 +64,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     public static final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
     public static final VoxelShape top = Block.box(0, 15, 0, 16, 16, 16);
 
+    
 //    public FluidDrawer(int drawerCount, boolean halfDepth, int storageUnits, Properties properties) {
 //        super(properties);
 //    }
@@ -92,9 +94,30 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
 
                 IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
                 if (_attrs instanceof IDrawerAttributesModifiable) {
-                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
-                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
+//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+//                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
+//                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
+                    return ActionResultType.PASS;
+                }
+
+            }
+            if (heldStack.getItem() == ModItems.QUANTIFY_KEY) {
+
+                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
+                if (_attrs instanceof IDrawerAttributesModifiable) {
+//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+//                    attrs.setIsShowingQuantity(!attrs.isShowingQuantity());
+                    return ActionResultType.PASS;
+                }
+
+            }
+            if (heldStack.getItem() == ModItems.SHROUD_KEY) {
+
+                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
+                if (_attrs instanceof IDrawerAttributesModifiable) {
+//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+//                    attrs.setIsSealed(!attrs.isSealed());
+                    return ActionResultType.PASS;
                 }
 
             }
@@ -283,9 +306,23 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
 
                     });
             stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
-            CompoundNBT nbtm = new CompoundNBT();
-            nbtm.putInt("Multiplier", tile.upgrades().getStorageMultiplier());
-            stack.addTagElement("Extra", nbtm);
+
+
+            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
+            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_EMPTY))
+                attrs.add(LockAttribute.LOCK_EMPTY);
+            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_POPULATED))
+                attrs.add(LockAttribute.LOCK_POPULATED);
+            if (!attrs.isEmpty()) {
+
+                stack.getOrCreateTag().putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
+            }
+
+            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isConcealed())
+                stack.getOrCreateTag().putBoolean("Shr", true);
+
+            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isShowingQuantity())
+                stack.getOrCreateTag().putBoolean("Qua", true);
         }
         return stack;
 //        return super.getCloneItemStack(blockReader, pos, state);

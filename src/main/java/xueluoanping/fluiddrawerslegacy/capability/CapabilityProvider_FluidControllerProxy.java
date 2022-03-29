@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api.capability;
+package xueluoanping.fluiddrawerslegacy.capability;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
 import net.minecraft.util.Direction;

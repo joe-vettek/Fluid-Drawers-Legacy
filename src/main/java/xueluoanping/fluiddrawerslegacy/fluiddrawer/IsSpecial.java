@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api.fluiddrawer;
+package xueluoanping.fluiddrawerslegacy.fluiddrawer;
 
 public interface IsSpecial {
     default boolean isspecial() {
