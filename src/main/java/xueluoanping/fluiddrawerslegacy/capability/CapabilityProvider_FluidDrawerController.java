@@ -5,6 +5,7 @@ import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import net.minecraft.block.Block;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -228,6 +229,9 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 if (i >= drawerDataList.size())
                     break;
                 if (drawerDataList.get(i).getTank().isFull())
+                    continue;
+                if(drawerDataList.get(0).getTank().getCacheFluid()!= Fluids.EMPTY
+                        &&drawerDataList.get(0).getTank().getCacheFluid().getFluid()!= resource.getFluid())
                     continue;
                 if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
                         || drawerDataList.get(i).getTank().getFluid().getAmount() == 0) {

@@ -14,6 +14,8 @@ import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -45,7 +47,11 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
     private IDrawerAttributesModifiable drawerAttributes = new DrawerAttributes();
 
     private GroupData groupData = new GroupData(1);
-//    public static int Capacity = 32000;
+
+
+
+    //    public static int Capacity = 32000;
+
 
     public TileEntityFluidDrawer() {
         super(ModContents.tankTileEntityType);
@@ -168,6 +174,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
     }
 
     public class GroupData extends StandardDrawerGroup {
+
         private final LazyOptional<?> attributesHandler = LazyOptional.of(TileEntityFluidDrawer.this::getDrawerAttributes);
         public final betterFluidHandler tank;
         private final LazyOptional<betterFluidHandler> tankHandler;
@@ -325,7 +332,14 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
     }
 
     public class betterFluidHandler extends FluidTank {
+        private Fluid cacheFluid= Fluids.EMPTY;
+        public Fluid getCacheFluid() {
+            return cacheFluid;
+        }
 
+        private void setCacheFluid(Fluid cacheFluid) {
+            this.cacheFluid = cacheFluid;
+        }
 
         public betterFluidHandler(int capacity) {
             super(capacity);
@@ -335,16 +349,40 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 //            发送信息时调整容量大小
             if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
                 this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
-            return writeToNBT(new CompoundNBT());
+            CompoundNBT nbt =new CompoundNBT();
+            if(getCacheFluid()!= Fluids.EMPTY&&
+                    fluid.getFluid()!=Fluids.EMPTY&&
+                    getCacheFluid()!=fluid.getFluid())
+            {
+                setCacheFluid(getFluid().getFluid());
+
+            }
+            if(getCacheFluid()==Fluids.EMPTY&&
+            getFluid().getAmount()>0)
+            {
+                setCacheFluid(getFluid().getFluid());
+            }
+//            FluidDrawersLegacyMod.logger(fluid.getTranslationKey().toString());
+            nbt.putString("cache",cacheFluid.getRegistryName().toString());
+            return writeToNBT(nbt);
         }
 
         public void deserializeNBT(CompoundNBT tank) {
+           if(tank.contains("cache"))
+           {
+               String[] x= tank.getString("cache").split(":");
+               ResourceLocation res =new ResourceLocation(x[0],x[1]);
+
+               Fluid fluid=ForgeRegistries.FLUIDS.getValue(res);
+               setCacheFluid(cacheFluid);
+           }
             readFromNBT(tank);
         }
 
         //        need to override ,or not sync
         @Override
         protected void onContentsChanged() {
+
 
             inventoryChanged();
 
@@ -359,6 +397,14 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         public int fill(FluidStack resource, FluidAction action) {
             if (upgrades().hasVendingUpgrade())
                 return 0;
+            if(getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
+            {
+                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
+                if(getCacheFluid().getFluid()!= Fluids.EMPTY
+                        &&getCacheFluid()!=resource.getFluid()){
+                    return 0;
+                }
+            }
             if ((this.getCapacity() - fluid.getAmount() - resource.getAmount()) < 0
                     && upgrades().write(new CompoundNBT()).toString().contains("storagedrawers:void_upgrade")) {
                 if (resource.isEmpty() || !isFluidValid(resource)) {

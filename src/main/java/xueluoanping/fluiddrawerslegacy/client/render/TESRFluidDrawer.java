@@ -1,22 +1,31 @@
 package xueluoanping.fluiddrawerslegacy.client.render;
 
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import static net.minecraft.client.renderer.tileentity.BellTileEntityRenderer.BELL_RESOURCE_LOCATION;
@@ -52,6 +61,47 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         renderFluid(tile, matrixStackIn, bufferIn, combinedLightIn, animationTime);
         matrixStackIn.popPose();
 
+        matrixStackIn.pushPose();
+        TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+
+        if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
+            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                FontRenderer fontRenderer = this.renderer.getFont();
+                matrixStackIn.translate(0.5, 0.15, 1);
+                matrixStackIn.scale(0.01f, 0.01f, 0.01f);
+                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+                IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()) + "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")");
+                ClientPlayerEntity player = Minecraft.getInstance().player;
+                Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - tile.getBlockPos().getX()
+                        , player.getPosition(1.0f).y() - tile.getBlockPos().getY()
+                        , player.getPosition(1.0f).z() - tile.getBlockPos().getZ());
+//                Direction direction = Direction.fromNormal((int) vector3d.x, (int) vector3d.y, (int) vector3d.z);
+//                matrixStackIn.translate((float) (-textWidth) / 2.0F,0,0);
+                FluidDrawersLegacyMod.logger(vector3d.toString());
+                fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey()) + "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")"
+                        , (float) (-textWidth) / 2.0F, 0.5F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                txtBuffer.endBatch();
+//                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()), 0F, 0F, 0xFFFFF);
+            }
+
+        } else {
+            if (betterFluidHandler.getFluid().getFluid() != Fluids.EMPTY) {
+                FluidStack fluidStackDown = betterFluidHandler.getFluid();
+                FontRenderer fontRenderer = this.renderer.getFont();
+                matrixStackIn.translate(0.5, 0.15, 1);
+                matrixStackIn.scale(0.01f, 0.01f, 0.01f);
+                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+                IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
+                fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey())
+                        , (float) (-textWidth) / 2.0F, 0.5F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                txtBuffer.endBatch();
+
+            }
+        }
+        matrixStackIn.popPose();
 //        }
         render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
     }
@@ -80,9 +130,22 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
                     fluidStack[0] = handler.getFluidInTank(0);
 //                    FluidDrawersLegacyMod.LOGGER.info(""+handler.getFluidInTank(0));
                 });
-        if (fluidStack[0] == null || fluidStack[0].getFluid() == Fluids.EMPTY) return;
+        if (fluidStack[0] == null || (fluidStack[0].getFluid() == Fluids.EMPTY) && !tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
+            return;
         else fluidStackDown = fluidStack[0];
+//        FluidDrawersLegacyMod.logger(((TileEntityFluidDrawer.betterFluidHandler) tile.getTank()).getCacheFluid().getDisplayName().toString());
 
+        if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
+            TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+            if (fluidStackDown.getAmount() <= 0 &&
+                    betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+
+                fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);
+//                FontRenderer fontRenderer = this.renderer.getFont();
+//                matrixStackIn.mulPose(new Quaternion(0, 0, 0, true));
+//                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()),0F, 0F, 0xFFFFF);
+            }
+        }
 //        Minecraft mc = Minecraft.getInstance();
 //        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
         FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
@@ -93,8 +156,8 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         int capacity = tile.getEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
-        float r=(float) amount / (float) capacity;
-        if(tile.upgrades().hasVendingUpgrade())r=1f;
+        float r = (float) amount / (float) capacity;
+        if (tile.upgrades().hasVendingUpgrade()) r = 1f;
         float height = r * 0.875f;
         float vHeight = (still.getV1() - still.getV0()) * (1f - r);
         matrixStackIn.pushPose();
