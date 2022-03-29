@@ -1,6 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.plugins.jade;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.block.BlockSlave;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
@@ -9,9 +10,12 @@ import mcp.mobius.waila.api.IWailaPlugin;
 import mcp.mobius.waila.api.TooltipPosition;
 import mcp.mobius.waila.api.WailaPlugin;
 import mcp.mobius.waila.api.event.WailaTooltipEvent;
+import net.minecraft.client.resources.I18n;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -50,7 +54,7 @@ public class JadeCompact implements IWailaPlugin {
 
                             String string = "Contains 3200mb of water";
 //                            String userInfo = String.format(string, name, amount);
-                            if (fluidStack.getAmount() > 0 ) {
+                            if (fluidStack.getAmount() > 0) {
                                 if (tile.upgrades().hasVendingUpgrade()) fluidStack.setAmount(Integer.MAX_VALUE);
                                 ITextComponent tail = event.getCurrentTip().get(event.getCurrentTip().size() - 1);
                                 event.getCurrentTip().set(event.getCurrentTip().size() - 1, new TranslationTextComponent("statement.fluiddrawerslegacy.fluiddrawer1")
@@ -59,7 +63,20 @@ public class JadeCompact implements IWailaPlugin {
                                         .append(new TranslationTextComponent("statement.fluiddrawerslegacy.fluiddrawer2"))
                                         .append(new TranslationTextComponent(fluidStack.getTranslationKey())
                                         ));
+                                if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
+                                    event.getCurrentTip().add(new TranslationTextComponent(I18n.get("tooltip.storagedrawers.waila.locked")));
+
                                 event.getCurrentTip().add(tail);
+                            } else {
+                                TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
+                                if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                                    ITextComponent tail = event.getCurrentTip().get(event.getCurrentTip().size() - 1);
+                                    event.getCurrentTip().set(event.getCurrentTip().size() - 1,
+                                            new TranslationTextComponent(new FluidStack(betterFluidHandler.getCacheFluid(), 1).getTranslationKey())
+                                    );
+                                    event.getCurrentTip().add(new TranslationTextComponent(I18n.get("tooltip.storagedrawers.waila.locked")));
+                                    event.getCurrentTip().add(tail);
+                                }
                             }
                         });
             }
