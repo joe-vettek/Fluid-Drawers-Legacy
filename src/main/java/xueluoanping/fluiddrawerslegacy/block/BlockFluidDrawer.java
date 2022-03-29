@@ -399,7 +399,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
             return 0;
         } else {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) blockAccess.getBlockEntity(pos);
-            FluidDrawersLegacyMod.logger("get"+tile.isRedstone()+tile.getRedstoneLevel() +tile.upgrades().serializeNBT());
+//            FluidDrawersLegacyMod.logger("get"+tile.isRedstone()+tile.getRedstoneLevel() +tile.upgrades().serializeNBT());
             return tile != null && tile.isRedstone() ? tile.getRedstoneLevel() : 0;
         }
     }

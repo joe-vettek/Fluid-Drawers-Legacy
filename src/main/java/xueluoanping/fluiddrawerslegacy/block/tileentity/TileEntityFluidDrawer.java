@@ -164,7 +164,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
     @Override
     public int getRedstoneLevel() {
-        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
+//        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
         return (int) (((float) getTankFLuid().getAmount() / (float) getEffectiveCapacity()) * 15);
     }
 
@@ -408,7 +408,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
                 return 0;
             if(getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
             {
-                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
+//                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
                 if(getCacheFluid().getFluid()!= Fluids.EMPTY
                         &&getCacheFluid()!=resource.getFluid()){
                     return 0;
