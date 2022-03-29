@@ -92,8 +92,9 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid() !=Fluids.EMPTY) {
-                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);}
+                        betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);
+                }
             }
             list.add(new TranslationTextComponent(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getTranslationKey()));
             renderComponentTooltip(stack, list, mouseX, mouseY);
@@ -233,38 +234,18 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
         this.font.draw(stack, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752);
         FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
         int amount = fluidStackDown.getAmount();
-        float labelLeft = 67F;
-        if(this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
-            amount=Integer.MAX_VALUE;
-//        每个数量级3.0f
-        if (amount < 10) {
-            labelLeft = 79.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 100) {
-            labelLeft = 76.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 1000) {
-            labelLeft = 73.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 10000) {
-            labelLeft = 70.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 100000) {
-            labelLeft = 67.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 1000000) {
-            labelLeft = 64.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-        } else if (amount < 10000000) {
-            labelLeft = 61.5F;
-            this.font.draw(stack, String.valueOf(amount) + "mB", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
-//            labelLeft = 73.5F;
-//            this.font.draw(stack, String.valueOf(amount/1000) + "B", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
+        String amountLabel = String.valueOf(amount) + "mB";
+        int textWidth = font.width(amountLabel);
 
-        } else {
-            labelLeft = 84F;
-            this.font.draw(stack, "∞", labelLeft, (float) (this.imageHeight - 144.5 + 2), 2237562);
+        if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
+            amount = Integer.MAX_VALUE;
+//        每个数量级3.0f
+        if (amount > 10000000) {
+            amountLabel = "∞";
+            textWidth = font.width(amountLabel);
         }
+        this.font.draw(stack, amountLabel, (float) ((this.imageWidth - textWidth) / 2.0), (float) (this.imageHeight - 144.5 + 2), 2237562);
+
 
     }
 
@@ -308,11 +289,11 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
         h = (float) amount / (float) capacity;
         if (((float) amount / (float) capacity) <= 0.0625 && ((float) amount / (float) capacity) >= 0.01)
             h = 0.01f;
-        if (((float) amount / (float) capacity) > 0.9375 && ((float) amount / (float) capacity) <0.99)
+        if (((float) amount / (float) capacity) > 0.9375 && ((float) amount / (float) capacity) < 0.99)
             h = 0.9375f;
-        int h0 = (int) (h * 16.0f) ;
-        if(this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
-            h0=16;
+        int h0 = (int) (h * 16.0f);
+        if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
+            h0 = 16;
 //        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
 
         renderFluidStackInGUI(stack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);

@@ -20,6 +20,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fluids.FluidAttributes;
@@ -61,49 +62,115 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         renderFluid(tile, matrixStackIn, bufferIn, combinedLightIn, animationTime);
         matrixStackIn.popPose();
 
-        matrixStackIn.pushPose();
+
         TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+        matrixStackIn.pushPose();
+        if (betterFluidHandler.getFluid().getFluid() != Fluids.EMPTY&&
+        tile.getDrawerAttributes().isConcealed()) {
+            FluidStack fluidStackDown = betterFluidHandler.getFluid();
+            FontRenderer fontRenderer = this.renderer.getFont();
+            ClientPlayerEntity player = Minecraft.getInstance().player;
+            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+            matrixStackIn.scale(0.007f, 0.007f, 0.007f);
+            IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+            int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
+            fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey())
+                    , (float) (-textWidth) / 2.0F, -9F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+            txtBuffer.endBatch();
+
+        }
+        matrixStackIn.popPose();
+
+
+        matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
             if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
                 FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 FontRenderer fontRenderer = this.renderer.getFont();
-                matrixStackIn.translate(0.5, 0.15, 1);
-                matrixStackIn.scale(0.01f, 0.01f, 0.01f);
-                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+//                matrixStackIn.translate(0.5, 0.15, 1);
+
+
                 IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-                int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()) + "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")");
+                String label ="("+I18n.get("tooltip.storagedrawers.waila.locked")+")";
+                int textWidth = fontRenderer.width(label);
                 ClientPlayerEntity player = Minecraft.getInstance().player;
-                Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - tile.getBlockPos().getX()
-                        , player.getPosition(1.0f).y() - tile.getBlockPos().getY()
-                        , player.getPosition(1.0f).z() - tile.getBlockPos().getZ());
-//                Direction direction = Direction.fromNormal((int) vector3d.x, (int) vector3d.y, (int) vector3d.z);
-//                matrixStackIn.translate((float) (-textWidth) / 2.0F,0,0);
-                FluidDrawersLegacyMod.logger(vector3d.toString());
-                fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey()) + "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")"
-                        , (float) (-textWidth) / 2.0F, 0.5F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+//                FluidDrawersLegacyMod.logger(vector3d + ""+d);
+                matrixStackIn.scale(0.007f, 0.007f, 0.007f);
+
+                fontRenderer.drawInBatch(label
+                        , (float) (-textWidth) / 2.0F, 0F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
                 txtBuffer.endBatch();
 //                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()), 0F, 0F, 0xFFFFF);
             }
 
-        } else {
-            if (betterFluidHandler.getFluid().getFluid() != Fluids.EMPTY) {
-                FluidStack fluidStackDown = betterFluidHandler.getFluid();
-                FontRenderer fontRenderer = this.renderer.getFont();
-                matrixStackIn.translate(0.5, 0.15, 1);
-                matrixStackIn.scale(0.01f, 0.01f, 0.01f);
-                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
-                IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
-                int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
-                fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey())
-                        , (float) (-textWidth) / 2.0F, 0.5F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
-                txtBuffer.endBatch();
+        }
+        matrixStackIn.popPose();
 
+        matrixStackIn.pushPose();
+
+        if (tile.getDrawerAttributes().isShowingQuantity()) {
+            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                FontRenderer fontRenderer = this.renderer.getFont();
+//                matrixStackIn.translate(0.5, 0.15, 1);
+
+
+                IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
+                int amount = fluidStackDown.getAmount();
+                String label = String.valueOf(amount) + "mB";
+                int textWidth = fontRenderer.width(label);
+                ClientPlayerEntity player = Minecraft.getInstance().player;
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+//                FluidDrawersLegacyMod.logger(vector3d + ""+d);
+                matrixStackIn.scale(0.007f, 0.007f, 0.007f);
+
+                fontRenderer.drawInBatch(label
+                        , (float) (-textWidth) / 2.0F, -18F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                txtBuffer.endBatch();
+//                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()), 0F, 0F, 0xFFFFF);
             }
+
         }
         matrixStackIn.popPose();
 //        }
         render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
+    }
+
+    private void handleMatrixAngle(MatrixStack matrixStackIn, ClientPlayerEntity player, BlockPos pos) {
+        Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - pos.getX() - 0.5
+                , player.getPosition(0f).y() - pos.getY()
+                , player.getPosition(0f).z() - pos.getZ() - 0.5);
+
+        Direction d = Direction.getNearest(vector3d.x, vector3d.y, vector3d.z);
+        if (d == Direction.DOWN || d == Direction.UP) {
+            if (vector3d.x > 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.EAST;
+            if (vector3d.x < 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.WEST;
+            if (vector3d.x > 0 && Math.abs(vector3d.x) < Math.abs(vector3d.z)) d = Direction.SOUTH;
+            if (vector3d.x < 0 && Math.abs(vector3d.x) < Math.abs(vector3d.z)) d = Direction.NORTH;
+        }
+        switch (d) {
+            case SOUTH:
+                matrixStackIn.translate(0.5, 0.15, 1);
+                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+                break;
+            case NORTH:
+                matrixStackIn.mulPose(new Quaternion(0, 0, 180, true));
+                matrixStackIn.translate(-0.5, -0.15, 0);
+                break;
+            case EAST:
+                matrixStackIn.mulPose(new Quaternion(0, 270, 180, true));
+                matrixStackIn.translate(-0.5, -0.15, -1);
+                break;
+            case WEST:
+                matrixStackIn.mulPose(new Quaternion(0, 90, 180, true));
+                matrixStackIn.translate(0.5, -0.15, 0);
+                break;
+            default:
+                matrixStackIn.scale(0.01f, 0.01f, 0.01f);
+                break;
+        }
     }
 
     public void render(float p_112234_, MatrixStack poseStack, IRenderTypeBuffer bufferSource, int p_112237_, int p_112238_) {
