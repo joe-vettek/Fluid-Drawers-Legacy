@@ -1,0 +1,76 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "fluiddrawerslegacy:fluiddrawer"
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "tank",
+          "target": "tank",
+          "op": "replace"
+        }
+      ]
+    },
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "Upgrades",
+          "target": "Upgrades",
+          "op": "replace"
+        }
+      ]
+    },
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "Lock",
+          "target": "Lock",
+          "op": "replace"
+        }
+      ]
+    },
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "Shr",
+          "target": "Shr",
+          "op": "replace"
+        }
+      ]
+    },
+    {
+      "function": "minecraft:copy_nbt",
+      "source": "block_entity",
+      "ops": [
+        {
+          "source": "Qua",
+          "target": "Qua",
+          "op": "replace"
+        }
+      ]
+    }
+  ]
+}
