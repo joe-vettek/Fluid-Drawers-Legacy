@@ -13,10 +13,10 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class FluidDrawerBakedModel implements IBakedModel {
+public class BakedModelFluidDrawer implements IBakedModel {
     private IBakedModel existingModel;
 
-    public FluidDrawerBakedModel(IBakedModel existingModel) {
+    public BakedModelFluidDrawer(IBakedModel existingModel) {
         this.existingModel = existingModel;
     }
 
