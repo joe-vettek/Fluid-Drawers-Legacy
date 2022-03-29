@@ -21,6 +21,7 @@ import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidControllerProxy;
 import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
@@ -29,6 +30,7 @@ import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawer
 import javax.annotation.Nullable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ControllerFluidCapabilityHandler {
     public static final ControllerFluidCapabilityHandler instance = new ControllerFluidCapabilityHandler();
     private static final ResourceLocation CAP_FLUID_CTRL = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluid_ctrl");
@@ -92,9 +94,6 @@ public class ControllerFluidCapabilityHandler {
     }
 
 
-    @SubscribeEvent
-    public void onItemTooltip(ItemTooltipEvent event) {
 
-    }
 
 }
