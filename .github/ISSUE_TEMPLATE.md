@@ -1,9 +1,9 @@
 ---
-
-title: [MC Version]Problem
 name: Issue Template
 about: report bugs.
-
+title: '[MC Version]Problem'
+labels: bug
+assignees: ''
 ---
 
 ## Game Version, Launcher Version, Mod Version
