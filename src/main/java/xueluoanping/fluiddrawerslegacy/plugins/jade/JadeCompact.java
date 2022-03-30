@@ -1,8 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.plugins.jade;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.block.BlockSlave;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
 import mcp.mobius.waila.api.IRegistrar;
@@ -15,11 +14,8 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
@@ -29,8 +25,7 @@ import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 @WailaPlugin
 public class JadeCompact implements IWailaPlugin {
     static final ResourceLocation RENDER_Fluid = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "tank");
-    @CapabilityInject(IDrawerGroup.class)
-    static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = null;
+
 
     public JadeCompact() {
         MinecraftForge.EVENT_BUS.addListener(this::overrideGrass);

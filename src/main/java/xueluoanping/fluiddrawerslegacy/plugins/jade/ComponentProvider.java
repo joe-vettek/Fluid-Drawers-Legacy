@@ -1,32 +1,22 @@
 package xueluoanping.fluiddrawerslegacy.plugins.jade;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.block.BlockController;
+
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
-import mcp.mobius.waila.addons.minecraft.HUDHandlerFurnace;
-import mcp.mobius.waila.addons.minecraft.PluginMinecraft;
 import mcp.mobius.waila.api.IComponentProvider;
 import mcp.mobius.waila.api.IDataAccessor;
 import mcp.mobius.waila.api.IPluginConfig;
 import mcp.mobius.waila.api.IServerDataProvider;
-import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import mcp.mobius.waila.api.RenderableTextComponent;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.fluids.FluidStack;
-import org.codehaus.plexus.util.CachedMap;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import java.util.HashMap;
@@ -35,9 +25,6 @@ import java.util.Map;
 
 public class ComponentProvider implements IComponentProvider, IServerDataProvider<TileEntity> {
     static final ComponentProvider INSTANCE = new ComponentProvider();
-    @CapabilityInject(IDrawerGroup.class)
-    static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = null;
-
 
     @Override
     public void appendBody(List<ITextComponent> tooltip, IDataAccessor accessor, IPluginConfig config) {
@@ -79,7 +66,7 @@ public class ComponentProvider implements IComponentProvider, IServerDataProvide
 
             final ListNBT list = new ListNBT();
             TileEntityController tile = (TileEntityController) tileEntity;
-            tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
+            tile.getCapability(TileEntityFluidDrawer.DRAWER_GROUP_CAPABILITY, null)
                     .ifPresent(handler -> {
 //                        FluidDrawersLegacyMod.logger(handler.getDrawerCount()+"");
                         for (int i = 0; i < handler.getDrawerCount(); i++) {
