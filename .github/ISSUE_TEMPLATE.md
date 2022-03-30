@@ -1,5 +1,7 @@
 ---
-name: [MC Version]Issue Template
+
+title: [MC Version]Problem
+name: Issue Template
 about: report bugs.
 
 ---
