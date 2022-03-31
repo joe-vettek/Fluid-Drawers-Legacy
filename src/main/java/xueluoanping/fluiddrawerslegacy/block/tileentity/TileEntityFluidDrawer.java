@@ -33,6 +33,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.config.General;
 
@@ -42,12 +43,10 @@ import java.util.EnumSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
-    @CapabilityInject(IDrawerAttributes.class)
-    static Capability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = null;
+
     private IDrawerAttributesModifiable drawerAttributes = new DrawerAttributes();
 
     private GroupData groupData = new GroupData(1);
-
 
 
     //    public static int Capacity = 32000;
@@ -170,7 +169,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
     @Override
     public boolean isRedstone() {
-        return  upgrades().getRedstoneType()!=null;
+        return upgrades().getRedstoneType() != null;
     }
 
     public class GroupData extends StandardDrawerGroup {
@@ -209,7 +208,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         @Nonnull
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-            if (capability == TileEntityFluidDrawer.DRAWER_ATTRIBUTES_CAPABILITY)
+            if (capability == ModConstants.DRAWER_ATTRIBUTES_CAPABILITY)
                 return attributesHandler.cast();
             if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
 //                inventoryChanged();
@@ -283,6 +282,9 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             super.read(nbt);
         }
 
+        public boolean idVoidUpgrade(){
+            return getDrawerAttributes().isVoid();
+        }
 
     }
 
@@ -308,6 +310,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
         }
 
+
+
         @Override
         protected void onItemChanged() {
             DrawerPopulatedEvent event = new DrawerPopulatedEvent(this);
@@ -327,12 +331,18 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
             }
         }
-
+        public boolean isLock() {
+            return TileEntityFluidDrawer.this.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
+        }
+        public boolean isVoid() {
+            return upgrades().serializeNBT().toString().contains("void");
+        }
 
     }
 
     public class betterFluidHandler extends FluidTank {
-        private Fluid cacheFluid= Fluids.EMPTY;
+        private Fluid cacheFluid = Fluids.EMPTY;
+
         public Fluid getCacheFluid() {
             return cacheFluid;
         }
@@ -349,33 +359,30 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 //            发送信息时调整容量大小
             if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
                 this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
-            CompoundNBT nbt =new CompoundNBT();
-            if(getCacheFluid()!= Fluids.EMPTY&&
-                    fluid.getFluid()!=Fluids.EMPTY&&
-                    getCacheFluid()!=fluid.getFluid())
-            {
+            CompoundNBT nbt = new CompoundNBT();
+            if (getCacheFluid() != Fluids.EMPTY &&
+                    fluid.getFluid() != Fluids.EMPTY &&
+                    getCacheFluid() != fluid.getFluid()) {
                 setCacheFluid(getFluid().getFluid());
 
             }
-            if(getCacheFluid()==Fluids.EMPTY&&
-            getFluid().getAmount()>0)
-            {
+            if (getCacheFluid() == Fluids.EMPTY &&
+                    getFluid().getAmount() > 0) {
                 setCacheFluid(getFluid().getFluid());
             }
 //            FluidDrawersLegacyMod.logger(fluid.getTranslationKey().toString());
-            nbt.putString("cache",cacheFluid.getRegistryName().toString());
+            nbt.putString("cache", cacheFluid.getRegistryName().toString());
             return writeToNBT(nbt);
         }
 
         public void deserializeNBT(CompoundNBT tank) {
-           if(tank.contains("cache"))
-           {
-               String[] x= tank.getString("cache").split(":");
-               ResourceLocation res =new ResourceLocation(x[0],x[1]);
+            if (tank.contains("cache")) {
+                String[] x = tank.getString("cache").split(":");
+                ResourceLocation res = new ResourceLocation(x[0], x[1]);
 
-               Fluid fluid=ForgeRegistries.FLUIDS.getValue(res);
-               setCacheFluid(cacheFluid);
-           }
+                Fluid fluid = ForgeRegistries.FLUIDS.getValue(res);
+                setCacheFluid(cacheFluid);
+            }
             readFromNBT(tank);
         }
 
@@ -384,11 +391,9 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         protected void onContentsChanged() {
 
 
-            if(this.getFluid().getAmount()>0 &&getFluid()!=FluidStack.EMPTY &&getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
-            {
+            if (this.getFluid().getAmount() > 0 && getFluid() != FluidStack.EMPTY && getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 setCacheFluid(getFluid().getFluid());
-            }
-            else {
+            } else {
 //                setCacheFluid(Fluids.EMPTY);
             }
 
@@ -406,11 +411,10 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         public int fill(FluidStack resource, FluidAction action) {
             if (upgrades().hasVendingUpgrade())
                 return 0;
-            if(getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
-            {
+            if (getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
 //                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
-                if(getCacheFluid().getFluid()!= Fluids.EMPTY
-                        &&getCacheFluid()!=resource.getFluid()){
+                if (getCacheFluid().getFluid() != Fluids.EMPTY
+                        && getCacheFluid() != resource.getFluid()) {
                     return 0;
                 }
             }
@@ -454,6 +458,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
                 return new FluidStack(fluid.getFluid(), maxDrain);
             return super.drain(maxDrain, action);
         }
+
+
     }
 
     //    extra attributes, not very useful

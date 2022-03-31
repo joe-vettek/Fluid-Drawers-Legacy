@@ -112,7 +112,8 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
 
         if (tile.getDrawerAttributes().isShowingQuantity()) {
             if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
-                FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+
+                FluidStack fluidStackDown = betterFluidHandler.getFluid();
                 FontRenderer fontRenderer = this.renderer.getFont();
 //                matrixStackIn.translate(0.5, 0.15, 1);
 

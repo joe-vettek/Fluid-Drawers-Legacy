@@ -159,7 +159,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                         if (!player.isCreative()) {
                                             player.setItemInHand(hand, DrinkHelper.createFilledResult(heldStack, player, new ItemStack(fluid.getBucket())));
                                         } else {
-                                            player.addItem(new ItemStack(fluid.getBucket()));
+//                                            player.addItem(new ItemStack(fluid.getBucket()));
                                         }
                                     }
                                 });

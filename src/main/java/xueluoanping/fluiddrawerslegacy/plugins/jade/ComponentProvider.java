@@ -17,6 +17,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import mcp.mobius.waila.api.RenderableTextComponent;
 import net.minecraftforge.fluids.FluidStack;
+import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import java.util.HashMap;
@@ -66,7 +67,7 @@ public class ComponentProvider implements IComponentProvider, IServerDataProvide
 
             final ListNBT list = new ListNBT();
             TileEntityController tile = (TileEntityController) tileEntity;
-            tile.getCapability(TileEntityFluidDrawer.DRAWER_GROUP_CAPABILITY, null)
+            tile.getCapability(ModConstants.DRAWER_GROUP_CAPABILITY, null)
                     .ifPresent(handler -> {
 //                        FluidDrawersLegacyMod.logger(handler.getDrawerCount()+"");
                         for (int i = 0; i < handler.getDrawerCount(); i++) {

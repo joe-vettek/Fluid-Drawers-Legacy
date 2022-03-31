@@ -21,6 +21,7 @@ import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
@@ -40,6 +41,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     final TileEntityController tile;
     private static final List<Timer> timerList = new ArrayList<>();
     private final List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
+    private final List<Integer> priorityList = new ArrayList<>();
     private boolean RebuildLock = false;
 
     public CapabilityProvider_FluidDrawerController(final TileEntityController tile) {
@@ -71,7 +73,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 //                优先处理不加载的区块
 //                FluidDrawersLegacyMod.logger("Chunk " + tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4) );
                 if (!tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4)) {
-                    FluidDrawersLegacyMod.logger("Not Chunk Cancel " + tile.getLevel() + tile.getBlockPos() );
+                    FluidDrawersLegacyMod.logger("Not Chunk Cancel " + tile.getLevel() + tile.getBlockPos());
                     timer.cancel();
                     return;
                 }
@@ -200,6 +202,13 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         };
     }
 
+    private void cancelLock() {
+        this.RebuildLock = false;
+    }
+
+    private void setupLock() {
+        this.RebuildLock = true;
+    }
 
     public class betterFluidHandler extends FluidTank {
 
@@ -215,44 +224,97 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             readFromNBT(tank);
         }
 
-        @Override
-        public int fill(FluidStack resource, FluidAction action) {
-            //                Exception caught during firing event: Index 3 out of bounds for length 0
-//                避免发生这种事情
-//                在重置之间要锁住
-            RebuildLock = true;
+
+        protected int fillByOrder(FluidStack resource, FluidAction action, int order) {
+            if (drawerDataList.size() == 0) return 0;
             for (int i = 0; i < drawerDataList.size(); i++) {
-//                FluidDrawersLegacyMod.logger("" + i + resource.writeToNBT(new CompoundNBT()));
-//                Exception caught during firing event: Index 3 out of bounds for length 0
-//                避免发生这种事情
-//                在重置之间要锁住
-                if (i >= drawerDataList.size())
-                    break;
-                if (drawerDataList.get(i).getTank().isFull())
-                    continue;
-                if(drawerDataList.get(0).getTank().getCacheFluid()!= Fluids.EMPTY
-                        &&drawerDataList.get(0).getTank().getCacheFluid().getFluid()!= resource.getFluid())
+//                reject invalid
+                //                only find valid and same order
+                if (priorityList.get(i) != order) continue;
+// when locked, need to check cache, or not necessary
+                if (drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
+                        && drawerDataList.get(i).getTank().getCacheFluid().getFluid() != resource.getFluid()
+                        && drawerDataList.get(i).isLock())
                     continue;
                 if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
                         || drawerDataList.get(i).getTank().getFluid().getAmount() == 0) {
                     if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
                             <= drawerDataList.get(i).getTank().getCapacity()) {
-                        drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
-                        RebuildLock = false;
+                        if (action.execute()) drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
                         return resource.getAmount();
                     } else {
-//                        需要避免被完全消耗
+//                      avoid can't consume once
                         FluidStack fluidStack = resource;
                         fluidStack.setAmount(drawerDataList.get(i).getTank().getCapacity() -
                                 drawerDataList.get(i).getTank().getFluid().getAmount());
-                        drawerDataList.get(i).getTank().fill(fluidStack, FluidAction.EXECUTE);
-                        RebuildLock = false;
+                        if (action.execute()) drawerDataList.get(i).getTank().fill(fluidStack, FluidAction.EXECUTE);
                         return resource.getAmount() - fluidStack.getAmount();
                     }
                 }
+
             }
-            RebuildLock = false;
+
             return 0;
+        }
+
+        private int getFluidDrawerPriority(TileEntityFluidDrawer.StandardDrawerData data) {
+            if (data.getTank().isFull()) return ModConstants.PRI_DISABLED;
+            if (data.getTank().isEmpty()) {
+                if (data.isLock()) return ModConstants.PRI_LOCKED_EMPTY;
+                else return ModConstants.PRI_EMPTY;
+            } else {
+                if (!data.isLock()) {
+                    if (data.isVoid()) return ModConstants.PRI_VOID;
+                    else return ModConstants.PRI_NORMAL;
+                } else {
+                    if (data.isVoid()) return ModConstants.PRI_LOCKED_VOID;
+//                    not delete else if ,or will handle anything else
+                    else if (data.isLock()) return ModConstants.PRI_LOCKED;
+                }
+            }
+            return -1;
+        }
+
+        @Override
+        public int fill(FluidStack resource, FluidAction action) {
+            //                Exception caught during firing event: Index 3 out of bounds for length 0
+//                避免发生这种事情
+//                在重置之间要锁住
+
+//            FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundNBT()) + RebuildLock);
+            setupLock();
+            int result = 0;
+            int amount = resource.getAmount();
+            final int amountF = amount;
+            if (amountF <= 0) return 0;
+            int i = 0;
+//            rember to clear it
+            priorityList.clear();
+            while (i < drawerDataList.size()) {
+                priorityList.add(getFluidDrawerPriority(drawerDataList.get(i)));
+//                FluidDrawersLegacyMod.logger("priorityList"+priorityList.get(priorityList.size()-1));
+                i++;
+            }
+            FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+priorityList.size());
+            if (drawerDataList.size() == priorityList.size() && drawerDataList.size() > 0)
+                for (int j = 0; j < ModConstants.PRI_DISABLED; j++) {
+//                这里需要确认，到底是什么情况(这里是个备份，不担心）
+                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
+                    amount -= fillByOrder(resource, action, j);
+//                amount=resource.getAmount();
+                    if (amount == 0) {
+                    FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
+                        result = amountF;
+                        break;
+                    }
+
+                }
+            if (amount > 0) {
+                result = amountF - amount;
+            }
+
+            cancelLock();
+            return result;
         }
 
         @Override
