@@ -1,29 +1,22 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
-import com.jaquadro.minecraft.storagedrawers.block.BlockDrawers;
-
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
-import com.jaquadro.minecraft.storagedrawers.core.ModContainers;
-import com.jaquadro.minecraft.storagedrawers.inventory.*;
+import com.jaquadro.minecraft.storagedrawers.inventory.InventoryUpgrade;
+import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
@@ -32,9 +25,9 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContainerFluiDrawer extends Container {
+public class ContainerFluiDrawer extends AbstractContainerMenu {
     private static final int[][] slotCoordinates = new int[][]{{80, 36}};
-    private IInventory upgradeInventory;
+    private Container upgradeInventory;
 
     private List<Slot> upgradeSlots;
     private List<Slot> playerSlots;
@@ -47,25 +40,24 @@ public class ContainerFluiDrawer extends Container {
 
     private TileEntityFluidDrawer tileEntityFluidDrawer;
 
-    public ContainerFluiDrawer(int windowId, PlayerInventory playerInv, PacketBuffer data) {
-        this(windowId, playerInv, getTileEntity(playerInv, data.readBlockPos()));
+    public ContainerFluiDrawer(int windowId, Inventory playerInv, FriendlyByteBuf data) {
+        this(ModContents.containerType,windowId, playerInv, getTileEntity(playerInv, data.readBlockPos()));
     }
 
-    public static TileEntityFluidDrawer getTileEntity(PlayerInventory playerInv, BlockPos pos) {
-        World world = playerInv.player.getCommandSenderWorld();
-        TileEntity tile = world.getBlockEntity(pos);
-        if (!(tile instanceof TileEntityFluidDrawer)) {
+    public static TileEntityFluidDrawer getTileEntity(Inventory playerInv, BlockPos pos) {
+        if (!(playerInv.player.getCommandSenderWorld().getBlockEntity(pos) instanceof TileEntityFluidDrawer tile)) {
             StorageDrawers.log.error("Expected a drawers tile entity at " + pos.toString());
             return null;
         } else {
-            return (TileEntityFluidDrawer) tile;
+            return  tile;
         }
     }
     public TileEntityFluidDrawer getTileEntityFluidDrawer() {
         return tileEntityFluidDrawer;
     }
-    public ContainerFluiDrawer(int windowId, PlayerInventory playerInventory, TileEntityFluidDrawer tileEntity) {
-        super(ModContents.containerType, windowId);
+
+    public ContainerFluiDrawer(@Nullable MenuType<?> type, int windowId, Inventory playerInventory, TileEntityFluidDrawer tileEntity) {
+        super(type, windowId);
         this.tileEntityFluidDrawer=tileEntity;
         int drawerCount = 1;
         this.upgradeInventory = new InventoryUpgrade(tileEntity);
@@ -101,26 +93,19 @@ public class ContainerFluiDrawer extends Container {
         return slotCoordinates[slot][1];
     }
 
-    public boolean stillValid(PlayerEntity player) {
-        return this.upgradeInventory.stillValid(player);
-    }
 
 
     public List<Slot> getUpgradeSlots() {
         return this.upgradeSlots;
     }
 
-    @Override
-    protected boolean moveItemStackTo(ItemStack p_75135_1_, int p_75135_2_, int p_75135_3_, boolean p_75135_4_) {
 
-        return super.moveItemStackTo(p_75135_1_, p_75135_2_, p_75135_3_, p_75135_4_);
-    }
 
     //    注意这里的index是slot的位置，本容器顺序为升级栏，玩家容器，玩家快捷栏
 //    player客户端和服务端各出现一次，说明是先客户端调用，然后服务端调用
     @Nonnull
     @Override
-    public ItemStack quickMoveStack(PlayerEntity player, int slotIndex) {
+    public ItemStack quickMoveStack(Player player, int slotIndex) {
 //        FluidDrawersLegacyMod.logger("hello" + player + slotIndex);
         try {
             ItemStack itemStack = ItemStack.EMPTY;
@@ -190,54 +175,15 @@ public class ContainerFluiDrawer extends Container {
 //            FluidDrawersLegacyMod.logger("hello" + itemStack);
             return itemStack;
 
-//            if (slotIndex < 7) {
-//                if (upgradeSlots.get(slotIndex).getItem() != ItemStack.EMPTY) {
-////                    player.addItem(upgradeSlots.get(slotIndex).getItem());
-//                    if (this.moveItemStackTo(upgradeSlots.get(slotIndex).getItem(), 7, 43, false))
-//                        return ItemStack.EMPTY;
-//                }
-//            } else if (7 <= slotIndex && slotIndex < 34) {
-//                if (playerSlots.get(slotIndex - 7).getItem() != ItemStack.EMPTY) {
-////                    FluidDrawersLegacyMod.logger("hello"+player + playerSlots.get(slotIndex).getItem());
-//                    for (int i = 0; i < upgradeSlots.size(); i++) {
-//                        if (upgradeSlots.get(i).getItem() == ItemStack.EMPTY) {
-//
-////                            upgradeSlots.get(i).set(playerSlots.get(slotIndex).getItem());
-//
-//                            if (!this.moveItemStackTo(playerSlots.get(slotIndex - 7).getItem(), 0, 7, false)) {
-//                                FluidDrawersLegacyMod.logger("hello" + player + playerSlots.get(slotIndex - 7).getItem());
-//                                return ItemStack.EMPTY;
-//                            }
-//
-//                        }
-//                    }
-//                }
-//            } else if (34 <= slotIndex && slotIndex < 43)
-//                if (hotbarSlots.get(slotIndex - 34).getItem() != ItemStack.EMPTY) {
-////                    FluidDrawersLegacyMod.logger("hello"+player + playerSlots.get(slotIndex).getItem());
-//                    for (int i = 0; i < upgradeSlots.size(); i++) {
-//                        if (upgradeSlots.get(i).getItem() == ItemStack.EMPTY) {
-//
-////                            upgradeSlots.get(i).set(playerSlots.get(slotIndex).getItem());
-//
-//                            if (!this.moveItemStackTo(hotbarSlots.get(slotIndex - 34).getItem(), 0, 7, false)) {
-//                                FluidDrawersLegacyMod.logger("hello" + player + hotbarSlots.get(slotIndex - 34).getItem());
-//                                return ItemStack.EMPTY;
-//                            }
-//
-//                        }
-//                    }
-//                }
-//
-////            for (int i = 0; i < upgradeSlots.size(); i++) {
-////                FluidDrawersLegacyMod.logger("hello"+player + (upgradeSlots.get(i).getItem().getItem()));
-////            }
-//
-////            if(upgradeSlots.get(0).getItem()!= ItemStack.EMPTY)return upgradeSlots.get(0).getItem();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
         return ItemStack.EMPTY;
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return this.upgradeInventory.stillValid(player);
     }
 }

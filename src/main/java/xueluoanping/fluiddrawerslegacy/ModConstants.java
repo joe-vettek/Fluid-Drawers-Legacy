@@ -3,7 +3,9 @@ package xueluoanping.fluiddrawerslegacy;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
+
 
 public class ModConstants {
 
@@ -16,8 +18,8 @@ public class ModConstants {
      * 4 空抽屉
      * 5 锁住，但是为空
      * 6 无效抽屉（这里改为满了）
-    *
-    */
+     *
+     */
     public static final int PRI_LOCKED = 0;
     public static final int PRI_LOCKED_VOID = 1;
     public static final int PRI_NORMAL = 2;
@@ -27,9 +29,9 @@ public class ModConstants {
     public static final int PRI_DISABLED = 6;
 
 
-    @CapabilityInject(IDrawerAttributes.class)
-    public static Capability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = null;
+    public static Capability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerAttributes>() {
+    });
 
-    @CapabilityInject(IDrawerGroup.class)
-    public static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = null;
+    public static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerGroup>() {
+    });
 }

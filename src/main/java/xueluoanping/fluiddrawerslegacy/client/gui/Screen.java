@@ -1,61 +1,55 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
-import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
-
-import com.jaquadro.minecraft.storagedrawers.inventory.ContainerDrawers;
-import com.jaquadro.minecraft.storagedrawers.inventory.DrawerScreen;
-import com.jaquadro.minecraft.storagedrawers.inventory.SlotStorage;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.*;
+import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.AtlasTexture;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ColorHelper;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.resources.language.I18n;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import org.lwjgl.opengl.GL11;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static net.minecraft.client.renderer.vertex.DefaultVertexFormats.POSITION_COLOR_TEX;
+import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR_TEX;
+import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
-public class Screen extends ContainerScreen<ContainerFluiDrawer> {
+
+public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     private static final ResourceLocation guiTextures1 = new ResourceLocation("storagedrawers", "textures/gui/drawers_1.png");
 
     private static final int smDisabledX = 176;
     private static final int smDisabledY = 0;
     private static StorageRenderItem storageItemRender;
     private final ResourceLocation background;
+    private final Inventory inventory;
 
-    public Screen(ContainerFluiDrawer container, PlayerInventory playerInv, ITextComponent name, ResourceLocation bg) {
+    public Screen(ContainerFluiDrawer container, Inventory playerInv, Component name, ResourceLocation bg) {
         super(container, playerInv, name);
         this.imageWidth = 176;
         this.imageHeight = 199;
         this.background = bg;
+        this.inventory = playerInv;
     }
 
     protected void init() {
@@ -67,7 +61,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
 
     }
 
-    public void render(MatrixStack stack, int mouseX, int mouseY, float partialTicks) {
+    public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         ItemRenderer ri = this.setItemRender(storageItemRender);
         ((ContainerFluiDrawer) this.menu).activeRenderItem = storageItemRender;
         this.renderBackground(stack);
@@ -88,15 +82,15 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
             int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
             if (capacity < amount) amount = capacity;
-            List<ITextComponent> list = new ArrayList<>();
+            List<Component> list = new ArrayList<>();
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
                         betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
-                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);
+                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 }
             }
-            list.add(new TranslationTextComponent(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getTranslationKey()));
+            list.add(new TranslatableComponent(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getTranslationKey()));
             renderComponentTooltip(stack, list, mouseX, mouseY);
 
         }
@@ -120,7 +114,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
      * @param overlay 覆盖
      * @param light   光照
      */
-    public static void buildMatrix(Matrix4f matrix, IVertexBuilder builder, float x, float y, float z, float u, float v, int overlay, int RGBA, float alpha, int light) {
+    public static void buildMatrix(Matrix4f matrix, VertexConsumer builder, float x, float y, float z, float u, float v, int overlay, int RGBA, float alpha, int light) {
         float red = ((RGBA >> 16) & 0xFF) / 255f;
         float green = ((RGBA >> 8) & 0xFF) / 255f;
         float blue = ((RGBA) & 0xFF) / 255f;
@@ -134,11 +128,11 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
                 .endVertex();
     }
 
-    public static void buildMatrix(Matrix4f matrix, IVertexBuilder builder, float x, float y, float z, float u, float v, int RGBA) {
-        int red = ColorHelper.PackedColor.red(RGBA);
-        int green = ColorHelper.PackedColor.green(RGBA);
-        int blue = ColorHelper.PackedColor.blue(RGBA);
-        int alpha = ColorHelper.PackedColor.alpha(RGBA);
+    public static void buildMatrix(Matrix4f matrix, VertexConsumer builder, float x, float y, float z, float u, float v, int RGBA) {
+        float red = ((RGBA >> 16) & 0xFF) / 255f;
+        float green = ((RGBA >> 8) & 0xFF) / 255f;
+        float blue = ((RGBA >> 0) & 0xFF) / 255f;
+        int alpha = 1;
 
         builder.vertex(matrix, x, y, z)
                 .color(red, green, blue, alpha)
@@ -147,7 +141,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
     }
 
     public static TextureAtlasSprite getBlockSprite(ResourceLocation sprite) {
-        return Minecraft.getInstance().getModelManager().getAtlas(PlayerContainer.BLOCK_ATLAS).getSprite(sprite);
+        return Minecraft.getInstance().getModelManager().getAtlas(InventoryMenu.BLOCK_ATLAS).getSprite(sprite);
     }
 
     /**
@@ -170,9 +164,16 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
         TextureAtlasSprite FLUID = getBlockSprite(attributes.getStillTexture());
 
         //绑atlas
-        Minecraft.getInstance().getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
+//        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
+        RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 
+//        注意color要这样写，后面的是无效的
         int color = fluid.getFluid().getAttributes().getColor();
+        float r = ((color >> 16) & 0xFF) / 255f;
+        float g = ((color >> 8) & 0xFF) / 255f;
+        float b = (color & 0xFF) / 255f;
+        float a = ((color >> 24) & 0xFF) / 255f;
+        RenderSystem.setShaderColor(r, g, b, a);
 
         /*
          * 获取横向和纵向层数
@@ -186,8 +187,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
 
         float u0 = FLUID.getU0();
         float v0 = FLUID.getV0();
-
-        Tessellator tessellator = Tessellator.getInstance();
+        Tesselator tessellator = Tesselator.getInstance();
         BufferBuilder builder = tessellator.getBuilder();
 
         /*
@@ -215,7 +215,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
                 float u1 = j == 0 ? FLUID.getU0() + ((FLUID.getU1() - u0) * ((float) extraWidth / 16f)) : FLUID.getU1();
 
                 //渲染主代码
-                builder.begin(GL11.GL_QUADS, POSITION_COLOR_TEX);
+                builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 buildMatrix(matrix, builder, xStart, yStart - yOffset, 0.0f, u0, v0, color);
                 buildMatrix(matrix, builder, xStart, yStart, 0.0f, u0, v1, color);
                 buildMatrix(matrix, builder, xStart + xOffset, yStart, 0.0f, u1, v1, color);
@@ -228,7 +228,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
     }
 
 
-    protected void renderLabels(MatrixStack stack, int mouseX, int mouseY) {
+    protected void renderLabels(PoseStack stack, int mouseX, int mouseY) {
         this.font.draw(stack, this.title.getString(), 8.0F, 6.0F, 4210752);
         this.font.draw(stack, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752);
         this.font.draw(stack, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752);
@@ -250,10 +250,10 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
     }
 
     @Override
-    protected void renderBg(MatrixStack stack, float partialTicks, int mouseX, int mouseY) {
+    protected void renderBg(PoseStack stack, float partialTicks, int mouseX, int mouseY) {
 
-        GlStateManager._color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        this.minecraft.getTextureManager().bind(this.background);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShaderTexture(0, this.background);
         int guiX = (this.width - this.imageWidth) / 2;
         int guiY = (this.height - this.imageHeight) / 2;
         this.blit(stack, guiX, guiY, 0, 0, this.imageWidth, this.imageHeight);
@@ -328,7 +328,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
 
 
     public static class Slot1 extends Screen {
-        public Slot1(ContainerFluiDrawer container, PlayerInventory playerInv, ITextComponent name) {
+        public Slot1(ContainerFluiDrawer container, Inventory playerInv, Component name) {
             super(container, playerInv, name, Screen.guiTextures1);
         }
     }

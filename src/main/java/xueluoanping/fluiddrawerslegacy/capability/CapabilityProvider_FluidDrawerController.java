@@ -1,17 +1,17 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.*;
+import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
-import net.minecraft.block.Block;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.world.WorldEvent;
@@ -28,6 +28,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
+import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
+
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider {
 
@@ -36,8 +38,6 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     public static final int Capacity = 32000;
     public static BlockPos tilePos = null;
     private Stack<BlockPos> posStack = new Stack<>();
-    @CapabilityInject(IDrawerGroup.class)
-    static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = null;
     final TileEntityController tile;
     private static final List<Timer> timerList = new ArrayList<>();
     private final List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
@@ -110,7 +110,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     }
 
     // use to find all nodes
-    public void searchNode(World world, BlockPos originPos, BlockPos basePos) {
+    public void searchNode(Level world, BlockPos originPos, BlockPos basePos) {
 
         if (!world.hasChunk(originPos.getX() >> 4, originPos.getZ() >> 4))
             return;
@@ -216,11 +216,11 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             super(capacity);
         }
 
-        public CompoundNBT serializeNBT() {
-            return writeToNBT(new CompoundNBT());
+        public CompoundTag serializeNBT() {
+            return writeToNBT(new CompoundTag());
         }
 
-        public void deserializeNBT(CompoundNBT tank) {
+        public void deserializeNBT(CompoundTag tank) {
             readFromNBT(tank);
         }
 
@@ -233,7 +233,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 if (priorityList.get(i) != order) continue;
 // when locked, need to check cache, or not necessary
                 if (drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
-                        && drawerDataList.get(i).getTank().getCacheFluid().getFluid() != resource.getFluid()
+                        && drawerDataList.get(i).getTank().getCacheFluid() != resource.getFluid()
                         && drawerDataList.get(i).isLock())
                     continue;
                 if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
@@ -295,15 +295,15 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 //                FluidDrawersLegacyMod.logger("priorityList"+priorityList.get(priorityList.size()-1));
                 i++;
             }
-            FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+priorityList.size());
+//            FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+priorityList.size());
             if (drawerDataList.size() == priorityList.size() && drawerDataList.size() > 0)
                 for (int j = 0; j < ModConstants.PRI_DISABLED; j++) {
 //                这里需要确认，到底是什么情况(这里是个备份，不担心）
-                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
+//                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
                     amount -= fillByOrder(resource, action, j);
 //                amount=resource.getAmount();
                     if (amount == 0) {
-                    FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
+//                    FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
                         result = amountF;
                         break;
                     }

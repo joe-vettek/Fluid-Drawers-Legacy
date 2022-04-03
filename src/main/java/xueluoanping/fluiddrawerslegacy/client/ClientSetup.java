@@ -1,15 +1,22 @@
 package xueluoanping.fluiddrawerslegacy.client;
 
-import net.minecraft.client.gui.ScreenManager;
+
+import com.jaquadro.minecraft.storagedrawers.client.renderer.TileEntityDrawersRenderer;
+import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
+import com.mojang.blaze3d.platform.ScreenManager;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ModelResourceLocation;
-import net.minecraft.util.ResourceLocation;
+
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.ClientRegistry;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
@@ -29,28 +36,30 @@ public class ClientSetup {
         return layerToCheck == RenderType.cutoutMipped() || layerToCheck == RenderType.translucent();
     }
 
-    @SubscribeEvent
-    public static void registerModels(ModelBakeEvent event) {
-//            ClientRegistry.bindTileEntityRenderer(ModBlocks.Tile.STANDARD_DRAWERS_1, TileEntityDrawersRenderer::new);
-    }
 
     @SubscribeEvent
     public static void onClientEvent(FMLClientSetupEvent event) {
         FluidDrawersLegacyMod.logger("Register Client");
         event.enqueueWork(() -> {
-            RenderTypeLookup.setRenderLayer(ModContents.fluiddrawer, ClientSetup::isGlassLanternValidLayer);
-
-            ClientRegistry.bindTileEntityRenderer(ModContents.tankTileEntityType, TESRFluidDrawer::new);
-            ScreenManager.register(ModContents.containerType, Screen.Slot1::new);
-
+            ItemBlockRenderTypes.setRenderLayer(ModContents.fluiddrawer, ClientSetup::isGlassLanternValidLayer);
+            MenuScreens.register(ModContents.containerType, Screen.Slot1::new);
         });
     }
 
+//    注意static是单次，比如启动类，没有比如右击事件
+    @SubscribeEvent
+    @OnlyIn(Dist.CLIENT)
+    public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
+        FluidDrawersLegacyMod.logger("Register Renderer");
+        event.registerBlockEntityRenderer(ModContents.tankTileEntityType, TESRFluidDrawer::new);
+    }
+
+
     @SubscribeEvent
     public static void onModelBaked(ModelBakeEvent event) {
-        Map<ResourceLocation, IBakedModel> modelRegistry = event.getModelRegistry();
+        Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
         ModelResourceLocation location = new ModelResourceLocation(ModContents.itemBlock.getRegistryName(), "inventory");
-        IBakedModel existingModel = modelRegistry.get(location);
+        BakedModel existingModel = modelRegistry.get(location);
         if (existingModel == null) {
             throw new RuntimeException("Did not find in registry");
         } else if (existingModel instanceof BakedModelFluidDrawer) {

@@ -1,8 +1,8 @@
 package xueluoanping.fluiddrawerslegacy.util;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 
@@ -20,7 +20,7 @@ public class SafeClientAccess {
 
   /** Gets the client player entity, or null on a server */
   @Nullable
-  public static PlayerEntity getPlayer() {
+  public static Player getPlayer() {
     if (FMLEnvironment.dist == Dist.CLIENT) {
       return ClientOnly.getClientPlayer();
     }
@@ -45,7 +45,7 @@ public class SafeClientAccess {
 
     /** Gets the client player instance */
     @Nullable
-    public static PlayerEntity getClientPlayer() {
+    public static Player getClientPlayer() {
       return Minecraft.getInstance().player;
     }
   }

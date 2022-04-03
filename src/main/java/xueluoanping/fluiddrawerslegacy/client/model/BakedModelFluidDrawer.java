@@ -1,25 +1,30 @@
 package xueluoanping.fluiddrawerslegacy.client.model;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.ItemCameraTransforms;
-import net.minecraft.client.renderer.model.ItemOverrideList;
+
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.BlockState;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Random;
 
-public class BakedModelFluidDrawer implements IBakedModel {
-    private IBakedModel existingModel;
+public class BakedModelFluidDrawer implements BakedModel {
+    private BakedModel existingModel;
 
-    public BakedModelFluidDrawer(IBakedModel existingModel) {
+    public BakedModelFluidDrawer(BakedModel existingModel) {
         this.existingModel = existingModel;
     }
 
+    public BakedModel self()
+    {
+        return this;
+    }
     @Override
     public List<BakedQuad> getQuads(@Nullable BlockState p_200117_1_, @Nullable Direction p_200117_2_, Random p_200117_3_) {
         throw new AssertionError("IForgeBakedModel::getQuads should never be called, only IForgeBakedModel::getQuads");
@@ -51,16 +56,16 @@ public class BakedModelFluidDrawer implements IBakedModel {
     }
 
     @Override
-    public ItemOverrideList getOverrides() {
+    public ItemOverrides getOverrides() {
         return this.existingModel.getOverrides();
     }
 
+
     @Override
-    public IBakedModel handlePerspective(ItemCameraTransforms.TransformType cameraTransformType, MatrixStack mat) {
+    public BakedModel handlePerspective(ItemTransforms.TransformType cameraTransformType, PoseStack mat) {
 
-
-        if (cameraTransformType == ItemCameraTransforms.TransformType.NONE ||
-                cameraTransformType ==ItemCameraTransforms.TransformType.FIXED)
+        if (cameraTransformType == ItemTransforms.TransformType.NONE ||
+                cameraTransformType ==ItemTransforms.TransformType.FIXED)
             return this.existingModel.handlePerspective(cameraTransformType, mat);
         return this;
     }

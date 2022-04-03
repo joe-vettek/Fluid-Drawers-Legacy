@@ -5,47 +5,46 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
-import com.jaquadro.minecraft.storagedrawers.item.ItemQuantifyKey;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalBlock;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.BucketItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.*;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
@@ -55,7 +54,7 @@ import javax.annotation.Nullable;
 import java.util.EnumSet;
 
 
-public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
+public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INetworked, EntityBlock {
     public static final VoxelShape center = Block.box(1, 1, 1, 15, 15, 15);
     public static final VoxelShape base = Block.box(0, 0, 0, 16, 1, 16);
     public static final VoxelShape column1 = Block.box(0, 1, 0, 1, 15, 1);
@@ -74,72 +73,42 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     }
 
     @Override
-    public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context) {
-        return VoxelShapes.or(center, base, column1, column2, column3, column4, top);
+    public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
+        return Shapes.or(center, base, column1, column2, column3, column4, top);
     }
 
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult hit) {
-//        player.getFoodData().eat(2, 0.1F);
-        if (hit.getDirection() == Direction.UP || hit.getDirection() == Direction.DOWN)
-            return ActionResultType.PASS;
+    public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
 
-        TileEntity tileEntity = world.getBlockEntity(pos);
+        if (hit.getDirection() == Direction.UP || hit.getDirection() == Direction.DOWN)
+            return InteractionResult.PASS;
+
+//        FluidDrawersLegacyMod.logger("ss2s22");
+        BlockEntity tileEntity = world.getBlockEntity(pos);
         if (tileEntity instanceof TileEntityFluidDrawer) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
             ItemStack heldStack = player.getItemInHand(hand);
             ItemStack offhandStack = player.getOffhandItem();
 //            FluidDrawersLegacyMod.logger("hello，screen" + world + player.isShiftKeyDown());
-            if (heldStack.getItem() == ModItems.DRAWER_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
-//                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
-                    return ActionResultType.PASS;
-                }
-
-            }
-            if (heldStack.getItem() == ModItems.QUANTIFY_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setIsShowingQuantity(!attrs.isShowingQuantity());
-                    return ActionResultType.PASS;
-                }
-
-            }
-            if (heldStack.getItem() == ModItems.SHROUD_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setIsSealed(!attrs.isSealed());
-                    return ActionResultType.PASS;
-                }
-
-            }
             if (heldStack.isEmpty() && player.isShiftKeyDown()) {
                 if (CommonConfig.GENERAL.enableUI.get() && !world.isClientSide()) {
 //                    FluidDrawersLegacyMod.logger("hello，screen");
-                    NetworkHooks.openGui((ServerPlayerEntity) player, new INamedContainerProvider() {
+                    NetworkHooks.openGui((ServerPlayer) player, new MenuProvider() {
                         @Override
-                        public ITextComponent getDisplayName() {
-                            return new TranslationTextComponent("gui.fluiddrawerslegacy.tittle");
+                        public Component getDisplayName() {
+                            return new TranslatableComponent("gui.fluiddrawerslegacy.tittle");
                         }
 
                         @Nullable
                         @Override
-                        public Container createMenu(int windowId, PlayerInventory playerInv, PlayerEntity playerEntity) {
+                        public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
 
-                            return new ContainerFluiDrawer(windowId, playerInv, tile);
+                            return new ContainerFluiDrawer(ModContents.containerType,windowId, playerInv, tile);
                         }
                     }, extraData -> {
                         extraData.writeBlockPos(pos);
                     });
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
             }
             if (offhandStack == ItemStack.EMPTY) {
@@ -152,12 +121,13 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                     Fluid fluid = fluidStack.getFluid();
                                     if (heldStack.getCount() > 1) {
                                         if (!player.addItem(new ItemStack(fluid.getBucket())))
-                                            InventoryHelper.dropItemStack(world, player.getX(), player.getY(), player.getZ(), new ItemStack(fluid.getBucket()));
+
+                                            Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), new ItemStack(fluid.getBucket()));
                                         if (!player.isCreative())
                                             heldStack.shrink(1);
                                     } else {
                                         if (!player.isCreative()) {
-                                            player.setItemInHand(hand, DrinkHelper.createFilledResult(heldStack, player, new ItemStack(fluid.getBucket())));
+                                            player.setItemInHand(hand, ItemUtils.createFilledResult(heldStack, player, new ItemStack(fluid.getBucket())));
                                         } else {
 //                                            player.addItem(new ItemStack(fluid.getBucket()));
                                         }
@@ -170,7 +140,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                     if (!player.isCreative())
                                         player.setItemInHand(hand, heldStack.getContainerItem());
                                 });
-                        return ActionResultType.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     } else {
                         if (tile.getTankFLuid().getAmount() + FluidAttributes.BUCKET_VOLUME <= tile.getEffectiveCapacity()
                                 && tile.getTankFLuid().getFluid() == bucketItem.getFluid()) {
@@ -181,14 +151,14 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                     });
                             if (!player.isCreative())
                                 player.setItemInHand(hand, heldStack.getContainerItem());
-                            return ActionResultType.SUCCESS;
+                            return InteractionResult.SUCCESS;
                         }
                     }
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
 //                Maybe so simple
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 } else if (heldStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).isPresent()) {
                     heldStack.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY)
                             .ifPresent((handler) -> {
@@ -223,47 +193,36 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                 }
 
                             });
-                    return ActionResultType.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
 
             }
 
         }
+        return super.use(state,world,pos,player,hand,hit);
+    }
 
 
-        return ActionResultType.PASS;
+
+
+    @Override
+    public RenderShape getRenderShape(BlockState p_149645_1_) {
+        return RenderShape.MODEL;
     }
 
     @Override
-    public boolean hasTileEntity(BlockState state) {
-        return true;
-    }
-
-    @Nullable
-    @Override
-    public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return new TileEntityFluidDrawer();
-//        return null;
-    }
-
-    @Override
-    public BlockRenderType getRenderShape(BlockState p_149645_1_) {
-        return BlockRenderType.MODEL;
-    }
-
-    @Override
-    public ItemStack getPickBlock(BlockState state, RayTraceResult target, IBlockReader blockReader, BlockPos pos, PlayerEntity player) {
+    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         ItemStack stack = ModContents.itemBlock.asItem().getDefaultInstance();
-        TileEntity tileEntity = blockReader.getBlockEntity(pos);
+        BlockEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof TileEntityFluidDrawer) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
             final FluidStack[] fluidStackDown = new FluidStack[1];
             tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                     .ifPresent(handler -> {
                         fluidStackDown[0] = handler.getFluidInTank(0);
-                        CompoundNBT nbt = new CompoundNBT();
+                        CompoundTag nbt = new CompoundTag();
                         handler.getFluidInTank(0).writeToNBT(nbt);
-                        stack.addTagElement("tank", nbt);
+                        stack.addTagElement("tank", ((TileEntityFluidDrawer.betterFluidHandler)handler).serializeNBT());
 
                     });
             stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
@@ -290,64 +249,24 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     }
 
     @Override
-    public ItemStack getCloneItemStack(IBlockReader blockReader, BlockPos pos, BlockState state) {
-        ItemStack stack = ModContents.itemBlock.asItem().getDefaultInstance();
-        TileEntity tileEntity = blockReader.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer) {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
-            final FluidStack[] fluidStackDown = new FluidStack[1];
-            tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
-                    .ifPresent(handler -> {
-                        fluidStackDown[0] = handler.getFluidInTank(0);
-                        CompoundNBT nbt = new CompoundNBT();
-                        handler.getFluidInTank(0).writeToNBT(nbt);
-
-                        stack.addTagElement("tank", nbt);
-
-                    });
-            stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
-
-
-            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_EMPTY))
-                attrs.add(LockAttribute.LOCK_EMPTY);
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_POPULATED))
-                attrs.add(LockAttribute.LOCK_POPULATED);
-            if (!attrs.isEmpty()) {
-
-                stack.getOrCreateTag().putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
-            }
-
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isConcealed())
-                stack.getOrCreateTag().putBoolean("Shr", true);
-
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isShowingQuantity())
-                stack.getOrCreateTag().putBoolean("Qua", true);
-        }
-        return stack;
-//        return super.getCloneItemStack(blockReader, pos, state);
-    }
-
-
-    @Override
-    public void setPlacedBy(World level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
-        TileEntity tileEntity = level.getBlockEntity(pos);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
+        BlockEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof TileEntityFluidDrawer) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
             if (stack.getOrCreateTag().contains("tank")) {
                 tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                         .ifPresent(handler -> {
-                            FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundNBT) stack.getOrCreateTag().get("tank"));
+                            FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
                             handler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
 //                        FluidDrawersLegacyMod.logger(level.toString()+fluidStack.getDisplayName());
                         });
             }
             if (stack.getTag().contains("Upgrades")) {
-                CompoundNBT nbt = new CompoundNBT();
+                CompoundTag nbt = new CompoundTag();
                 nbt.put("Upgrades", stack.getTag().get("Upgrades"));
                 tile.upgrades().read(nbt);
             }
-            CompoundNBT tag = stack.getOrCreateTag();
+            CompoundTag tag = stack.getOrCreateTag();
             if (tag.contains("Lock")) {
                 EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(tag.getByte("Lock"));
                 if (attrs != null) {
@@ -384,17 +303,20 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
 
 
     @Override
-    public void destroy(IWorld p_176206_1_, BlockPos p_176206_2_, BlockState p_176206_3_) {
-        super.destroy(p_176206_1_, p_176206_2_, p_176206_3_);
-        p_176206_1_.playSound(null, p_176206_2_, Fluids.WATER.getAttributes().getEmptySound(), SoundCategory.BLOCKS, 1.0F, 1.0F);
+    public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
+        super.destroy(level,pos,state);
+        level.playSound(null, pos, Fluids.WATER.getAttributes().getEmptySound(), SoundSource.BLOCKS, 1.0F, 1.0F);
 
     }
 
+    @Override
     public boolean isSignalSource(BlockState state) {
         return true;
     }
 
-    public int getSignal(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) {
+
+    @Override
+    public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction side) {
         if (!this.isSignalSource(state)||!(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
             return 0;
         } else {
@@ -404,7 +326,14 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
         }
     }
 
-    public int getDirectSignal(BlockState state, IBlockReader worldIn, BlockPos pos, Direction side) {
+    @Override
+    public int getDirectSignal(BlockState state, BlockGetter worldIn, BlockPos pos, Direction side) {
         return side == Direction.UP ? this.getSignal(state, worldIn, pos, side):0 ;
+    }
+
+    @org.jetbrains.annotations.Nullable
+    @Override
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+        return new TileEntityFluidDrawer(pos,state);
     }
 }
