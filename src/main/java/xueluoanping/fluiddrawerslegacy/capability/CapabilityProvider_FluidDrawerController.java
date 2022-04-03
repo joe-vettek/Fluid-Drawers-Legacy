@@ -55,6 +55,8 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             public void run() {
                 // if null, then cancel
 //                    sometimes maybe a empty tile
+                if (!RebuildLock) {
+                    drawerDataList.clear();}
                 if (tile == null) {
                     return;
                 }
