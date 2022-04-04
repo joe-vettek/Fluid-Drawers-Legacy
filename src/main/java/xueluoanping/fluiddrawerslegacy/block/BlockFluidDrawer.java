@@ -334,14 +334,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
         TileEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof TileEntityFluidDrawer) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
-            if (stack.getOrCreateTag().contains("tank")) {
-                tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
-                        .ifPresent(handler -> {
-                            FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundNBT) stack.getOrCreateTag().get("tank"));
-                            handler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-//                        FluidDrawersLegacyMod.logger(level.toString()+fluidStack.getDisplayName());
-                        });
-            }
+
             if (stack.getTag().contains("Upgrades")) {
                 CompoundNBT nbt = new CompoundNBT();
                 nbt.put("Upgrades", stack.getTag().get("Upgrades"));
@@ -376,6 +369,10 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                     attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
 
                 }
+            }
+            if (stack.getOrCreateTag().contains("tank")) {
+                TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+                tank.deserializeNBT((CompoundNBT) stack.getOrCreateTag().get("tank"));
             }
         }
 

@@ -119,7 +119,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             ListNBT list = stack.getOrCreateTag().getList("Upgrades", Constants.NBT.TAG_COMPOUND);
             if (list.size() > 0)
                 for (int j = 0; j < list.size(); j++) {
-                    CompoundNBT id = (CompoundNBT) list.get(i);
+                    CompoundNBT id = (CompoundNBT) list.get(j);
                     String ids = id.get("id").getAsString();
                     String[] idGroup = ids.split(":");
                     ResourceLocation res = new ResourceLocation(idGroup[0], idGroup[1]);
@@ -376,6 +376,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         }
 
         public void deserializeNBT(CompoundNBT tank) {
+            if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
+                this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
             if (tank.contains("cache")) {
                 String[] x = tank.getString("cache").split(":");
                 ResourceLocation res = new ResourceLocation(x[0], x[1]);
