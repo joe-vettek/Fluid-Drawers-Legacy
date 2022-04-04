@@ -10,7 +10,6 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
@@ -24,15 +23,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
-import org.lwjgl.opengl.GL11;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import static com.mojang.blaze3d.vertex.DefaultVertexFormat.POSITION_COLOR_TEX;
-import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
 
 public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
@@ -79,7 +74,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             TextureAtlasSprite still = getBlockSprite(attributes.getStillTexture());
             int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
 
-            int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getEffectiveCapacity();
+            int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
             if (capacity < amount) amount = capacity;
             List<Component> list = new ArrayList<>();
@@ -282,7 +277,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         TextureAtlasSprite still = getBlockSprite(attributes.getStillTexture());
         int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
 
-        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getEffectiveCapacity();
+        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float h = 0.0f;

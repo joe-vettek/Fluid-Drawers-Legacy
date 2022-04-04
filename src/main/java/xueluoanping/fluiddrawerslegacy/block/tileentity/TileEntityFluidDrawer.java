@@ -6,17 +6,17 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
+import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
+import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -33,6 +33,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.config.General;
@@ -46,15 +47,19 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
     private IDrawerAttributesModifiable drawerAttributes = new DrawerAttributes();
 
     private GroupData groupData = new GroupData(1);
-
+    private UpgradeData upgradeData = new TileEntityFluidDrawer.DrawerUpgradeData();
 
     //    public static int Capacity = 32000;
 
 
     public TileEntityFluidDrawer(BlockPos pos, BlockState state) {
         super(ModContents.tankTileEntityType, pos, state);
-        groupData.setCapabilityProvider(this);
-        injectPortableData(groupData);
+        this.groupData.setCapabilityProvider(this);
+        this.injectPortableData(groupData);
+
+        this.upgradeData.setDrawerAttributes(this.drawerAttributes);
+        this.injectPortableData(this.upgradeData);
+//        FluidDrawersLegacyMod.logger("create tile");
     }
 
     private static int getCapacityStandard() {
@@ -97,52 +102,36 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         return this.groupData.tank;
     }
 
-    public int getEffectiveCapacity() {
-//FluidDrawersLegacyMod.LOGGER.info(""+getLevel()+upgrades().write(new CompoundTag()).toString().contains("storagedrawers:creative_vending_upgrade"));
+    public int getTankEffectiveCapacity() {
 
-        if (upgrades().write(new CompoundTag()).toString().contains("storagedrawers:creative_vending_upgrade")
-                || upgrades().hasUnlimitedUpgrade())
+        if (upgrades().hasVendingUpgrade() || upgrades().hasUnlimitedUpgrade())
             return Integer.MAX_VALUE;
         if (upgrades().hasOneStackUpgrade())
             return getCapacityStandard() / 32;
+
         return getCapacityStandard() * upgrades().getStorageMultiplier();
     }
 
-    public static int calcultaeCapacitybyStack(ItemStack stack) {
+    public static int calcultaeTankCapacitybyStack(ItemStack stack) {
         if (!stack.getOrCreateTag().contains("Upgrades"))
             return getCapacityStandard();
         else {
-            int i = 0;
-//            use 8 instead of 7, maybe 1 =null?
-            UpgradeData upgradeData0 = new UpgradeData(8);
+            int i = 1;
+//            use 7 now, just need to setDrawerAttributes with a default one
+            UpgradeData tmpData = new UpgradeData(7);
+            tmpData.setDrawerAttributes(new IDrawerAttributesModifiable() {
+            });
+            CompoundTag tag = new CompoundTag();
+            tag.put("Upgrades", stack.getOrCreateTag().get("Upgrades"));
+            tmpData.deserializeNBT(tag);
 
-
-            ListTag list = stack.getOrCreateTag().getList("Upgrades", Tag.TAG_COMPOUND);
-            if (list.size() > 0)
-                for (int j = 0; j < list.size(); j++) {
-                    CompoundTag id = (CompoundTag) list.get(i);
-                    String ids = id.get("id").getAsString();
-                    String[] idGroup = ids.split(":");
-                    ResourceLocation res = new ResourceLocation(idGroup[0], idGroup[1]);
-                    if (ForgeRegistries.ITEMS.containsKey(res)) {
-                        upgradeData0.addUpgrade(ForgeRegistries.ITEMS.getValue(res).asItem().getDefaultInstance());
-                        if (ForgeRegistries.ITEMS.getValue(res).asItem() instanceof ItemUpgradeStorage) {
-                            int level = ((ItemUpgradeStorage) ForgeRegistries.ITEMS.getValue(res).asItem()).level.getLevel();
-                            i += CommonConfig.UPGRADES.getLevelMult(level);
-                        }
-//                    if(ForgeRegistries.ITEMS.getValue(res).getItem() ==ModItems.ONE_STACK_UPGRADE) return getCapacityStandard() / 32;
-                    }
-                }
-
-//            i += upgradeData0.getStorageMultiplier();
-            i = i == 0 ? 1 : i;
-            if (upgradeData0.write(new CompoundTag()).toString().contains("storagedrawers:creative_vending_upgrade")
-                    || upgradeData0.write(new CompoundTag()).toString().contains("storagedrawers:creative_storage_upgrade"))
+//            FluidDrawersLegacyMod.logger(tmpData.hasVendingUpgrade()+"");
+            i = tmpData.getStorageMultiplier();
+            if (tmpData.hasVendingUpgrade() || tmpData.hasUnlimitedUpgrade())
                 return Integer.MAX_VALUE;
-            if (upgradeData0.write(new CompoundTag()).toString().contains("storagedrawers:one_stack_upgrade"))
+            if (tmpData.hasOneStackUpgrade())
                 return getCapacityStandard() / 32;
-//            FluidDrawersLegacyMod.logger(""+upgradeData0.getStorageMultiplier());
-            return upgradeData0.hasVendingUpgrade() ? Integer.MAX_VALUE : getCapacityStandard() * i;
+            return getCapacityStandard() * i;
         }
     }
 
@@ -165,12 +154,17 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
     @Override
     public int getRedstoneLevel() {
 //        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
-        return (int) (((float) getTankFLuid().getAmount() / (float) getEffectiveCapacity()) * 15);
+        return (int) (((float) getTankFLuid().getAmount() / (float) getTankEffectiveCapacity()) * 15);
     }
 
     @Override
     public boolean isRedstone() {
         return upgrades().getRedstoneType() != null;
+    }
+
+    @Override
+    public UpgradeData upgrades() {
+        return this.upgradeData;
     }
 
     public class GroupData extends StandardDrawerGroup {
@@ -362,9 +356,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         @NotNull
         @Override
         public FluidStack getFluid() {
-            if(upgrades().hasVendingUpgrade()&& this.fluid!=FluidStack.EMPTY)
-            {
-                FluidStack stack =fluid.copy();
+            if (upgrades().hasVendingUpgrade() && this.fluid != FluidStack.EMPTY) {
+                FluidStack stack = fluid.copy();
                 stack.setAmount(Integer.MAX_VALUE);
                 return stack;
             }
@@ -373,8 +366,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
         public CompoundTag serializeNBT() {
 //            发送信息时调整容量大小
-            if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
-                this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
+            if (this.getCapacity() != TileEntityFluidDrawer.this.getTankEffectiveCapacity())
+                this.setCapacity(TileEntityFluidDrawer.this.getTankEffectiveCapacity());
             CompoundTag nbt = new CompoundTag();
             if (getCacheFluid() != Fluids.EMPTY &&
                     fluid.getFluid() != Fluids.EMPTY &&
@@ -393,8 +386,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         }
 
         public void deserializeNBT(CompoundTag tank) {
-            if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
-                this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
+            if (this.getCapacity() != TileEntityFluidDrawer.this.getTankEffectiveCapacity())
+                this.setCapacity(TileEntityFluidDrawer.this.getTankEffectiveCapacity());
             if (tank.contains("cache")) {
                 String[] x = tank.getString("cache").split(":");
                 ResourceLocation res = new ResourceLocation(x[0], x[1]);
@@ -435,12 +428,11 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
                         && getCacheFluid() != resource.getFluid()) {
                     return 0;
                 }
-                if(getCacheFluid()==Fluids.EMPTY){
-                    if(resource.getAmount()>0){
+                if (getCacheFluid() == Fluids.EMPTY) {
+                    if (resource.getAmount() > 0) {
                         setCacheFluid(resource.getFluid());
-                        return super.fill(resource,action);
-                    }
-                    else return 0;
+                        return super.fill(resource, action);
+                    } else return 0;
 
                 }
             }
@@ -510,4 +502,74 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         }
     }
 
+    private class DrawerUpgradeData extends UpgradeData {
+        DrawerUpgradeData() {
+            super(7);
+        }
+
+        public boolean canAddUpgrade(@Nonnull ItemStack upgrade) {
+            if (!super.canAddUpgrade(upgrade)) {
+                return false;
+            } else {
+                if (upgrade.getItem() == ModItems.ONE_STACK_UPGRADE) {
+                    if (upgrades().hasOneStackUpgrade())
+                        return false;
+
+                    if (TileEntityFluidDrawer.this.getTank().getFluidInTank(0).getAmount()
+                            >= getCapacityStandard() / 32)
+                        return false;
+//                    int lostStackCapacity = getCapacityStandard() * upgrades().getStorageMultiplier();
+//
+//                    if (!this.stackCapacityCheck(lostStackCapacity)) {
+//                        return false;
+//                    }
+                }
+
+                return true;
+            }
+        }
+
+        public boolean canRemoveUpgrade(int slot) {
+            if (!super.canRemoveUpgrade(slot)) {
+                return false;
+            } else {
+                ItemStack upgrade = this.getUpgrade(slot);
+                if (upgrade.getItem() instanceof ItemUpgradeStorage) {
+                    int storageLevel = ((ItemUpgradeStorage) upgrade.getItem()).level.getLevel();
+                    int storageMult = CommonConfig.UPGRADES.getLevelMult(storageLevel);
+                    int effectiveStorageMult = TileEntityFluidDrawer.this.upgrades().getStorageMultiplier();
+//                    单个物品特殊处理，
+                    if (effectiveStorageMult == storageMult) {
+                        --storageMult;
+                    }
+                    int amount =getTank().getFluidInTank(0).getAmount();
+                    int capacity=getTank().getTankCapacity(0);
+                    int standardCapacity=getCapacityStandard();
+                    int afterCapacity=standardCapacity*(effectiveStorageMult-storageMult);
+                    if(afterCapacity<amount)return false;
+
+                }
+
+                return true;
+            }
+        }
+
+        protected void onUpgradeChanged(ItemStack oldUpgrade, ItemStack newUpgrade) {
+            if (TileEntityFluidDrawer.this.getLevel() != null && !TileEntityFluidDrawer.this.getLevel().isClientSide) {
+                TileEntityFluidDrawer.this.setChanged();
+                TileEntityFluidDrawer.this.markBlockForUpdate();
+            }
+
+        }
+
+//        private boolean stackCapacityCheck(int stackCapacity) {
+//            return false;
+//        }
+//
+//        @Override
+//        public int getStorageMultiplier() {
+////            if(hasOneStackUpgrade())return super.getStorageMultiplier()/32;
+//            return super.getStorageMultiplier();
+//        }
+    }
 }

@@ -12,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -27,8 +26,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.InventoryMenu;
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
@@ -61,6 +58,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         if (!tile.hasLevel())
             return;
 
+        if (tile.upgrades().hasIlluminationUpgrade()) combinedLightIn = 15728880;
 
         matrixStackIn.pushPose();
 
@@ -76,7 +74,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY &&
                 tile.getDrawerAttributes().isConcealed()) {
 
-            FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(),1);
+            FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
             Font fontRenderer = this.font;
             LocalPlayer player = Minecraft.getInstance().player;
             handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
@@ -120,8 +118,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isShowingQuantity()) {
-            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY)
-            {
+            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
 
                 FluidStack fluidStackDown = betterFluidHandler.getFluid();
                 Font fontRenderer = this.font;
@@ -162,10 +159,9 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             if (vector3d.x > 0 && Math.abs(vector3d.x) < Math.abs(vector3d.z)) d = Direction.SOUTH;
             if (vector3d.x < 0 && Math.abs(vector3d.x) < Math.abs(vector3d.z)) d = Direction.NORTH;
         }
-        if(ClientConfig.distance.get()!=-1)
-        {
-            if(MathUtil.calDistanceSelf(vector3d)>ClientConfig.distance.get())
-                d=Direction.DOWN;
+        if (ClientConfig.distance.get() != -1) {
+            if (MathUtil.calDistanceSelf(vector3d) > ClientConfig.distance.get())
+                d = Direction.DOWN;
         }
         switch (d) {
             case SOUTH:
@@ -212,18 +208,17 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
             TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
-            if (fluidStackDown.getAmount() <= 0 )
-                if(betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+            if (fluidStackDown.getAmount() <= 0)
+                if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
 
-                fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
-                FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
+                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
 //                FontRenderer fontRenderer = this.renderer.getFont();
 //                matrixStackIn.mulPose(new Quaternion(0, 0, 0, true));
 //                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()),0F, 0F, 0xFFFFF);
-            }
-            else {
-                return;
-            }
+                } else {
+                    return;
+                }
         }
 //        Minecraft mc = Minecraft.getInstance();
 //        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
@@ -237,7 +232,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
 
-        int capacity = tile.getEffectiveCapacity();
+        int capacity = tile.getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float r = (float) amount / (float) capacity;
@@ -247,6 +242,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         matrixStackIn.pushPose();
         GlStateManager._disableCull();
         VertexConsumer buffer = bufferIn.getBuffer(RenderType.translucent());
+
 
         addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
         addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
@@ -294,7 +290,10 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         float red = ((RGBA >> 16) & 0xFF) / 255f;
         float green = ((RGBA >> 8) & 0xFF) / 255f;
         float blue = ((RGBA >> 0) & 0xFF) / 255f;
-        renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880)/*.lightmap(0, 240)*/.normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
+        //		renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880)/*.lightmap(0, 240)*/.normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
+        int light1 = brightness & '\uffff';
+        int light2 = brightness >> 16 & '\uffff';
+        renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).uv2(light1, light2).overlayCoords(OverlayTexture.NO_OVERLAY).normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
     }
 
 

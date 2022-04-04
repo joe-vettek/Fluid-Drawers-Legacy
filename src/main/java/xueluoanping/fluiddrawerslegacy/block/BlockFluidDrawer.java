@@ -8,6 +8,7 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute
 import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +46,6 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
@@ -63,7 +63,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public static final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
     public static final VoxelShape top = Block.box(0, 15, 0, 16, 16, 16);
 
-    
+
 //    public FluidDrawer(int drawerCount, boolean halfDepth, int storageUnits, Properties properties) {
 //        super(properties);
 //    }
@@ -103,12 +103,27 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         @Override
                         public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
 
-                            return new ContainerFluiDrawer(ModContents.containerType,windowId, playerInv, tile);
+                            return new ContainerFluiDrawer(ModContents.containerType, windowId, playerInv, tile);
                         }
                     }, extraData -> {
                         extraData.writeBlockPos(pos);
                     });
                     return InteractionResult.SUCCESS;
+                }
+            }
+
+            if (heldStack.getItem() instanceof ItemUpgrade) {
+
+                if (tile.upgrades().canAddUpgrade(heldStack)) {
+                    if (tile.upgrades().addUpgrade(heldStack)) {
+                        if (!player.isCreative()) heldStack.shrink(1);
+                        return InteractionResult.SUCCESS;
+                    } else if (!world.isClientSide()) {
+                        player.displayClientMessage(new TranslatableComponent("message.storagedrawers.max_upgrades"), true);
+                    }
+
+                } else if (!world.isClientSide()) {
+                    player.displayClientMessage(new TranslatableComponent("message.storagedrawers.cannot_add_upgrade"), true);
                 }
             }
             if (offhandStack == ItemStack.EMPTY) {
@@ -142,7 +157,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                                 });
                         return InteractionResult.SUCCESS;
                     } else {
-                        if (tile.getTankFLuid().getAmount() + FluidAttributes.BUCKET_VOLUME <= tile.getEffectiveCapacity()
+                        if (tile.getTankFLuid().getAmount() + FluidAttributes.BUCKET_VOLUME <= tile.getTankEffectiveCapacity()
                                 && tile.getTankFLuid().getFluid() == bucketItem.getFluid()) {
                             tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                     .ifPresent(handler -> {
@@ -164,7 +179,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                             .ifPresent((handler) -> {
 
                                 if (tile.hasNoFluid()) {
-                                    if (tile.getEffectiveCapacity() > handler.getTankCapacity(0)) {
+                                    if (tile.getTankEffectiveCapacity() > handler.getTankCapacity(0)) {
                                         tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                                 .ifPresent(TEhandler -> {
                                                     TEhandler.fill(handler.drain(handler.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
@@ -173,11 +188,11 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                                     } else {
                                         tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                                 .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(tile.getEffectiveCapacity(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                                    TEhandler.fill(handler.drain(tile.getTankEffectiveCapacity(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
                                                 });
                                     }
                                 } else if (tile.getTankFLuid().getFluid() == handler.drain(1, IFluidHandler.FluidAction.SIMULATE).getFluid()) {
-                                    if (tile.getEffectiveCapacity() < handler.getTankCapacity(0) + tile.getTankFLuid().getAmount()) {
+                                    if (tile.getTankEffectiveCapacity() < handler.getTankCapacity(0) + tile.getTankFLuid().getAmount()) {
                                         tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                                 .ifPresent(TEhandler -> {
                                                     TEhandler.fill(handler.drain(handler.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
@@ -187,7 +202,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                                     } else {
                                         tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                                 .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(tile.getEffectiveCapacity() - tile.getTankFLuid().getAmount(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
+                                                    TEhandler.fill(handler.drain(tile.getTankEffectiveCapacity() - tile.getTankFLuid().getAmount(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
                                                 });
                                     }
                                 }
@@ -198,11 +213,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
             }
 
+
         }
-        return super.use(state,world,pos,player,hand,hit);
+        return InteractionResult.PASS;
     }
-
-
 
 
     @Override
@@ -222,7 +236,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         fluidStackDown[0] = handler.getFluidInTank(0);
                         CompoundTag nbt = new CompoundTag();
                         handler.getFluidInTank(0).writeToNBT(nbt);
-                        stack.addTagElement("tank", ((TileEntityFluidDrawer.betterFluidHandler)handler).serializeNBT());
+                        stack.addTagElement("tank", ((TileEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
 
                     });
             stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
@@ -253,14 +267,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         BlockEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof TileEntityFluidDrawer) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
-            if (stack.getOrCreateTag().contains("tank")) {
-                tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
-                        .ifPresent(handler -> {
-                            FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
-                            handler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-//                        FluidDrawersLegacyMod.logger(level.toString()+fluidStack.getDisplayName());
-                        });
-            }
+
             if (stack.getTag().contains("Upgrades")) {
                 CompoundTag nbt = new CompoundTag();
                 nbt.put("Upgrades", stack.getTag().get("Upgrades"));
@@ -296,6 +303,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
                 }
             }
+            if (stack.getOrCreateTag().contains("tank")) {
+                TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+                tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
+            }
         }
 
         super.setPlacedBy(level, pos, state, entity, stack);
@@ -304,7 +315,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
-        super.destroy(level,pos,state);
+        super.destroy(level, pos, state);
         level.playSound(null, pos, Fluids.WATER.getAttributes().getEmptySound(), SoundSource.BLOCKS, 1.0F, 1.0F);
 
     }
@@ -317,7 +328,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction side) {
-        if (!this.isSignalSource(state)||!(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
+        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
             return 0;
         } else {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) blockAccess.getBlockEntity(pos);
@@ -328,12 +339,12 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public int getDirectSignal(BlockState state, BlockGetter worldIn, BlockPos pos, Direction side) {
-        return side == Direction.UP ? this.getSignal(state, worldIn, pos, side):0 ;
+        return side == Direction.UP ? this.getSignal(state, worldIn, pos, side) : 0;
     }
 
     @org.jetbrains.annotations.Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TileEntityFluidDrawer(pos,state);
+        return new TileEntityFluidDrawer(pos, state);
     }
 }

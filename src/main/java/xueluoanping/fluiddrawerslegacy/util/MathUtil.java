@@ -14,6 +14,6 @@ public class MathUtil {
         double dx=v1.x;
         double dy=v1.y;
         double dz=v1.z;
-        return (float) Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2)+Math.pow(dx,2));
+        return (float) Math.sqrt(Math.pow(dx,2)+Math.pow(dy,2)+Math.pow(dz,2));
     }
 }

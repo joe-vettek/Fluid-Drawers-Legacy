@@ -170,6 +170,7 @@ dependencies {
     implementation fg.deobf("curse.maven:journeymap-32274:3696405")
 
     implementation fg.deobf("curse.maven:cyclic-239286:3708026")
+    implementation fg.deobf("curse.maven:voluminous-energy-416704:3706606")
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency

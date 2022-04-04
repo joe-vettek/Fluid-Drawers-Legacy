@@ -22,11 +22,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.fluids.FluidStack;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
-
-import java.util.function.Supplier;
 
 import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
@@ -111,7 +108,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
         int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
 
-        int capacity = TileEntityFluidDrawer.calcultaeCapacitybyStack(stack);
+        int capacity = TileEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float height = (float) amount / (float) capacity * 0.875f;

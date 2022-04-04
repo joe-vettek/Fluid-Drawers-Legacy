@@ -21,7 +21,9 @@ import snownee.jade.VanillaPlugin;
 import snownee.jade.addon.forge.ForgeCapabilityProvider;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
+import xueluoanping.fluiddrawerslegacy.ModTranslateKey;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,14 +67,14 @@ public class SlaveCompoentProvider implements IComponentProvider, IServerDataPro
             fluidMap.forEach((fluid, integerList) -> {
                 i.getAndIncrement();
                 if (!accessor.getPlayer().isShiftKeyDown()
-                        && i.get() < 9)
+                        && i.get() < ClientConfig.showlimit.get())
                     ForgeCapabilityProvider.appendTank(tooltip, new FluidStack(fluid, integerList.get(0)), integerList.get(1));
                 else if (accessor.getPlayer().isShiftKeyDown())
                     ForgeCapabilityProvider.appendTank(tooltip, new FluidStack(fluid, integerList.get(0)), integerList.get(1));
 
             });
-            if (i.get() >= 9)
-                tooltip.add(new TextComponent(I18n.get("waila.fluiddrawerslegacy.conceal")));
+            if (i.get() >= ClientConfig.showlimit.get() &&!accessor.getPlayer().isShiftKeyDown())
+                tooltip.add(new TextComponent(ModTranslateKey.getWailaHide()));
 
 
         }
