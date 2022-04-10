@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.container.PlayerContainer;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -30,6 +31,7 @@ import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import static net.minecraft.client.renderer.tileentity.BellTileEntityRenderer.BELL_RESOURCE_LOCATION;
+import static net.minecraft.inventory.container.PlayerContainer.BLOCK_ATLAS;
 
 // Thanks to WaterSource
 public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
@@ -267,11 +269,11 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         GlStateManager._enableCull();
         matrixStackIn.popPose();
 
-
+        ColorHelper
     }
 
     public static TextureAtlasSprite getBlockSprite(ResourceLocation sprite) {
-        return Minecraft.getInstance().getModelManager().getAtlas(PlayerContainer.BLOCK_ATLAS).getSprite(sprite);
+        return Minecraft.getInstance().getModelManager().getAtlas(BLOCK_ATLAS).getSprite(sprite);
     }
 
     private void addVertex(IVertexBuilder renderer, MatrixStack stack, float x, float y, float z, float u, float v, int RGBA, float alpha, int brightness) {
