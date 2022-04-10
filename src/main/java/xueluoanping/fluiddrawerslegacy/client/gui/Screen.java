@@ -163,7 +163,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 
 //        注意color要这样写，后面的是无效的
-        int color = fluid.getFluid().getAttributes().getColor();
+        int color = fluid.getFluid().getAttributes().getColor(fluid);
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;

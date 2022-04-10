@@ -511,7 +511,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             if (!super.canAddUpgrade(upgrade)) {
                 return false;
             } else {
-                if (upgrade.getItem() == ModItems.ONE_STACK_UPGRADE) {
+                if(upgrade.getItem() == ModItems.FILL_LEVEL_UPGRADE)return false;
+                else if (upgrade.getItem() == ModItems.ONE_STACK_UPGRADE) {
                     if (upgrades().hasOneStackUpgrade())
                         return false;
 

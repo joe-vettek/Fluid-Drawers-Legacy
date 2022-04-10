@@ -230,7 +230,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
+        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
 
         int capacity = tile.getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();

@@ -106,7 +106,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         Minecraft mc = Minecraft.getInstance();
         TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
+        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
 
         int capacity = TileEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
         int amount = fluidStackDown.getAmount();
