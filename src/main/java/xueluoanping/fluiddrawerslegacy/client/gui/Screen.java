@@ -85,7 +85,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 }
             }
-            list.add(new TranslatableComponent(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getTranslationKey()));
+            list.add(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName());
             renderComponentTooltip(stack, list, mouseX, mouseY);
 
         }

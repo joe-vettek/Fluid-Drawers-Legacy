@@ -81,7 +81,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             matrixStackIn.scale(0.007f, 0.007f, 0.007f);
             MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
-            fontRenderer.drawInBatch(I18n.get(fluidStackDown.getTranslationKey())
+            fontRenderer.drawInBatch(fluidStackDown.getDisplayName().getString()
                     , (float) (-textWidth) / 2.0F, -9F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
             txtBuffer.endBatch();
 
