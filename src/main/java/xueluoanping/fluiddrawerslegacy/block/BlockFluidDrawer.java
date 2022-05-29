@@ -265,7 +265,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer) {
+        if (tileEntity instanceof TileEntityFluidDrawer&&
+                stack.hasTag()) {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
 
             if (stack.getTag().contains("Upgrades")) {
@@ -294,7 +295,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             } else {
                 ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setIsShowingQuantity(false);
             }
-            if (entity != null && entity.getOffhandItem().getItem() == ModItems.DRAWER_KEY) {
+            if (entity != null && entity.getOffhandItem().getItem() == ModItems.DRAWER_KEY.get()) {
                 IDrawerAttributes _attrs = (IDrawerAttributes) tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
                 if (_attrs instanceof IDrawerAttributesModifiable) {
                     IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;

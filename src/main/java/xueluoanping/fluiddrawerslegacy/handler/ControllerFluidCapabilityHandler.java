@@ -57,7 +57,7 @@ public class ControllerFluidCapabilityHandler {
         BlockPos pos = event.getPos();
         Direction face = event.getFace();
         BlockState state = world.getBlockState(pos);
-        if (state.getBlock() != ModBlocks.CONTROLLER || face != state.getValue(BlockController.FACING)) {
+        if (state.getBlock() != ModBlocks.CONTROLLER.get() || face != state.getValue(BlockController.FACING)) {
             return;
         }
 //        FluidDrawersLegacyMod.logger("Try Interact in " + world);
