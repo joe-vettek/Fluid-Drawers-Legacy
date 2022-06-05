@@ -31,6 +31,7 @@ import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.util.MathUtil;
@@ -77,7 +78,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
             Font fontRenderer = this.font;
             LocalPlayer player = Minecraft.getInstance().player;
-            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
             matrixStackIn.scale(0.007f, 0.007f, 0.007f);
             MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
@@ -102,7 +103,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 String label = "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")";
                 int textWidth = fontRenderer.width(label);
                 LocalPlayer player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -130,7 +131,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 String label = String.valueOf(amount) + "mB";
                 int textWidth = fontRenderer.width(label);
                 LocalPlayer player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -146,13 +147,14 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
     }
 
 
-    private void handleMatrixAngle(PoseStack matrixStackIn, LocalPlayer player, BlockPos pos) {
+    private void handleMatrixAngle(PoseStack matrixStackIn, LocalPlayer player, BlockPos pos,Direction d) {
         Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - pos.getX() - 0.5
                 , player.getPosition(0f).y() - pos.getY()
                 , player.getPosition(0f).z() - pos.getZ() - 0.5);
 
 
-        Direction d = Direction.getNearest(vector3d.x, vector3d.y, vector3d.z);
+//        Direction d = Direction.getNearest(vector3d.x, vector3d.y, vector3d.z);
+
         if (d == Direction.DOWN || d == Direction.UP) {
             if (vector3d.x > 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.EAST;
             if (vector3d.x < 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.WEST;
@@ -212,7 +214,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
 
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
-                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
+//                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
 //                FontRenderer fontRenderer = this.renderer.getFont();
 //                matrixStackIn.mulPose(new Quaternion(0, 0, 0, true));
 //                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()),0F, 0F, 0xFFFFF);

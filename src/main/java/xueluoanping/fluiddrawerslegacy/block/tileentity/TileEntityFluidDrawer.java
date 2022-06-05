@@ -224,20 +224,20 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
             CompoundTag nbt = super.write(tag);
 
-            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
-            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY))
-                attrs.add(LockAttribute.LOCK_EMPTY);
-            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_POPULATED))
-                attrs.add(LockAttribute.LOCK_POPULATED);
-            if (!attrs.isEmpty()) {
-                tag.putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
-            }
-
-            if (drawerAttributes.isConcealed())
-                tag.putBoolean("Shr", true);
-
-            if (drawerAttributes.isShowingQuantity())
-                tag.putBoolean("Qua", true);
+//            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
+//            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY))
+//                attrs.add(LockAttribute.LOCK_EMPTY);
+//            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_POPULATED))
+//                attrs.add(LockAttribute.LOCK_POPULATED);
+//            if (!attrs.isEmpty()) {
+//                tag.putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
+//            }
+//
+//            if (drawerAttributes.isConcealed())
+//                tag.putBoolean("Shr", true);
+//
+//            if (drawerAttributes.isShowingQuantity())
+//                tag.putBoolean("Qua", true);
 //            inventoryChanged();
             //            If want to camouflage, pay attention to setting the capacity first, but we don't need it.
 
@@ -253,27 +253,27 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             if (nbt.contains("tank")) {
                 tank.deserializeNBT((CompoundTag) nbt.get("tank"));
             }
-            if (nbt.contains("Lock")) {
-                EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(nbt.getByte("Lock"));
-                if (attrs != null) {
-                    drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
-                    drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
-                }
-
-            } else {
-                drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, false);
-                drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, false);
-            }
-            if (nbt.contains("Shr"))
-                drawerAttributes.setIsConcealed(nbt.getBoolean("Shr"));
-            else
-                drawerAttributes.setIsConcealed(false);
-
-
-            if (nbt.contains("Qua"))
-                drawerAttributes.setIsShowingQuantity(nbt.getBoolean("Qua"));
-            else
-                drawerAttributes.setIsShowingQuantity(false);
+//            if (nbt.contains("Lock")) {
+//                EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(nbt.getByte("Lock"));
+//                if (attrs != null) {
+//                    drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
+//                    drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
+//                }
+//
+//            } else {
+//                drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, false);
+//                drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, false);
+//            }
+//            if (nbt.contains("Shr"))
+//                drawerAttributes.setIsConcealed(nbt.getBoolean("Shr"));
+//            else
+//                drawerAttributes.setIsConcealed(false);
+//
+//
+//            if (nbt.contains("Qua"))
+//                drawerAttributes.setIsShowingQuantity(nbt.getBoolean("Qua"));
+//            else
+//                drawerAttributes.setIsShowingQuantity(false);
 //            inventoryChanged();
 
             super.read(nbt);
