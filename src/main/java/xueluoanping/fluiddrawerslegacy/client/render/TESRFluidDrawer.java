@@ -28,6 +28,7 @@ import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import static net.minecraft.client.renderer.tileentity.BellTileEntityRenderer.BELL_RESOURCE_LOCATION;
@@ -72,7 +73,7 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
             FluidStack fluidStackDown = betterFluidHandler.getFluid();
             FontRenderer fontRenderer = this.renderer.getFont();
             ClientPlayerEntity player = Minecraft.getInstance().player;
-            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
             matrixStackIn.scale(0.007f, 0.007f, 0.007f);
             IRenderTypeBuffer.Impl txtBuffer = IRenderTypeBuffer.immediate(Tessellator.getInstance().getBuilder());
             int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
@@ -97,7 +98,7 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
                 String label ="("+I18n.get("tooltip.storagedrawers.waila.locked")+")";
                 int textWidth = fontRenderer.width(label);
                 ClientPlayerEntity player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -125,7 +126,7 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
                 String label = String.valueOf(amount) + "mB";
                 int textWidth = fontRenderer.width(label);
                 ClientPlayerEntity player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos());
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -141,12 +142,12 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlayIn);
     }
 
-    private void handleMatrixAngle(MatrixStack matrixStackIn, ClientPlayerEntity player, BlockPos pos) {
+    private void handleMatrixAngle(MatrixStack matrixStackIn, ClientPlayerEntity player, BlockPos pos,Direction d) {
         Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - pos.getX() - 0.5
                 , player.getPosition(0f).y() - pos.getY()
                 , player.getPosition(0f).z() - pos.getZ() - 0.5);
 
-        Direction d = Direction.getNearest(vector3d.x, vector3d.y, vector3d.z);
+//        Direction d = Direction.getNearest(vector3d.x, vector3d.y, vector3d.z);
         if (d == Direction.DOWN || d == Direction.UP) {
             if (vector3d.x > 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.EAST;
             if (vector3d.x < 0 && Math.abs(vector3d.x) > Math.abs(vector3d.z)) d = Direction.WEST;
@@ -269,7 +270,7 @@ public class TESRFluidDrawer extends TileEntityRenderer<TileEntityFluidDrawer> {
         GlStateManager._enableCull();
         matrixStackIn.popPose();
 
-        ColorHelper
+
     }
 
     public static TextureAtlasSprite getBlockSprite(ResourceLocation sprite) {

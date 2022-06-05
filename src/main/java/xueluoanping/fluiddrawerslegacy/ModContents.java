@@ -38,7 +38,7 @@ public class ModContents {
     public static void onBlocksRegistry(final RegistryEvent.Register<Block> event) {
         // register a new block here
         FluidDrawersLegacyMod.logger("Register Block");
-        fluiddrawer = new BlockFluidDrawer(AbstractBlock.Properties.of(Material.GLASS)
+        fluiddrawer = new BlockFluidDrawer(AbstractBlock.Properties.of(Material.STONE)
                 .sound(SoundType.GLASS).strength(5.0F)
                 .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse)
 

@@ -1,0 +1,69 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"north": "fluiddrawerslegacy:blocks/front",
+		"east": "fluiddrawerslegacy:blocks/side1",
+		"south": "fluiddrawerslegacy:blocks/back",
+		"west": "fluiddrawerslegacy:blocks/side2",
+		"up": "fluiddrawerslegacy:blocks/top",
+		"down": "storagedrawers:blocks/drawers_comp_side",
+		"trim": "storagedrawers:blocks/drawers_comp_side",
+		"particle": "blocks/glass"
+	},
+	"elements": [
+		{
+			"name": "Front Face",
+			"from": [0, 0, 1],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#north", "cullface": "north"},
+				"east": {"uv": [0, 0, 15, 16], "texture": "#east", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#south", "cullface": "south"},
+				"west": {"uv": [1, 0, 16, 16], "texture": "#west", "cullface": "west"},
+				"up": {"uv": [0, 1, 16, 16], "texture": "#up", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 15], "texture": "#down", "cullface": "down"}
+			}
+		},
+		{
+			"name": "Top Edge",
+			"from": [0, 15, 0],
+			"to": [16, 16, 1],
+			"faces": {
+				"north": {"uv": [0, 0, 16, 1], "texture": "#trim", "cullface": "north"},
+				"up": {"uv": [0, 0, 16, 1], "texture": "#trim", "cullface": "up"},
+				"down": {"uv": [0, 15, 16, 16], "texture": "#trim"}
+			}
+		},
+		{
+			"name": "Bottom Edge",
+			"from": [0, 0, 0],
+			"to": [16, 1, 1],
+			"faces": {
+				"north": {"uv": [0, 15, 16, 16], "texture": "#trim", "cullface": "north"},
+				"up": {"uv": [0, 0, 16, 1], "texture": "#trim"},
+				"down": {"uv": [0, 15, 16, 16], "texture": "#trim", "cullface": "down"}
+			}
+		},
+		{
+			"name": "Right Edge",
+			"from": [0, 0, 0],
+			"to": [1, 16, 1],
+			"faces": {
+				"north": {"uv": [15, 0, 16, 16], "texture": "#trim", "cullface": "north"},
+				"east": {"uv": [15, 0, 16, 16], "texture": "#trim"},
+				"west": {"uv": [0, 0, 1, 16], "texture": "#trim", "cullface": "west"}
+			}
+		},
+		{
+			"name": "Left Edge",
+			"from": [15, 0, 0],
+			"to": [16, 16, 1],
+			"faces": {
+				"north": {"uv": [0, 0, 1, 16], "texture": "#trim", "cullface": "north"},
+				"east": {"uv": [15, 0, 16, 16], "texture": "#trim", "cullface": "east"},
+				"west": {"uv": [0, 0, 1, 16], "texture": "#trim"}
+			}
+		}
+	]
+}

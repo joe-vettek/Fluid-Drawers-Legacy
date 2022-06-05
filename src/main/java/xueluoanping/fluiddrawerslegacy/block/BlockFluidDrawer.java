@@ -23,10 +23,14 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.INamedContainerProvider;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.state.DirectionProperty;
+import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -56,6 +60,8 @@ import java.util.EnumSet;
 
 
 public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
+    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+
     public static final VoxelShape center = Block.box(1, 1, 1, 15, 15, 15);
     public static final VoxelShape base = Block.box(0, 0, 0, 16, 1, 16);
     public static final VoxelShape column1 = Block.box(0, 1, 0, 1, 15, 1);
@@ -71,6 +77,12 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
 
     public BlockFluidDrawer(Properties properties) {
         super(properties);
+    }
+
+    //Add all the properties here, or may cause a null point exception.
+    @Override
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> p_206840_1_) {
+        super.createBlockStateDefinition(p_206840_1_.add(FACING));
     }
 
     @Override
@@ -90,37 +102,37 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
             ItemStack heldStack = player.getItemInHand(hand);
             ItemStack offhandStack = player.getOffhandItem();
 //            FluidDrawersLegacyMod.logger("hello，screen" + world + player.isShiftKeyDown());
-            if (heldStack.getItem() == ModItems.DRAWER_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
-//                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
-                    return ActionResultType.PASS;
-                }
-
-            }
-            if (heldStack.getItem() == ModItems.QUANTIFY_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setIsShowingQuantity(!attrs.isShowingQuantity());
-                    return ActionResultType.PASS;
-                }
-
-            }
-            if (heldStack.getItem() == ModItems.SHROUD_KEY) {
-
-                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-//                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-//                    attrs.setIsSealed(!attrs.isSealed());
-                    return ActionResultType.PASS;
-                }
-
-            }
+//            if (heldStack.getItem() == ModItems.DRAWER_KEY) {
+//
+//                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
+//                if (_attrs instanceof IDrawerAttributesModifiable) {
+////                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+////                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
+////                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
+//                    return ActionResultType.PASS;
+//                }
+//
+//            }
+//            if (heldStack.getItem() == ModItems.QUANTIFY_KEY) {
+//
+//                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
+//                if (_attrs instanceof IDrawerAttributesModifiable) {
+////                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+////                    attrs.setIsShowingQuantity(!attrs.isShowingQuantity());
+//                    return ActionResultType.PASS;
+//                }
+//
+//            }
+//            if (heldStack.getItem() == ModItems.SHROUD_KEY) {
+//
+//                IDrawerAttributes _attrs = tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
+//                if (_attrs instanceof IDrawerAttributesModifiable) {
+////                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
+////                    attrs.setIsSealed(!attrs.isSealed());
+//                    return ActionResultType.PASS;
+//                }
+//
+//            }
             if (heldStack.isEmpty() && player.isShiftKeyDown()) {
                 if (CommonConfig.GENERAL.enableUI.get() && !world.isClientSide()) {
 //                    FluidDrawersLegacyMod.logger("hello，screen");
@@ -328,6 +340,12 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
 //        return super.getCloneItemStack(blockReader, pos, state);
     }
 
+
+    @Nullable
+    @Override
+    public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
+        return (BlockState)this.defaultBlockState().setValue(FACING, p_196258_1_.getHorizontalDirection().getOpposite());
+    }
 
     @Override
     public void setPlacedBy(World level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
