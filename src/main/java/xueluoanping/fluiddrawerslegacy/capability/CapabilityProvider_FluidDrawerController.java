@@ -386,11 +386,13 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
 //            FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + maxDrain);
             RebuildLock = true;
-            if (maxDrain <= 0) {
+            if (maxDrain <= 0 && drawerDataList.size()==0) {
                 RebuildLock = false;
                 return FluidStack.EMPTY;
             }
             FluidStack fluid = FluidStack.EMPTY;
+
+            // Strange , 0<0 ,but for will ingroe it.
             for (int i = 0; i < drawerDataList.size(); i++) {
                 if (drawerDataList.get(i).getTank().isEmpty() || (drawerDataList.get(i).getTank().getFluid() == FluidStack.EMPTY))
                     continue;
