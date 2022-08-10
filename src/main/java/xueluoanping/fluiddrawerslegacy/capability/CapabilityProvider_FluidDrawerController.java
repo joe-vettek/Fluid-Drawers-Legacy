@@ -234,12 +234,20 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 //                only find valid and same order
                 if (priorityList.get(i) != order) continue;
 // when locked, need to check cache, or not necessary
-                if (drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
-                        && drawerDataList.get(i).getTank().getCacheFluid().getFluid() != resource.getFluid()
+                
+                // if drawer is empty and locked, no need to continue checking
+                if( drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY 
                         && drawerDataList.get(i).isLock())
                     continue;
-                if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
-                        || drawerDataList.get(i).getTank().getFluid().getAmount() == 0) {
+                
+                // if drawer not empty and fluids are different, no need to check for lock nor continue checking
+                if ( drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
+                        && drawerDataList.get(i).getTank().getCacheFluid().getFluid() != resource.getFluid())
+                    continue;
+                
+                if ( drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
+                        || drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY ) 
+                {
                     if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
                             <= drawerDataList.get(i).getTank().getCapacity()) {
                         if (action.execute()) drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
