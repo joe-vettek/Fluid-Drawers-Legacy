@@ -176,13 +176,17 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                     }
                                 });
                     } else if (tile.hasNoFluid()) {
-                        tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
-                                .ifPresent(handler -> {
-                                    handler.fill(new FluidStack(bucketItem.getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                    if (!player.isCreative())
-                                        player.setItemInHand(hand, heldStack.getContainerItem());
-                                });
-                        return ActionResultType.SUCCESS;
+                        if(bucketItem.getFluid() == Fluids.EMPTY)
+                            return ActionResultType.FAIL;
+                        else {
+                            tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
+                                    .ifPresent(handler -> {
+                                        handler.fill(new FluidStack(bucketItem.getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+                                        if (!player.isCreative())
+                                            player.setItemInHand(hand, heldStack.getContainerItem());
+                                    });
+                            return ActionResultType.SUCCESS;
+                        }
                     } else {
                         if (tile.getTankFLuid().getAmount() + FluidAttributes.BUCKET_VOLUME <= tile.getEffectiveCapacity()
                                 && tile.getTankFLuid().getFluid() == bucketItem.getFluid()) {
