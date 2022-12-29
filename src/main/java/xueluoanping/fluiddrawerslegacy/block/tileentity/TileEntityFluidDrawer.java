@@ -6,6 +6,7 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
+import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
@@ -14,6 +15,8 @@ import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
+import com.jaquadro.minecraft.storagedrawers.network.CountUpdateMessage;
+import com.jaquadro.minecraft.storagedrawers.network.MessageHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -31,6 +34,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
@@ -42,13 +46,13 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
+public class TileEntityFluidDrawer extends ChamTileEntity {
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
     private GroupData groupData = new GroupData(1);
     private UpgradeData upgradeData = new TileEntityFluidDrawer.DrawerUpgradeData();
-
+    private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
 
 
@@ -66,14 +70,15 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         return General.volume.get();
     }
 
-    @Override
+//    @Override
     public IDrawerGroup getGroup() {
-        return groupData;
+        return this.groupData;
     }
 
-    @Override
+//    @Override
     protected void onAttributeChanged() {
-        super.onAttributeChanged();
+//        super.onAttributeChanged();
+        this.requestModelDataUpdate();
         groupData.syncAttributes();
     }
 
@@ -91,11 +96,75 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
     }
-
+    @Nonnull
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+        IDrawerGroup group = this.getGroup();
+        if (capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
+            return this.capabilityGroup.cast();
+        } else {
+            LazyOptional<T> cap = this.getGroup().getCapability(capability, facing);
+            return cap.isPresent() ? cap : super.getCapability(capability, facing);
+        }
+    }
 
     @Override
+    public CompoundTag writePortable(CompoundTag tag) {
+        tag = super.writePortable(tag);
+        EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
+        if (this.drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY))
+            attrs.add(LockAttribute.LOCK_EMPTY);
+        if (this.drawerAttributes.isItemLocked(LockAttribute.LOCK_POPULATED))
+            attrs.add(LockAttribute.LOCK_POPULATED);
+        if (!attrs.isEmpty()) {
+            tag.putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
+        }
+        if (this.drawerAttributes.isConcealed())
+            tag.putBoolean("Shr", true);
+
+        if (this.drawerAttributes.isShowingQuantity())
+            tag.putBoolean("Qua", true);
+
+        return tag;
+    }
+
+    @Override
+    public void readPortable(CompoundTag nbt) {
+        super.readPortable(nbt);
+
+        if (nbt.contains("Lock")) {
+            EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(nbt.getByte("Lock"));
+            if (attrs != null) {
+                this.drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
+                this.drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
+//                    FluidDrawersLegacyMod.logger( attrs.contains(LockAttribute.LOCK_POPULATED)+""+ attrs.contains(LockAttribute.LOCK_EMPTY));
+            }
+        } else {
+            this.drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, false);
+            this.drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, false);
+        }
+        if (nbt.contains("Shr"))
+            this.drawerAttributes.setIsConcealed(nbt.getBoolean("Shr"));
+        else
+            this.drawerAttributes.setIsConcealed(false);
+        if (nbt.contains("Qua"))
+            this.drawerAttributes.setIsShowingQuantity(nbt.getBoolean("Qua"));
+        else
+            this.drawerAttributes.setIsShowingQuantity(false);
+
+    }
+
+//    @Override
     public IDrawerAttributes getDrawerAttributes() {
         return this.drawerAttributes;
+    }
+
+    protected void syncClientCount(int slot, int count) {
+        if (this.getLevel() == null || !this.getLevel().isClientSide) {
+            PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double)this.getBlockPos().getX(), (double)this.getBlockPos().getY(), (double)this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
+            MessageHandler.INSTANCE.send(PacketDistributor.NEAR.with(() -> {
+                return point;
+            }), new CountUpdateMessage(this.getBlockPos(), slot, count));
+        }
     }
 
     public IFluidHandler getTank() {
@@ -135,34 +204,34 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         }
     }
 
-    @Override
-    public int getDrawerCapacity() {
-        return 0;
-    }
+//    @Override
+//    public int getDrawerCapacity() {
+//        return 0;
+//    }
 
-    @Override
-    public int getEffectiveDrawerCapacity() {
-        return 0;
-    }
+//    @Override
+//    public int getEffectiveDrawerCapacity() {
+//        return 0;
+//    }
 
     @Nonnull
-    @Override
-    public IDrawer getDrawer(int slot) {
-        return super.getDrawer(slot);
-    }
+//    @Override
+//    public IDrawer getDrawer(int slot) {
+//        return super.getDrawer(slot);
+//    }
 
-    @Override
+//    @Override
     public int getRedstoneLevel() {
 //        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
         return (int) (((float) getTankFLuid().getAmount() / (float) getTankEffectiveCapacity()) * 15);
     }
 
-    @Override
+//    @Override
     public boolean isRedstone() {
         return upgrades().getRedstoneType() != null;
     }
 
-    @Override
+//    @Override
     public UpgradeData upgrades() {
         return this.upgradeData;
     }
@@ -197,12 +266,14 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
         @Override
         public boolean isGroupValid() {
-            return TileEntityFluidDrawer.this.isGroupValid();
+//            return TileEntityFluidDrawer.this.isGroupValid();
+            return !TileEntityFluidDrawer.this.isRemoved();
         }
 
         @Nonnull
         @Override
         public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
+
             if (capability == ModConstants.DRAWER_ATTRIBUTES_CAPABILITY)
                 return attributesHandler.cast();
             if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
@@ -218,64 +289,33 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         }
 
 
-
         @Override
         public CompoundTag write(CompoundTag tag) {
 
+//            FluidDrawersLegacyMod.logger(tag.toString());
             tag.put("tank", tank.serializeNBT());
 
-            CompoundTag nbt = super.write(tag);
 
-            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
-            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY))
-                attrs.add(LockAttribute.LOCK_EMPTY);
-            if (drawerAttributes.isItemLocked(LockAttribute.LOCK_POPULATED))
-                attrs.add(LockAttribute.LOCK_POPULATED);
-            if (!attrs.isEmpty()) {
-                tag.putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
-            }
-
-            if (drawerAttributes.isConcealed())
-                tag.putBoolean("Shr", true);
-
-            if (drawerAttributes.isShowingQuantity())
-                tag.putBoolean("Qua", true);
 //            inventoryChanged();
             //            If want to camouflage, pay attention to setting the capacity first, but we don't need it.
 
-            return nbt;
+            return super.write(tag);
         }
 
 
         @Override
         public void read(CompoundTag nbt) {
+
+//            if(!getLevel().isClientSide())
+//            FluidDrawersLegacyMod.logger(getLevel().isClientSide()+"");
+
+
 //            upgrades must first,to adjust the capacity
             upgrades().read(nbt);
-            FluidDrawersLegacyMod.logger("read"+nbt.toString());
+//            FluidDrawersLegacyMod.logger("read"+nbt.toString());
             if (nbt.contains("tank")) {
                 tank.deserializeNBT((CompoundTag) nbt.get("tank"));
             }
-            if (nbt.contains("Lock")) {
-                EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(nbt.getByte("Lock"));
-                if (attrs != null) {
-                    drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
-                    drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
-                }
-
-            } else {
-                drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, false);
-                drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, false);
-            }
-            if (nbt.contains("Shr"))
-                drawerAttributes.setIsConcealed(nbt.getBoolean("Shr"));
-            else
-                drawerAttributes.setIsConcealed(false);
-
-
-            if (nbt.contains("Qua"))
-                drawerAttributes.setIsShowingQuantity(nbt.getBoolean("Qua"));
-            else
-                drawerAttributes.setIsShowingQuantity(false);
 //            inventoryChanged();
 
             super.read(nbt);
@@ -306,7 +346,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
         @Override
         protected int getStackCapacity() {
-            return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
+//            return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
+            return 0;
         }
 
 
@@ -358,10 +399,10 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         @NotNull
         @Override
         public FluidStack getFluid() {
-            if (upgrades().hasVendingUpgrade() && this.fluid.getFluid() != Fluids.EMPTY ) {
+            if (upgrades().hasVendingUpgrade() && this.fluid.getFluid() != Fluids.EMPTY) {
 //                FluidStack stack = fluid.copy();
 //                stack.setAmount(Integer.MAX_VALUE);
-                return new FluidStack(getFluid().getFluid(),Integer.MAX_VALUE);
+                return new FluidStack(super.getFluid().getFluid(), Integer.MAX_VALUE);
             }
             return super.getFluid();
         }
@@ -424,6 +465,16 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
 
             if (upgrades().hasVendingUpgrade())
                 return 0;
+//            if(!getLevel().isClientSide())
+//            FluidDrawersLegacyMod.logger(
+//                    "server:"+getCacheFluid().getRegistryName()+";"
+//                    +resource.getFluid().getRegistryName()
+//                    +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
+//            if(getLevel().isClientSide())
+//                FluidDrawersLegacyMod.logger(
+//                        "client:"+getCacheFluid().getRegistryName()+";"
+//                                +resource.getFluid().getRegistryName()
+//                                +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
             if (getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
 //                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
                 if (getCacheFluid() != Fluids.EMPTY
@@ -491,7 +542,8 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         protected void onAttributeChanged() {
 
             TileEntityFluidDrawer.this.onAttributeChanged();
-            if (TileEntityFluidDrawer.this.getLevel() != null && !TileEntityFluidDrawer.this.getLevel().isClientSide) {
+            if (TileEntityFluidDrawer.this.getLevel() != null
+                    && !TileEntityFluidDrawer.this.getLevel().isClientSide) {
                 TileEntityFluidDrawer.this.setChanged();
                 TileEntityFluidDrawer.this.markBlockForUpdate();
             }
@@ -501,6 +553,12 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
         @Override
         public boolean isUnlimitedVending() {
             return upgrades().hasVendingUpgrade();
+        }
+
+        @Override
+        public boolean setItemLocked(LockAttribute attr, boolean isLocked) {
+            boolean result = super.setItemLocked(attr, isLocked);
+            return result;
         }
     }
 
@@ -513,7 +571,7 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
             if (!super.canAddUpgrade(upgrade)) {
                 return false;
             } else {
-                if(upgrade.getItem() == ModItems.FILL_LEVEL_UPGRADE.get())return false;
+                if (upgrade.getItem() == ModItems.FILL_LEVEL_UPGRADE.get()) return false;
                 else if (upgrade.getItem() == ModItems.ONE_STACK_UPGRADE.get()) {
                     if (upgrades().hasOneStackUpgrade())
                         return false;
@@ -545,11 +603,11 @@ public class TileEntityFluidDrawer extends TileEntityDrawersStandard {
                     if (effectiveStorageMult == storageMult) {
                         --storageMult;
                     }
-                    int amount =getTank().getFluidInTank(0).getAmount();
-                    int capacity=getTank().getTankCapacity(0);
-                    int standardCapacity=getCapacityStandard();
-                    int afterCapacity=standardCapacity*(effectiveStorageMult-storageMult);
-                    if(afterCapacity<amount)return false;
+                    int amount = getTank().getFluidInTank(0).getAmount();
+                    int capacity = getTank().getTankCapacity(0);
+                    int standardCapacity = getCapacityStandard();
+                    int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
+                    if (afterCapacity < amount) return false;
 
                 }
 

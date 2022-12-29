@@ -34,4 +34,6 @@ public class ModConstants {
 
     public static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerGroup>() {
     });
+
+
 }
