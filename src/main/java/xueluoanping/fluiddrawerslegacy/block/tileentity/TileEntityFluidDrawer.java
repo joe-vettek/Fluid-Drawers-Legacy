@@ -46,7 +46,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class TileEntityFluidDrawer extends ChamTileEntity {
+public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGroup {
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -96,6 +96,24 @@ public class TileEntityFluidDrawer extends ChamTileEntity {
             level.sendBlockUpdated(getBlockPos(), getBlockState(), getBlockState(), Block.UPDATE_ALL);
         }
     }
+
+    @Override
+    public int getDrawerCount() {
+        return 0;
+    }
+
+    @NotNull
+    @Override
+    public IDrawer getDrawer(int i) {
+        return new StandardDrawerData((StandardDrawerGroup) getGroup(),0);
+    }
+
+    @NotNull
+    @Override
+    public int[] getAccessibleDrawerSlots() {
+        return new int[0];
+    }
+
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         IDrawerGroup group = this.getGroup();

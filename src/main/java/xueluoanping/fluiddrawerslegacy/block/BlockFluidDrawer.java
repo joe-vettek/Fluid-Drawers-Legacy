@@ -163,7 +163,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                                 });
                     } else if (tile.hasNoFluid()) {
                         if(bucketItem.getFluid() == Fluids.EMPTY)
-                            return ActionResultType.FAIL;
+                            return InteractionResult.FAIL;
                         else {
                             tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                     .ifPresent(handler -> {
