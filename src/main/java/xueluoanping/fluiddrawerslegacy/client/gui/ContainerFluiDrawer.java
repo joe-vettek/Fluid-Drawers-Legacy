@@ -6,7 +6,7 @@ import com.jaquadro.minecraft.storagedrawers.block.BlockDrawers;
 import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
 import com.jaquadro.minecraft.storagedrawers.core.ModContainers;
-import com.jaquadro.minecraft.storagedrawers.inventory.*;
+import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,6 +26,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.custom.InventoryUpgrade;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
