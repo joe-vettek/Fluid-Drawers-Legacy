@@ -42,7 +42,10 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     private static final List<Timer> timerList = new ArrayList<>();
     private final List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
     private final List<Integer> priorityList = new ArrayList<>();
-    private boolean RebuildLock = false;
+    private boolean RebuildLock_fill = false;
+    private boolean RebuildLock_drain = false;
+    private boolean RebuildLock_drain0 = false;
+    private Timer timer;
 
     public CapabilityProvider_FluidDrawerController(final TileEntityController tile) {
         this.tile = tile;
@@ -50,53 +53,55 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         tankHandler = LazyOptional.of(() -> tank);
         tilePos = tile.getBlockPos();
 
-        Timer timer = new Timer();
+        timer = new Timer();
         timer.schedule(new TimerTask() {
             public void run() {
                 // if null, then cancel
-//                    sometimes maybe a empty tile
-                if (!RebuildLock) {
-                    drawerDataList.clear();}
+                //                    sometimes maybe a empty tile
+                if (!hasLock()) {
+                    drawerDataList.clear();
+                }
                 if (tile == null) {
                     return;
                 }
 
 
                 if (((IDrawerGroup) tile).getDrawerCount() == 0) {
-//                    FluidDrawersLegacyMod.logger("Not Found Drawer in " + tile.getLevel() + tile.getBlockPos() + ", Stop Now");
-//                    FluidDrawersLegacyMod.logger(""+ timerList.size());
+                    //                    FluidDrawersLegacyMod.logger("Not Found Drawer in " + tile.getLevel() + tile.getBlockPos() + ", Stop Now");
+                    //                    FluidDrawersLegacyMod.logger(""+ timerList.size());
                     if (tile.isRemoved() || tile.getLevel().isClientSide()) {
-//                        FluidDrawersLegacyMod.logger("Not Run in" + tile.getLevel());
-//                        System.gc();
-                        timer.cancel();
+                        //                        FluidDrawersLegacyMod.logger("Not Run in" + tile.getLevel());
+                        //                        System.gc();
+                        cleanAndCancelTimer();
+
                     }
                     return;
                 }
-//                优先处理不加载的区块
-//                FluidDrawersLegacyMod.logger("Chunk " + tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4) );
+                //                优先处理不加载的区块
+                //                FluidDrawersLegacyMod.logger("Chunk " + tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4) );
                 if (!tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4)) {
                     FluidDrawersLegacyMod.logger("Not Chunk Cancel " + tile.getLevel() + tile.getBlockPos());
-                    timer.cancel();
+                    cleanAndCancelTimer();
                     return;
                 }
                 //                    问题在于如何处置服务器上被移除的entity的计时器
-//                说明，必须要延时处理，否则坐标是0，0，0
+                //                说明，必须要延时处理，否则坐标是0，0，0
                 if (!(tile.getLevel().getBlockState(tile.getBlockPos()).getBlock() instanceof BlockController)) {
-//                    FluidDrawersLegacyMod.logger("null Cancel" + tile.getLevel());
-                    timer.cancel();
+                    //                    FluidDrawersLegacyMod.logger("null Cancel" + tile.getLevel());
+                    cleanAndCancelTimer();
                     return;
                 }
-//                    long start = System.currentTimeMillis();
-//                    searchNode(tile.getLevel(), tile.getBlockPos(), tile.getBlockPos());
+                //                    long start = System.currentTimeMillis();
+                //                    searchNode(tile.getLevel(), tile.getBlockPos(), tile.getBlockPos());
 
                 posStack = new Stack<>();
-//                    FluidDrawersLegacyMod.LOGGER.info(System.currentTimeMillis() - start);
+                //                    FluidDrawersLegacyMod.LOGGER.info(System.currentTimeMillis() - start);
 
                 tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
                         .ifPresent((handler -> {
                             if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
 
-                                if (!RebuildLock) {
+                                if (!hasLock()) {
                                     drawerDataList.clear();
                                     for (int i = 0; i < handler.getDrawerCount(); i++)
                                         if (handler.getDrawer(i) instanceof TileEntityFluidDrawer.StandardDrawerData) {
@@ -111,12 +116,22 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         timerList.add(timer);
     }
 
+    private void cleanAndCancelTimer() {
+        this.timer.cancel();
+        this.drawerDataList.clear();
+        this.priorityList.clear();
+    }
+
+    private boolean hasLock() {
+        return this.RebuildLock_fill || this.RebuildLock_drain || this.RebuildLock_drain0;
+    }
+
     // use to find all nodes
     public void searchNode(Level world, BlockPos originPos, BlockPos basePos) {
 
         if (!world.hasChunk(originPos.getX() >> 4, originPos.getZ() >> 4))
             return;
-//above
+        // above
         BlockPos p1 = originPos.above();
         if (withinRange(p1, basePos))
             if (testBlock(world.getBlockState(p1).getBlock())) {
@@ -124,7 +139,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                         (Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getZ() - basePos.getZ())));
                 searchNode(world, p1, basePos);
             }
-//        east
+        //        east
         BlockPos p2 = originPos.east();
         if (withinRange(p2, basePos)) {
             if (testBlock(world.getBlockState(p2).getBlock())) {
@@ -133,7 +148,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 searchNode(world, p2, basePos);
             }
         }
-//        south
+        //        south
         BlockPos p3 = originPos.south();
         if (withinRange(p3, basePos)) {
             if (testBlock(world.getBlockState(p3).getBlock())) {
@@ -141,7 +156,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 searchNode(world, p3, basePos);
             }
         }
-//        west
+        //        west
         BlockPos p4 = originPos.west();
         if (withinRange(p4, basePos)) {
             if (testBlock(world.getBlockState(p4).getBlock())) {
@@ -149,7 +164,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 searchNode(world, p4, basePos);
             }
         }
-//        north
+        //        north
         BlockPos p5 = originPos.north();
         if (withinRange(p5, basePos)) {
             if (testBlock(world.getBlockState(p5).getBlock())) {
@@ -157,7 +172,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 searchNode(world, p5, basePos);
             }
         }
-//        below
+        //        below
         BlockPos p6 = originPos.below();
         if (withinRange(p6, basePos)) {
             if (testBlock(world.getBlockState(p6).getBlock())) {
@@ -192,7 +207,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
-//            FluidDrawersLegacyMod.LOGGER.info("hello" + tile);
+            //            FluidDrawersLegacyMod.LOGGER.info("hello" + tile);
             return tankHandler.cast();
         }
         return LazyOptional.empty();
@@ -204,13 +219,6 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         };
     }
 
-    private void cancelLock() {
-        this.RebuildLock = false;
-    }
-
-    private void setupLock() {
-        this.RebuildLock = true;
-    }
 
     public class betterFluidHandler extends FluidTank {
 
@@ -228,36 +236,39 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
 
         protected int fillByOrder(FluidStack resource, FluidAction action, int order) {
-            if (drawerDataList.size() == 0) return 0;
+            if (drawerDataList.size() == 0)
+                return 0;
             for (int i = 0; i < drawerDataList.size(); i++) {
-//                reject invalid
+                //                reject invalid
                 //                only find valid and same order
-                if (priorityList.get(i) != order) continue;
-// when locked, need to check cache, or not necessary
-                
+                if (priorityList.get(i) != order)
+                    continue;
+                // when locked, need to check cache, or not necessary
+
                 // if drawer is empty and locked, no need to continue checking
-                if( drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY 
+                if (drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY
                         && drawerDataList.get(i).isLock())
                     continue;
-                
-                 // if drawer not empty and fluids are different, no need to check for lock nor continue checking
-                if ( drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
-                        && drawerDataList.get(i).getTank().getCacheFluid()!= resource.getFluid())
+
+                // if drawer not empty and fluids are different, no need to check for lock nor continue checking
+                if (drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
+                        && drawerDataList.get(i).getTank().getCacheFluid() != resource.getFluid())
                     continue;
-                
-                if ( drawerDataList.get(i).getTank().getCacheFluid() == resource.getFluid()
-                        || drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY ) 
-                {
+
+                if (drawerDataList.get(i).getTank().getCacheFluid() == resource.getFluid()
+                        || drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY) {
                     if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
                             <= drawerDataList.get(i).getTank().getCapacity()) {
-                        if (action.execute()) drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
+                        if (action.execute())
+                            drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
                         return resource.getAmount();
                     } else {
-//                      avoid can't consume once
+                        //                      avoid can't consume once
                         FluidStack fluidStack = resource;
                         fluidStack.setAmount(drawerDataList.get(i).getTank().getCapacity() -
                                 drawerDataList.get(i).getTank().getFluid().getAmount());
-                        if (action.execute()) drawerDataList.get(i).getTank().fill(fluidStack, FluidAction.EXECUTE);
+                        if (action.execute())
+                            drawerDataList.get(i).getTank().fill(fluidStack, FluidAction.EXECUTE);
                         return resource.getAmount() - fluidStack.getAmount();
                     }
                 }
@@ -268,18 +279,25 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         }
 
         private int getFluidDrawerPriority(TileEntityFluidDrawer.StandardDrawerData data) {
-            if (data.getTank().isFull()) return ModConstants.PRI_DISABLED;
+            if (data.getTank().isFull())
+                return ModConstants.PRI_DISABLED;
             if (data.getTank().isEmpty()) {
-                if (data.isLock()) return ModConstants.PRI_LOCKED_EMPTY;
-                else return ModConstants.PRI_EMPTY;
+                if (data.isLock())
+                    return ModConstants.PRI_LOCKED_EMPTY;
+                else
+                    return ModConstants.PRI_EMPTY;
             } else {
                 if (!data.isLock()) {
-                    if (data.isVoid()) return ModConstants.PRI_VOID;
-                    else return ModConstants.PRI_NORMAL;
+                    if (data.isVoid())
+                        return ModConstants.PRI_VOID;
+                    else
+                        return ModConstants.PRI_NORMAL;
                 } else {
-                    if (data.isVoid()) return ModConstants.PRI_LOCKED_VOID;
-//                    not delete else if ,or will handle anything else
-                    else if (data.isLock()) return ModConstants.PRI_LOCKED;
+                    if (data.isVoid())
+                        return ModConstants.PRI_LOCKED_VOID;
+                        //                    not delete else if ,or will handle anything else
+                    else if (data.isLock())
+                        return ModConstants.PRI_LOCKED;
                 }
             }
             return -1;
@@ -288,32 +306,33 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         @Override
         public int fill(FluidStack resource, FluidAction action) {
             //                Exception caught during firing event: Index 3 out of bounds for length 0
-//                避免发生这种事情
-//                在重置之间要锁住
+            //                避免发生这种事情
+            //                在重置之间要锁住
 
-//            FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundNBT()) + RebuildLock);
-            setupLock();
+            //            FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundNBT()) + RebuildLock);
+            RebuildLock_fill = true;
             int result = 0;
             int amount = resource.getAmount();
             final int amountF = amount;
-            if (amountF <= 0) return 0;
+            if (amountF <= 0)
+                return 0;
             int i = 0;
-//            rember to clear it
+            //            rember to clear it
             priorityList.clear();
             while (i < drawerDataList.size()) {
                 priorityList.add(getFluidDrawerPriority(drawerDataList.get(i)));
-//                FluidDrawersLegacyMod.logger("priorityList"+priorityList.get(priorityList.size()-1));
+                //                FluidDrawersLegacyMod.logger("priorityList"+priorityList.get(priorityList.size()-1));
                 i++;
             }
-//            FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+priorityList.size());
+            //            FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+priorityList.size());
             if (drawerDataList.size() == priorityList.size() && drawerDataList.size() > 0)
                 for (int j = 0; j < ModConstants.PRI_DISABLED; j++) {
-//                这里需要确认，到底是什么情况(这里是个备份，不担心）
-//                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
+                    //                这里需要确认，到底是什么情况(这里是个备份，不担心）
+                    //                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
                     amount -= fillByOrder(resource, action, j);
-//                amount=resource.getAmount();
+                    //                amount=resource.getAmount();
                     if (amount == 0) {
-//                    FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
+                        //                    FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
                         result = amountF;
                         break;
                     }
@@ -323,7 +342,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 result = amountF - amount;
             }
 
-            cancelLock();
+            RebuildLock_fill = false;
             return result;
         }
 
@@ -352,11 +371,11 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         @Nonnull
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
-//            FluidDrawersLegacyMod.logger("Drainresource" + resource.writeToNBT(new CompoundNBT()));
-            RebuildLock = true;
+            //            FluidDrawersLegacyMod.logger("Drainresource" + resource.writeToNBT(new CompoundNBT()));
+            RebuildLock_drain0 = true;
 
             if (resource.isEmpty() || resource.getAmount() <= 0) {
-                RebuildLock = false;
+                RebuildLock_drain0 = false;
                 return FluidStack.EMPTY;
             }
             for (int i = 0; i < drawerDataList.size(); i++) {
@@ -371,20 +390,20 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                         if (action.execute()) {
                             drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
                         }
-                        RebuildLock = false;
+                        RebuildLock_drain0 = false;
                         return fluid;
                     } else {
-//                        需要避免一个容器不能完全提供
+                        //                        需要避免一个容器不能完全提供
                         FluidStack fluid = new FluidStack(drawerDataList.get(i).getTank().getCacheFluid(), drawerDataList.get(i).getTank().getFluid().getAmount());
                         if (action.execute()) {
                             drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
                         }
-                        RebuildLock = false;
+                        RebuildLock_drain0 = false;
                         return fluid;
                     }
                 }
             }
-            RebuildLock = false;
+            RebuildLock_drain0 = false;
             return FluidStack.EMPTY;
         }
 
@@ -392,10 +411,10 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
 
-//            FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + maxDrain);
-            RebuildLock = true;
-            if (maxDrain <= 0 && drawerDataList.size()==0) {
-                RebuildLock = false;
+            //            FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + maxDrain);
+            RebuildLock_drain = true;
+            if (maxDrain <= 0 && drawerDataList.size() == 0) {
+                RebuildLock_drain = false;
                 return FluidStack.EMPTY;
             }
             FluidStack fluid = FluidStack.EMPTY;
@@ -404,7 +423,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             for (int i = 0; i < drawerDataList.size(); i++) {
                 if (drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY)
                     continue;
-//                FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + i+drawerDataList.get(i).getTank().getFluidAmount());
+                //                FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + i+drawerDataList.get(i).getTank().getFluidAmount());
                 if (drawerDataList.get(i).getTank().getFluidAmount() >= maxDrain) {
                     fluid = new FluidStack(drawerDataList.get(i).getTank().getCacheFluid(), maxDrain);
                     if (action.execute()) {
@@ -425,74 +444,75 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             }
 
             if (fluid.getAmount() <= 0) {
-                RebuildLock = false;
+                RebuildLock_drain = false;
                 return FluidStack.EMPTY;
             }
-            RebuildLock = false;
+            RebuildLock_drain = false;
             return fluid;
         }
 
 
     }
 
-//    private static class FluidSlotRecord implements Comparable<FluidSlotRecord> {
-//
-//        private static final IDrawerAttributes EMPTY_ATTRS = new EmptyDrawerAttributes();
-//        private static final int PRI_LOCKED = 0;
-//        private static final int PRI_LOCKED_VOID = 1;
-//        private static final int PRI_NORMAL = 2;
-//        private static final int PRI_VOID = 3;
-//        private static final int PRI_EMPTY = 4;
-//        private static final int PRI_LOCKED_EMPTY = 5;
-//
-//        private final FluidDrawerGroup group;
-//        private final int slot;
-//        private final BlockPos pos;
-//        private final int priority;
-//
-//        int index;
-//
-//        FluidSlotRecord(FluidDrawerGroup group, int slot, BlockPos pos) {
-//            this.group = group;
-//            this.slot = slot;
-//            this.pos = pos;
-//            this.priority = computePriority();
-//        }
-//
-//        int computePriority() {
-//            FluidDrawer drawer = group.getFluidDrawer(slot);
-//            return 0;
-////            IDrawerAttributes attrs = group.hasCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null)
-////                    ? Objects.requireNonNull(group.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null))
-////                    : EMPTY_ATTRS;
-////            if (drawer.isEmpty()) {
-////                return attrs.isItemLocked(LockAttribute.LOCK_EMPTY) ? PRI_LOCKED_EMPTY : PRI_EMPTY;
-////            } else if (attrs.isVoid()) {
-////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED_VOID : PRI_VOID;
-////            } else {
-////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED : PRI_NORMAL;
-////            }
-//        }
-//
-//        FluidDrawer getDrawer() {
-//            return group.getFluidDrawer(slot);
-//        }
-//
-//        boolean isDrawerValid() {
-//            return group.isFluidDrawerGroupValid();
-//        }
-//
-//        @Override
-//        public int compareTo(FluidSlotRecord other) {
-//            int diff = priority - other.priority;
-//            return diff != 0 ? diff : pos.compareTo(other.pos);
-//        }
-//
-//    }
+    //    private static class FluidSlotRecord implements Comparable<FluidSlotRecord> {
+    //
+    //        private static final IDrawerAttributes EMPTY_ATTRS = new EmptyDrawerAttributes();
+    //        private static final int PRI_LOCKED = 0;
+    //        private static final int PRI_LOCKED_VOID = 1;
+    //        private static final int PRI_NORMAL = 2;
+    //        private static final int PRI_VOID = 3;
+    //        private static final int PRI_EMPTY = 4;
+    //        private static final int PRI_LOCKED_EMPTY = 5;
+    //
+    //        private final FluidDrawerGroup group;
+    //        private final int slot;
+    //        private final BlockPos pos;
+    //        private final int priority;
+    //
+    //        int index;
+    //
+    //        FluidSlotRecord(FluidDrawerGroup group, int slot, BlockPos pos) {
+    //            this.group = group;
+    //            this.slot = slot;
+    //            this.pos = pos;
+    //            this.priority = computePriority();
+    //        }
+    //
+    //        int computePriority() {
+    //            FluidDrawer drawer = group.getFluidDrawer(slot);
+    //            return 0;
+    ////            IDrawerAttributes attrs = group.hasCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null)
+    ////                    ? Objects.requireNonNull(group.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY, null))
+    ////                    : EMPTY_ATTRS;
+    ////            if (drawer.isEmpty()) {
+    ////                return attrs.isItemLocked(LockAttribute.LOCK_EMPTY) ? PRI_LOCKED_EMPTY : PRI_EMPTY;
+    ////            } else if (attrs.isVoid()) {
+    ////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED_VOID : PRI_VOID;
+    ////            } else {
+    ////                return attrs.isItemLocked(LockAttribute.LOCK_POPULATED) ? PRI_LOCKED : PRI_NORMAL;
+    ////            }
+    //        }
+    //
+    //        FluidDrawer getDrawer() {
+    //            return group.getFluidDrawer(slot);
+    //        }
+    //
+    //        boolean isDrawerValid() {
+    //            return group.isFluidDrawerGroupValid();
+    //        }
+    //
+    //        @Override
+    //        public int compareTo(FluidSlotRecord other) {
+    //            int diff = priority - other.priority;
+    //            return diff != 0 ? diff : pos.compareTo(other.pos);
+    //        }
+    //
+    //    }
 
     @SubscribeEvent
     public static void StopForSave(WorldEvent.Unload event) {
-        if (timerList.size() == 0) return;
+        if (timerList.size() == 0)
+            return;
         for (int i = 0; i < timerList.size(); i++) {
             timerList.get(i).cancel();
             FluidDrawersLegacyMod.logger("TRY CLOSE" + i);
