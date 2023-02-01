@@ -26,9 +26,11 @@ Fractur9dLuna,  Sam_Chai,  3TUSK,  sz0999312,  Kogasa_Studio,  Morningqwq,  Prom
 ## Note
 
 This mod only refers to a partial implementation of the old version, so the content will not be completely consistent, and no mixins are used.
-
+The model is original, as are some of the extra textures, which are prohibited from being used in other mods, modpacks or games without authorization.
+The code part follows the ARR agreement.
  
 
 ## Link
 
 - [phantamanta44/fluid-drawers](https://github.com/phantamanta44/fluid-drawers/)
+
