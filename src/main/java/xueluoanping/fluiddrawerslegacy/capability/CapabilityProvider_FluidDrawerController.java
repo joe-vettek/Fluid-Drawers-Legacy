@@ -45,6 +45,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     private boolean RebuildLock_fill = false;
     private boolean RebuildLock_drain = false;
     private boolean RebuildLock_drain0 = false;
+    private int RebuildLock_query = 3;
     private Timer timer;
 
     public CapabilityProvider_FluidDrawerController(final TileEntityController tile) {
@@ -60,7 +61,14 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 //                    sometimes maybe a empty tile
                 if (!hasLock()) {
                     drawerDataList.clear();
+                }else {
+                    try{
+                        Thread.sleep(1000);
+                    }catch (Exception exception){
+                        exception.printStackTrace();
+                    }
                 }
+
                 if (tile == null) {
                     return;
                 }
@@ -123,7 +131,10 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     }
 
     private boolean hasLock() {
-        return this.RebuildLock_fill || this.RebuildLock_drain || this.RebuildLock_drain0;
+        return this.RebuildLock_fill
+                || this.RebuildLock_drain
+                || this.RebuildLock_drain0
+                ||RebuildLock_query!=3;
     }
 
     // use to find all nodes
@@ -235,6 +246,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         }
 
 
+        // this function is used by others, so not need to lock it
         protected int fillByOrder(FluidStack resource, FluidAction action, int order) {
             if (drawerDataList.size() == 0)
                 return 0;
@@ -351,20 +363,31 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             return CapabilityProvider_FluidDrawerController.this.drawerDataList.size();
         }
 
+        // the following three function must be treated cautiously
+        // because I'm not sure what would happens if return null
         @Nonnull
         @Override
         public FluidStack getFluidInTank(int tank) {
-            return CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getFluid();
+            RebuildLock_query--;
+            FluidStack stack = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getFluid();
+            RebuildLock_query++;
+            return stack;
         }
 
         @Override
         public int getTankCapacity(int tank) {
-            return CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getCapacity();
+            RebuildLock_query--;
+            int amount = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getCapacity();
+            RebuildLock_query++;
+            return amount;
         }
 
         @Override
         public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-            return CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().isFluidValid(0, stack);
+            RebuildLock_query--;
+            boolean result = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().isFluidValid(0, stack);
+            RebuildLock_query++;
+            return result;
         }
 
 
