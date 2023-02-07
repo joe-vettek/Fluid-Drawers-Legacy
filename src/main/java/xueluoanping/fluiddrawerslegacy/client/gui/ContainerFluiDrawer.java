@@ -2,6 +2,7 @@ package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
+import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import net.minecraft.core.BlockPos;
@@ -16,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.custom.InventoryUpgrade;
@@ -52,6 +54,8 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
             return  tile;
         }
     }
+
+
     public TileEntityFluidDrawer getTileEntityFluidDrawer() {
         return tileEntityFluidDrawer;
     }
@@ -106,7 +110,7 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
     @Nonnull
     @Override
     public ItemStack quickMoveStack(Player player, int slotIndex) {
-//        FluidDrawersLegacyMod.logger("hello" + player + slotIndex);
+       // FluidDrawersLegacyMod.logger("hello" + player + slotIndex);
         try {
             ItemStack itemStack = ItemStack.EMPTY;
             Slot slot = (Slot) this.slots.get(slotIndex);
@@ -184,6 +188,8 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
+        // this.upgradeInventory.setItem(0, ModItems.CONVERSION_UPGRADE.get().getDefaultInstance());
         return this.upgradeInventory.stillValid(player);
     }
+
 }

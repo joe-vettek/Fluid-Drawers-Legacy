@@ -612,6 +612,7 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
             if (!super.canRemoveUpgrade(slot)) {
                 return false;
             } else {
+
                 ItemStack upgrade = this.getUpgrade(slot);
                 if (upgrade.getItem() instanceof ItemUpgradeStorage) {
                     int storageLevel = ((ItemUpgradeStorage) upgrade.getItem()).level.getLevel();

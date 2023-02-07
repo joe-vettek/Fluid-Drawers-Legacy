@@ -9,11 +9,13 @@ import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
 
-public class InventoryUpgrade implements Container {
+// need extend InventoryUpgrade
+public class InventoryUpgrade extends com.jaquadro.minecraft.storagedrawers.inventory.InventoryUpgrade {
     private static final int upgradeCapacity = 7;
     private TileEntityFluidDrawer tile;
 
     public InventoryUpgrade(TileEntityFluidDrawer tileEntity) {
+        super(null);
         this.tile = tileEntity;
     }
 
@@ -80,6 +82,7 @@ public class InventoryUpgrade implements Container {
 
     public boolean canPlaceItem(int slot, @Nonnull ItemStack item) {
         return this.tile.upgrades().canAddUpgrade(item);
+        // return true;
     }
 
     public void clearContent() {
