@@ -71,7 +71,8 @@ public class ModContents {
 
     @SubscribeEvent
     public static void onContainerRegistry(final RegistryEvent.Register<MenuType<?>> event) {
-        containerType = (MenuType<ContainerFluiDrawer>) IForgeMenuType.create(ContainerFluiDrawer::new).setRegistryName("container_1");
+        containerType =
+                (MenuType<ContainerFluiDrawer>) IForgeMenuType.create(ContainerFluiDrawer::new).setRegistryName("container_1");
         event.getRegistry().register(containerType);
     }
 
