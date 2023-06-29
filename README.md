@@ -1,3 +1,11 @@
+## Important
+
+Since the old account is unavailable, now as requested by ticket 167001, hereby announcing the activation of my new Curseforge account named
+joe_vettek, can be viewed through the link https://legacy.curseforge.com/members/joe_vettek/projects.
+
+
+
+
 # [Fluid Drawers Legacy](https://www.curseforge.com/minecraft/mc-mods/fluid-drawers-legacy)
 
 
@@ -28,7 +36,7 @@ Fractur9dLuna,  Sam_Chai,  3TUSK,  sz0999312,  Kogasa_Studio,  Morningqwq,  Prom
 This mod only refers to a partial implementation of the old version, so the content will not be completely consistent, and no mixins are used.
 The model is original, as are some of the extra textures, which are prohibited from being used in other mods, modpacks or games without authorization.
 The code part follows the ARR agreement.
- 
+
 
 ## Link
 
