@@ -4,6 +4,9 @@
   "statement.fluiddrawerslegacy.fluiddrawer1": "Contains ",
   "statement.fluiddrawerslegacy.fluiddrawer2": " of ",
   "gui.fluiddrawerslegacy.tittle": "Fluid Drawer",
-  "waila.fluiddrawerslegacy.conceal": "§o<..Hold shift to see more..>"
+  "waila.fluiddrawerslegacy.conceal": "§o<..Hold shift to see more..>",
+  "config.jade.plugin_fluiddrawerslegacy.fluiddrawer": "Fluid Drawers Legacy",
+  "config.jade.plugin_fluiddrawerslegacy.controller": "Fluid Drawers Legacy Controller Fix",
+  "config.jade.plugin_fluiddrawerslegacy.controller_slave": "Fluid Drawers Legacy Controller Slave Fix"
 }
 

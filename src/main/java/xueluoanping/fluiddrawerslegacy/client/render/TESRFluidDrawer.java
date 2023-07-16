@@ -27,9 +27,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
@@ -198,7 +200,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 //        FluidStack fluidStackDown = new FluidStack(Fluids.WATER, 30000);
         FluidStack fluidStackDown = null;
         final FluidStack[] fluidStack = new FluidStack[1];
-        tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)
+        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                 .ifPresent(handler -> {
                     fluidStack[0] = handler.getFluidInTank(0);
 //                    FluidDrawersLegacyMod.LOGGER.info(""+handler.getFluidInTank(0));
@@ -223,16 +225,16 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 }
         }
 //        Minecraft mc = Minecraft.getInstance();
-//        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
-        FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
+//        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getFluidType().getStillTexture());
+        FluidType attributes = fluidStackDown.getFluid().getFluidType();
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
 
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
+        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
         int capacity = tile.getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();

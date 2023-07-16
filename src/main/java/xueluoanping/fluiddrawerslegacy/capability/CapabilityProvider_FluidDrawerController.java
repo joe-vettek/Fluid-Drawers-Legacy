@@ -3,7 +3,7 @@ package xueluoanping.fluiddrawerslegacy.capability;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -12,12 +12,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.world.WorldEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
@@ -39,7 +40,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     public static final int Capacity = 32000;
     public static BlockPos tilePos = null;
     private Stack<BlockPos> posStack = new Stack<>();
-    final TileEntityController tile;
+    final BlockEntityController tile;
     private static final List<Timer> timerList = new ArrayList<>();
     private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
     private final List<Integer> priorityList = new ArrayList<>();
@@ -50,7 +51,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     private int lockALL = 0;
     private Timer timer;
 
-    public CapabilityProvider_FluidDrawerController(final TileEntityController tile) {
+    public CapabilityProvider_FluidDrawerController(final BlockEntityController tile) {
         this.tile = tile;
         tank = createFuildHandler();
         tankHandler = LazyOptional.of(() -> tank);
@@ -173,7 +174,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+        if (cap == ForgeCapabilities.FLUID_HANDLER) {
             //            FluidDrawersLegacyMod.LOGGER.info("hello" + tile);
             return tankHandler.cast();
         }
@@ -486,7 +487,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     //    }
 
     @SubscribeEvent
-    public static void StopForSave(WorldEvent.Unload event) {
+    public static void StopForSave(LevelEvent.Unload event) {
         if (timerList.size() == 0)
             return;
         for (int i = 0; i < timerList.size(); i++) {

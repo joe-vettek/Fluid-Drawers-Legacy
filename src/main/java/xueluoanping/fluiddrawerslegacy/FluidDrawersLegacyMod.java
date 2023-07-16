@@ -2,13 +2,18 @@ package xueluoanping.fluiddrawerslegacy;
 
 
 
+import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
+import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.NonNullList;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
@@ -23,16 +28,17 @@ public class FluidDrawersLegacyMod {
     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab("fluiddrawers") {
         @Override
         public ItemStack makeIcon() {
-            return ModContents.itemBlock.getDefaultInstance();
+            return ModContents.itemBlock.get().getDefaultInstance();
         }
 
-        @Override
-        public void fillItemList(NonNullList<ItemStack> itemStackNonNullList) {
-//            itemStackNonNullList.add(0, RegistryEvents.fluiddrawer.asItem().getDefaultInstance());
-            super.fillItemList(itemStackNonNullList);
-        }
+//         @Override
+//         public void fillItemList(NonNullList<ItemStack> itemStackNonNullList) {
+// //            itemStackNonNullList.add(0, RegistryEvents.fluiddrawer.asItem().getDefaultInstance());
+//             super.fillItemList(itemStackNonNullList);
+//         }
     };
     public static final String MOD_ID = "fluiddrawerslegacy";
+
 
 
     // Directly reference a log4j logger.
@@ -55,6 +61,14 @@ public class FluidDrawersLegacyMod {
         MinecraftForge.EVENT_BUS.register(ControllerFluidCapabilityHandler.instance);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, General.COMMON_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.CLIENT_CONFIG);
+
+        ModContents.DREntityBlocks.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ModContents.DREntityBlockItems.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ModContents.DRBlockEntities.register(FMLJavaModLoadingContext.get().getModEventBus());
+        ModContents.DRMenuType.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
+    public static ResourceLocation rl(String id){
+        return new ResourceLocation(MOD_ID,id);
+    }
 }

@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+// import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 
 import net.minecraft.world.entity.player.Inventory;
@@ -21,7 +21,8 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
@@ -70,9 +71,13 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
-            FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
-            TextureAtlasSprite still = getBlockSprite(attributes.getStillTexture());
-            int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
+            FluidType attributes = fluidStackDown.getFluid().getFluidType();
+            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+
+
+
+
+            int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
             int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
@@ -155,15 +160,15 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
         //获取sprite
-        FluidAttributes attributes = fluid.getFluid().getAttributes();
-        TextureAtlasSprite FLUID = getBlockSprite(attributes.getStillTexture());
+        FluidType attributes = fluid.getFluid().getFluidType();
+        TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture());
 
         //绑atlas
 //        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 
 //        注意color要这样写，后面的是无效的
-        int color = fluid.getFluid().getAttributes().getColor(fluid);
+        int color = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor();
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
@@ -273,9 +278,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
-        FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
-        TextureAtlasSprite still = getBlockSprite(attributes.getStillTexture());
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
+        FluidType attributes = fluidStackDown.getFluid().getFluidType();
+        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
         int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();

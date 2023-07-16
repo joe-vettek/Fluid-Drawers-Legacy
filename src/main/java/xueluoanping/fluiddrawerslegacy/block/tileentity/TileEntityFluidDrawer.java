@@ -6,9 +6,10 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
+// import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
+// import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
+// import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
@@ -29,9 +30,10 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.network.PacketDistributor;
@@ -46,7 +48,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGroup {
+public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGroup {
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -57,7 +59,7 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
 
 
     public TileEntityFluidDrawer(BlockPos pos, BlockState state) {
-        super(ModContents.tankTileEntityType, pos, state);
+        super(ModContents.tankTileEntityType.get(), pos, state);
         this.groupData.setCapabilityProvider(this);
         this.injectPortableData(groupData);
 
@@ -294,7 +296,7 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
 
             if (capability == ModConstants.DRAWER_ATTRIBUTES_CAPABILITY)
                 return attributesHandler.cast();
-            if (capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY) {
+            if (capability == ForgeCapabilities.FLUID_HANDLER) {
 //                inventoryChanged();
                 if (facing == null) {
 //                    FluidDrawersLegacyMod.LOGGER.info(getLevel().toString() + facing+tank.serializeNBT());
@@ -442,7 +444,7 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
 
             }
 
-            nbt.putString("cache", cacheFluid.getRegistryName().toString());
+            nbt.putString("cache", cacheFluid.getFluidType().toString());
             return writeToNBT(nbt);
         }
 

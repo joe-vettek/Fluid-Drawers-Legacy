@@ -43,7 +43,7 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
     private TileEntityFluidDrawer tileEntityFluidDrawer;
 
     public ContainerFluiDrawer(int windowId, Inventory playerInv, FriendlyByteBuf data) {
-        this(ModContents.containerType,windowId, playerInv, getTileEntity(playerInv, data.readBlockPos()));
+        this(ModContents.containerType.get(),windowId, playerInv, getTileEntity(playerInv, data.readBlockPos()));
     }
 
     public static TileEntityFluidDrawer getTileEntity(Inventory playerInv, BlockPos pos) {

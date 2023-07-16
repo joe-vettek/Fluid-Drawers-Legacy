@@ -21,6 +21,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
@@ -47,7 +48,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
 //        FluidDrawersLegacyMod.LOGGER.info(transformType+""+matrixStackIn.last().pose().toString());
         renderFluid(stack, matrixStackIn, bufferIn, combinedLightIn, 0);
         matrixStackIn.translate(0.5F, 0.5F, 0.5F);
-        itemRenderer.render(stack, ItemTransforms.TransformType.NONE, false, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay, ibakedmodel.handlePerspective(ItemTransforms.TransformType.NONE,matrixStackIn));
+        itemRenderer.render(stack, ItemTransforms.TransformType.NONE, false, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay, ibakedmodel.applyTransform(ItemTransforms.TransformType.NONE,matrixStackIn,false));
         matrixStackIn.popPose();
 
     }
@@ -104,9 +105,9 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         if(stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))fluidStackDown.setAmount(Integer.MAX_VALUE);
 
         Minecraft mc = Minecraft.getInstance();
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
+        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
         int capacity = TileEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
         int amount = fluidStackDown.getAmount();

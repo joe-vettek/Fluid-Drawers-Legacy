@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"render_type": "cutout_mipped",
 	"textures": {
 		"glass": "fluiddrawerslegacy:blocks/glass",
 		"back": "fluiddrawerslegacy:blocks/back",
