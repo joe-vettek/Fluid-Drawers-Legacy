@@ -78,7 +78,7 @@ public class ControllerFluidCapabilityHandler {
         FluidStack fluidStack = fluidStacksList.get(0);
 
         BlockEntity tile = world.getBlockEntity(pos);
-        if (tile instanceof BlockEntityController || tile instanceof BlockEntitySlave) {
+        if (tile instanceof BlockEntityController) {
             tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
                     .ifPresent((handler -> {
                         if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
@@ -93,7 +93,8 @@ public class ControllerFluidCapabilityHandler {
                                             event.setCancellationResult(InteractionResult.SUCCESS);
                                         }
                                 } else {
-                                    if (drawer.canItemBeStored(stack))
+                                    if (drawer.canItemBeStored(stack)
+                                            &&drawer.getStoredItemPrototype().is(stack.getItem()))
                                         break;
                                 }
                             }
