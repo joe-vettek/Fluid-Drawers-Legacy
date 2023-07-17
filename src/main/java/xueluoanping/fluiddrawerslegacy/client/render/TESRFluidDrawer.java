@@ -6,8 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3d;
+// import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.model.geom.ModelLayers;
@@ -32,6 +31,8 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import org.joml.Quaternionf;
+import org.joml.Vector3d;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
@@ -170,18 +171,22 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         switch (d) {
             case SOUTH:
                 matrixStackIn.translate(0.5, 0.15, 1);
-                matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+                // matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
+                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 180, 180));
                 break;
             case NORTH:
-                matrixStackIn.mulPose(new Quaternion(0, 0, 180, true));
+                // matrixStackIn.mulPose(new Quaternion(0, 0, 180, true));
+                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 0, 180));
                 matrixStackIn.translate(-0.5, -0.15, 0);
                 break;
             case EAST:
-                matrixStackIn.mulPose(new Quaternion(0, 270, 180, true));
+                // matrixStackIn.mulPose(new Quaternion(0, 270, 180, true));
+                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 270, 180));
                 matrixStackIn.translate(-0.5, -0.15, -1);
                 break;
             case WEST:
-                matrixStackIn.mulPose(new Quaternion(0, 90, 180, true));
+                // matrixStackIn.mulPose(new Quaternion(0, 90, 180, true));
+                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 90, 180));
                 matrixStackIn.translate(0.5, -0.15, 0);
                 break;
             default:

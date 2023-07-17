@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
+// import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -23,6 +23,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import org.joml.Quaterniond;
+import org.joml.Quaternionf;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 
@@ -59,7 +61,9 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         if (transformType == ItemTransforms.TransformType.GUI) {
             matrixStackIn.translate(0.9375F, 0.21875F, 0F);
 //            FluidDrawersLegacyMod.LOGGER.info(transformType+"00"+matrixStackIn.last().pose().toString());
-            matrixStackIn.mulPose(new Quaternion(30, 225, 0, true));
+//             matrixStackIn.mulPose(new Quaternion(30, 225, 0, true));
+            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(30, 225, 0));
+
 //            FluidDrawersLegacyMod.LOGGER.info(transformType+"11"+matrixStackIn.last().pose().toString());
             matrixStackIn.scale(0.625f, 0.625f, 0.625f);
 //            FluidDrawersLegacyMod.LOGGER.info(transformType+"22"+matrixStackIn.last().pose().toString());
@@ -73,23 +77,27 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
 //            matrixStackIn.scale(0.5f, 0.5f, 0.5f);
 //        }
         if (transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND) {
-            matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
+            // matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
+            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(75, 45, 0));
             matrixStackIn.translate(0.51625, 0.46875, -0.1875);
             matrixStackIn.scale(0.375f, 0.375f, 0.375f);
         }
         if (transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND) {
-            matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
+            // matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
+            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(75, 45, 0));
             matrixStackIn.translate(0.51625, 0.46875, -0.1875);
             matrixStackIn.scale(0.375f, 0.375f, 0.375f);
         }
         if (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND) {
             matrixStackIn.translate(0.40625, -0.1875, 0);
-            matrixStackIn.mulPose(new Quaternion(0, 45, 0, true));
+            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 45, 0));
+            // matrixStackIn.mulPose(new Quaternion(0, 45, 0, true));
             matrixStackIn.scale(0.675f, 0.675f, 0.675f);
         }
         if (transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND) {
             matrixStackIn.translate(0.59375, -0.1875, 0);
-            matrixStackIn.mulPose(new Quaternion(0, 225, 0, true));
+            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 225, 0));
+            // matrixStackIn.mulPose(new Quaterniond(0, 225, 0, true));
             matrixStackIn.scale(0.675f, 0.675f, 0.675f);
         }
         return matrixStackIn;
