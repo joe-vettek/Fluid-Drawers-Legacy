@@ -2,14 +2,14 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"north": "fluiddrawerslegacy:blocks/front",
-		"east": "fluiddrawerslegacy:blocks/side1",
-		"south": "fluiddrawerslegacy:blocks/back",
-		"west": "fluiddrawerslegacy:blocks/side2",
-		"up": "fluiddrawerslegacy:blocks/top",
-		"down": "storagedrawers:blocks/drawers_comp_side",
-		"trim": "storagedrawers:blocks/drawers_comp_side",
-		"particle": "blocks/glass"
+		"north": "fluiddrawerslegacy:block/front",
+		"east": "fluiddrawerslegacy:block/side1",
+		"south": "fluiddrawerslegacy:block/back",
+		"west": "fluiddrawerslegacy:block/side2",
+		"up": "fluiddrawerslegacy:block/top",
+		"down": "storagedrawers:block/drawers_comp_side",
+		"trim": "storagedrawers:block/drawers_comp_side",
+		"particle": "block/glass"
 	},
 	"elements": [
 		{

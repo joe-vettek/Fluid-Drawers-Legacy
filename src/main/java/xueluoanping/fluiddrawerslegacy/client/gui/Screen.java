@@ -53,7 +53,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         super.init();
         if (storageItemRender == null) {
             ItemRenderer defaultRenderItem = this.minecraft.getItemRenderer();
-            storageItemRender = new StorageRenderItem(this.minecraft.getTextureManager(), defaultRenderItem.getItemModelShaper().getModelManager(), this.minecraft.getItemColors());
+            storageItemRender = new StorageRenderItem(this.minecraft, this.minecraft.getTextureManager(), defaultRenderItem.getItemModelShaper().getModelManager(), this.minecraft.getItemColors());
         }
 
     }

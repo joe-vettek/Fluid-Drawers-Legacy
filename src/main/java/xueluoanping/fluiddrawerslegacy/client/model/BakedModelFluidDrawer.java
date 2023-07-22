@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
@@ -76,13 +77,15 @@ public class BakedModelFluidDrawer implements BakedModel {
     }
 
     @Override
-    public BakedModel applyTransform(ItemTransforms.TransformType transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
-        if (transformType == ItemTransforms.TransformType.NONE ||
-                transformType ==ItemTransforms.TransformType.FIXED)
+    public BakedModel applyTransform(ItemDisplayContext transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
+
+        if (transformType == ItemDisplayContext.NONE ||
+                transformType ==ItemDisplayContext.FIXED)
             return this.existingModel.applyTransform(transformType, poseStack,applyLeftHandTransform);
-        return this;
-        // return BakedModel.super.applyTransform(transformType, poseStack, applyLeftHandTransform);
+        // return this;
+        return BakedModel.super.applyTransform(transformType, poseStack, applyLeftHandTransform);
     }
+
 
     // @Override
     // public BakedModel handlePerspective(ItemTransforms.TransformType cameraTransformType, PoseStack mat) {

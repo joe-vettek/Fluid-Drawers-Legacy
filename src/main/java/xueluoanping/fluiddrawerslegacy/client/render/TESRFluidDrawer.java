@@ -86,7 +86,8 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
             fontRenderer.drawInBatch(fluidStackDown.getDisplayName().getString()
-                    , (float) (-textWidth) / 2.0F, -9F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                    , (float) (-textWidth) / 2.0F, -9F, 0xFFFFFF, false,
+                    matrixStackIn.last().pose(), txtBuffer, Font.DisplayMode.NORMAL, 0, combinedLightIn);
             txtBuffer.endBatch();
 
         }
@@ -111,7 +112,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
                 fontRenderer.drawInBatch(label
-                        , (float) (-textWidth) / 2.0F, 0F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                        , (float) (-textWidth) / 2.0F, 0F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, Font.DisplayMode.NORMAL, 0, combinedLightIn);
                 txtBuffer.endBatch();
 //                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()), 0F, 0F, 0xFFFFF);
             }
@@ -139,7 +140,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
                 fontRenderer.drawInBatch(label
-                        , (float) (-textWidth) / 2.0F, -18F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, false, 0, combinedLightIn);
+                        , (float) (-textWidth) / 2.0F, -18F, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, Font.DisplayMode.NORMAL, 0, combinedLightIn);
                 txtBuffer.endBatch();
 //                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()), 0F, 0F, 0xFFFFF);
             }
@@ -172,21 +173,21 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             case SOUTH:
                 matrixStackIn.translate(0.5, 0.15, 1);
                 // matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 180, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 180, 180));
                 break;
             case NORTH:
                 // matrixStackIn.mulPose(new Quaternion(0, 0, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 0, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 0, 180));
                 matrixStackIn.translate(-0.5, -0.15, 0);
                 break;
             case EAST:
                 // matrixStackIn.mulPose(new Quaternion(0, 270, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 270, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 270, 180));
                 matrixStackIn.translate(-0.5, -0.15, -1);
                 break;
             case WEST:
                 // matrixStackIn.mulPose(new Quaternion(0, 90, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 90, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 90, 180));
                 matrixStackIn.translate(0.5, -0.15, 0);
                 break;
             default:

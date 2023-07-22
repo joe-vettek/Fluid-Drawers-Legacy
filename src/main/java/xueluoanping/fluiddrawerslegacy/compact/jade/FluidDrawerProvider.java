@@ -8,6 +8,7 @@ import snownee.jade.addon.universal.FluidStorageProvider;
 import snownee.jade.api.*;
 
 import snownee.jade.api.config.IPluginConfig;
+import snownee.jade.api.fluid.JadeFluidObject;
 import snownee.jade.api.ui.BoxStyle;
 import snownee.jade.api.ui.IElementHelper;
 import snownee.jade.api.ui.IProgressStyle;
@@ -67,7 +68,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
             }
 
-            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(fluidStack));
+            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(),fluidStack.getAmount())));
             // tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, text, progressStyle, helper.borderStyle()).tag(VanillaPlugin.FORGE_FLUID));
             tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, (Component)text, progressStyle, BoxStyle.DEFAULT, true));
         }

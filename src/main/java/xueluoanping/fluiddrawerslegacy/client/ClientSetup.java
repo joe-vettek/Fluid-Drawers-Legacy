@@ -57,7 +57,7 @@ public class ClientSetup {
 
 
     @SubscribeEvent
-    public static void onModelBaked(ModelEvent.BakingCompleted event) {
+    public static void onModelBaked(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> modelRegistry = event.getModels();
         ModelResourceLocation location = new ModelResourceLocation(ModContents.itemBlock.getId(), "inventory");
         BakedModel existingModel = modelRegistry.get(location);
@@ -67,7 +67,7 @@ public class ClientSetup {
             throw new RuntimeException("Tried to replace twice");
         } else {
             BakedModelFluidDrawer model = new BakedModelFluidDrawer(existingModel);
-            event.getModels().put(location, model);
+            modelRegistry.put(location, model);
         }
     }
 }

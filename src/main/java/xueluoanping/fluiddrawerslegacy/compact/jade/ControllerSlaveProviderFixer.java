@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
+import snownee.jade.api.fluid.JadeFluidObject;
 import snownee.jade.api.ui.BoxStyle;
 import snownee.jade.api.ui.IElementHelper;
 import snownee.jade.api.ui.IProgressStyle;
@@ -36,7 +37,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig iPluginConfig) {
-        tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
+        // tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
         if (!(accessor.getBlockEntity() instanceof BlockEntitySlave))
             return;
        // FluidDrawersLegacyMod.logger(accessor.getServerData().toString());
@@ -76,7 +77,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
                 {
                     IElementHelper helper = tooltip.getElementHelper();
                     FluidStack fluidStack= new FluidStack(fluid, integerList.get(0));
-                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(fluidStack));
+                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid, integerList.get(0))));
                     String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
 
                     Component text=Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
