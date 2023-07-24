@@ -9,11 +9,12 @@ import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
 
-public class InventoryUpgrade implements IInventory {
+public class InventoryUpgrade extends com.jaquadro.minecraft.storagedrawers.inventory.InventoryUpgrade {
     private static final int upgradeCapacity = 7;
     private TileEntityFluidDrawer tile;
 
     public InventoryUpgrade(TileEntityFluidDrawer tileEntity) {
+        super(null);
         this.tile = tileEntity;
     }
 
