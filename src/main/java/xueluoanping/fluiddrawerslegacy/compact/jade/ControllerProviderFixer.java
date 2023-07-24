@@ -3,10 +3,12 @@ package xueluoanping.fluiddrawerslegacy.compact.jade;
 
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 
+import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import snownee.jade.addon.universal.FluidStorageProvider;
 import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
@@ -28,6 +30,7 @@ import snownee.jade.api.view.FluidView;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModTranslateKey;
+import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 
 import java.util.ArrayList;
@@ -42,23 +45,26 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        // tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
-        if (!(accessor.getBlockEntity() instanceof BlockEntityController))
+        tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
+        if (!(accessor.getBlockEntity() instanceof BlockEntityController tile))
             return;
-        FluidDrawersLegacyMod.logger(accessor.getServerData()+"");
+        // FluidDrawersLegacyMod.logger(accessor.getServerData()+"");
         if (accessor.getServerData().contains("JadeFluidStorage")) {
             ListTag list =
                     ((CompoundTag) accessor.getServerData().getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
                             .getList("Views", CompoundTag.TAG_COMPOUND);
-            // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0)).getList("Views", CompoundTag.TAG_COMPOUND).toString());
+            // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0))
+            //         .toString());
 
             Map<Fluid, List<Integer>> fluidMap = new HashMap<>();
             list.forEach(
                     (ele) -> {
-
+                        ((CompoundTag) ele).putString("FluidName",((CompoundTag) ele).getString("fluid"));
+                        ((CompoundTag) ele).putInt("Amount",((CompoundTag) ele).getInt("amount"));
                         FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
-                        int capacity = ((CompoundTag) ele).getInt("Capacity");
+                        int capacity = ((CompoundTag) ele).getInt("capacity");
                         List<Integer> integerList = new ArrayList<>();
+                        // FluidDrawersLegacyMod.logger(fluidStack.getDisplayName().toString());
                         if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY) {
                             if (fluidMap.containsKey(fluidStack.getFluid())) {
                                 integerList = fluidMap.get(fluidStack.getFluid());
@@ -73,12 +79,14 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
                         }
                     }
             );
+            // FluidDrawersLegacyMod.logger(list.toString());
             AtomicInteger i = new AtomicInteger();
             fluidMap.forEach((fluid, integerList) -> {
                 i.getAndIncrement();
                 if (accessor.getPlayer().isShiftKeyDown() ||
                         (!accessor.getPlayer().isShiftKeyDown()
-                                && i.get() < ClientConfig.showlimit.get())) {
+                                && i.get() < ClientConfig.showlimit.get()))
+                {
                     IElementHelper helper = tooltip.getElementHelper();
                     FluidStack fluidStack = new FluidStack(fluid, integerList.get(0));
                     IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid, integerList.get(0))));

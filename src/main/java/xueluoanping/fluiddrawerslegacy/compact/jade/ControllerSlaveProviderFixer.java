@@ -37,7 +37,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig iPluginConfig) {
-        // tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
+        tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
         if (!(accessor.getBlockEntity() instanceof BlockEntitySlave))
             return;
        // FluidDrawersLegacyMod.logger(accessor.getServerData().toString());
@@ -50,9 +50,10 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
             Map<Fluid, List<Integer>> fluidMap = new HashMap<>();
             list.forEach(
                     (ele) -> {
-
+                        ((CompoundTag) ele).putString("FluidName",((CompoundTag) ele).getString("fluid"));
+                        ((CompoundTag) ele).putInt("Amount",((CompoundTag) ele).getInt("amount"));
                         FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
-                        int capacity = ((CompoundTag) ele).getInt("Capacity");
+                        int capacity = ((CompoundTag) ele).getInt("capacity");
                         List<Integer> integerList = new ArrayList<>();
                         if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY) {
                             if (fluidMap.containsKey(fluidStack.getFluid())) {
