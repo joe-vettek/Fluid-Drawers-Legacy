@@ -1,7 +1,8 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
-import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
+// import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
+import com.jaquadro.minecraft.storagedrawers.client.gui.StorageGuiGraphics;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
@@ -35,7 +36,8 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
     private List<Slot> playerSlots;
     private List<Slot> hotbarSlots;
     @OnlyIn(Dist.CLIENT)
-    public StorageRenderItem activeRenderItem;
+    public StorageGuiGraphics activeGuiGraphics;
+    // public StorageRenderItem activeRenderItem;
     private boolean isRemote;
 
 
@@ -87,6 +89,13 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
         }
 
         this.isRemote = playerInventory.player.getCommandSenderWorld().isClientSide();
+    }
+
+    public void setLastAccessedItem(ItemStack stack) {
+        if (this.isRemote && this.activeGuiGraphics != null) {
+            this.activeGuiGraphics.overrideStack = stack;
+        }
+
     }
 
     protected int getStorageSlotX(int slot) {

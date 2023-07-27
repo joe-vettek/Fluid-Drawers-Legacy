@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IServerDataProvider<BlockEntity> {
+public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IServerDataProvider<BlockAccessor>{
     static final ControllerSlaveProviderFixer INSTANCE = new ControllerSlaveProviderFixer();
 
 
@@ -94,10 +94,6 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
         }
     }
 
-    @Override
-    public void appendServerData(CompoundTag compoundTag, ServerPlayer serverPlayer, Level level, BlockEntity blockEntity, boolean b) {
-
-    }
 
     @Override
     public ResourceLocation getUid() {
@@ -107,5 +103,10 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
     @Override
     public int getDefaultPriority() {
         return FluidStorageProvider.INSTANCE.getDefaultPriority()+1000;
+    }
+
+    @Override
+    public void appendServerData(CompoundTag compoundTag, BlockAccessor blockAccessor) {
+
     }
 }
