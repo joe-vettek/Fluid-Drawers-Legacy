@@ -172,21 +172,21 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
             case SOUTH:
                 matrixStackIn.translate(0.5, 0.15, 1);
                 // matrixStackIn.mulPose(new Quaternion(0, 180, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 180, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 180, 180));
                 break;
             case NORTH:
                 // matrixStackIn.mulPose(new Quaternion(0, 0, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 0, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 0, 180));
                 matrixStackIn.translate(-0.5, -0.15, 0);
                 break;
             case EAST:
                 // matrixStackIn.mulPose(new Quaternion(0, 270, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 270, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 270, 180));
                 matrixStackIn.translate(-0.5, -0.15, -1);
                 break;
             case WEST:
                 // matrixStackIn.mulPose(new Quaternion(0, 90, 180, true));
-                matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 90, 180));
+                matrixStackIn.mulPose(XYZ.deg_to_rad(0, 90, 180));
                 matrixStackIn.translate(0.5, -0.15, 0);
                 break;
             default:

@@ -50,6 +50,8 @@ public class ModContents {
     public static final DeferredRegister<MenuType<?>> DRMenuType = DeferredRegister.create(ForgeRegistries.MENU_TYPES, FluidDrawersLegacyMod.MOD_ID);
 
     private static CreativeModeTab MAIN;
+
+    @SubscribeEvent
     public static void creativeModeTabRegister(CreativeModeTabEvent.Register event) {
         MAIN = event.registerCreativeModeTab(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawers"), builder -> builder
                 .icon(() -> ModContents.itemBlock.get().getDefaultInstance())

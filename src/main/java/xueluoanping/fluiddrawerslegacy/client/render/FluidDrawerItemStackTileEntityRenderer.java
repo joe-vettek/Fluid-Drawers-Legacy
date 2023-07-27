@@ -62,7 +62,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
             matrixStackIn.translate(0.9375F, 0.21875F, 0F);
 //            FluidDrawersLegacyMod.LOGGER.info(transformType+"00"+matrixStackIn.last().pose().toString());
 //             matrixStackIn.mulPose(new Quaternion(30, 225, 0, true));
-            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(30, 225, 0));
+            matrixStackIn.mulPose(XYZ.deg_to_rad(30, 225, 0));
 
 //            FluidDrawersLegacyMod.LOGGER.info(transformType+"11"+matrixStackIn.last().pose().toString());
             matrixStackIn.scale(0.625f, 0.625f, 0.625f);
@@ -78,25 +78,25 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
 //        }
         if (transformType == ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND) {
             // matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
-            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(75, 45, 0));
+            matrixStackIn.mulPose(XYZ.deg_to_rad(75, 45, 0));
             matrixStackIn.translate(0.51625, 0.46875, -0.1875);
             matrixStackIn.scale(0.375f, 0.375f, 0.375f);
         }
         if (transformType == ItemTransforms.TransformType.THIRD_PERSON_LEFT_HAND) {
             // matrixStackIn.mulPose(new Quaternion(75, 45, 0, true));
-            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(75, 45, 0));
+            matrixStackIn.mulPose(XYZ.deg_to_rad(75, 45, 0));
             matrixStackIn.translate(0.51625, 0.46875, -0.1875);
             matrixStackIn.scale(0.375f, 0.375f, 0.375f);
         }
         if (transformType == ItemTransforms.TransformType.FIRST_PERSON_RIGHT_HAND) {
             matrixStackIn.translate(0.40625, -0.1875, 0);
-            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 45, 0));
+            matrixStackIn.mulPose(XYZ.deg_to_rad(0, 45, 0));
             // matrixStackIn.mulPose(new Quaternion(0, 45, 0, true));
             matrixStackIn.scale(0.675f, 0.675f, 0.675f);
         }
         if (transformType == ItemTransforms.TransformType.FIRST_PERSON_LEFT_HAND) {
             matrixStackIn.translate(0.59375, -0.1875, 0);
-            matrixStackIn.mulPose(new Quaternionf().rotateXYZ(0, 225, 0));
+            matrixStackIn.mulPose(XYZ.deg_to_rad(0, 225, 0));
             // matrixStackIn.mulPose(new Quaterniond(0, 225, 0, true));
             matrixStackIn.scale(0.675f, 0.675f, 0.675f);
         }
