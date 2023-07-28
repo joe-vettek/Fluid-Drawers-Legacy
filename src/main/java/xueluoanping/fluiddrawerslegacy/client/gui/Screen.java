@@ -12,29 +12,37 @@ import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
 // import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.network.ServerStatusPing;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.commons.lang3.StringUtils;
 import org.joml.Matrix4f;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
@@ -65,47 +73,24 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        ((ContainerFluiDrawer)this.menu).activeGuiGraphics = storageGuiGraphics;
+        ((ContainerFluiDrawer) this.menu).activeGuiGraphics = storageGuiGraphics;
 
         super.render(storageGuiGraphics, mouseX, mouseY, partialTicks);
 
-        ((ContainerFluiDrawer)this.menu).activeGuiGraphics = null;
+        ((ContainerFluiDrawer) this.menu).activeGuiGraphics = null;
         storageGuiGraphics.overrideStack = ItemStack.EMPTY;
 
 
-        // if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
-        //     FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
-        //
-        //     FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        //     TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-        //
-        //
-        //
-        //
-        //     int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
-        //
-        //     int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
-        //     int amount = fluidStackDown.getAmount();
-        //     if (capacity < amount) amount = capacity;
-        //     List<Component> list = new ArrayList<>();
-        //     if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-        //         TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
-        //         if (fluidStackDown.getAmount() <= 0 &&
-        //                 betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
-        //             fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
-        //         }
-        //     }
-        //     list.add(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName());
-        //     renderComponentTooltip(stack, list, mouseX, mouseY);
-        // }
-//        this.font.draw(stack, mouseY + "|" + mouseX, mouseX, mouseY, 4210752);
-//        this.font.draw(stack, "屏高" + imageHeight + ",屏宽" + imageWidth, mouseX, mouseY + 8, 4210752);
-//        this.font.draw(stack, "屏高" + height + ",屏宽" + width, mouseX, mouseY + 16, 4210752);
+        renderTooltip(graphics, mouseX, mouseY);
+        //        this.font.draw(stack, mouseY + "|" + mouseX, mouseX, mouseY, 4210752);
+        //        this.font.draw(stack, "屏高" + imageHeight + ",屏宽" + imageWidth, mouseX, mouseY + 8, 4210752);
+        //        this.font.draw(stack, "屏高" + height + ",屏宽" + width, mouseX, mouseY + 16, 4210752);
 
     }
 
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
+        super.renderTooltip(graphics, mouseX, mouseY);
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
@@ -113,13 +98,12 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
 
 
-
-
             int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
             int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
-            if (capacity < amount) amount = capacity;
+            if (capacity < amount)
+                amount = capacity;
             List<Component> list = new ArrayList<>();
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
@@ -129,9 +113,28 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 }
             }
             list.add(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName());
+            ModList modList = ModList.get();
+            FluidStack finalFluidStackDown = fluidStackDown;
+
+            Optional<Map.Entry<ResourceKey<Fluid>, Fluid>> fluidInfo=  ForgeRegistries.FLUIDS.getEntries().stream()
+                    .filter(resourceKeyFluidEntry -> resourceKeyFluidEntry.getValue()== finalFluidStackDown.getFluid())
+                    .findFirst();
+
+            fluidInfo.ifPresent(resourceKeyFluidEntry -> {
+                String modId=resourceKeyFluidEntry.getKey().registry().getNamespace();
+                // String modId = finalFluidStackDown.getTranslationKey().split("\\.")[1];
+                Optional<String> modName = modList.getMods().stream().filter((modInfo) -> modInfo.getModId().equals(modId))
+                        .map(IModInfo::getDisplayName)
+                        .findFirst();
+                modName.ifPresent(s -> list.add(Component.literal("§9§o" + s)));
+
+            });
+
             // renderComponentTooltip(stack, list, mouseX, mouseY);
-            graphics.renderTooltip(this.font, list, Optional.empty(), ItemStack.EMPTY, mouseX,mouseY);
+            graphics.renderComponentTooltip(this.getMinecraft().font, list, mouseX, mouseY);
+
         }
+
     }
 
     /**
@@ -188,19 +191,19 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
      * @param y      y（绝对）
      */
     public static void renderFluidStackInGUI(Matrix4f matrix, FluidStack fluid, int width, int height, float x, float y) {
-        //正常渲染透明度
+        // 正常渲染透明度
         RenderSystem.enableBlend();
         RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 
-        //获取sprite
+        // 获取sprite
         FluidType attributes = fluid.getFluid().getFluidType();
         TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture());
 
-        //绑atlas
-//        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
+        // 绑atlas
+        //        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 
-//        注意color要这样写，后面的是无效的
+        //        注意color要这样写，后面的是无效的
         int color = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor();
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
@@ -218,6 +221,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int hFloors = height / 16;
         int extraHeight = hFloors == 0 ? height : height % 16;
 
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+
         float u0 = FLUID.getU0();
         float v0 = FLUID.getV0();
         Tesselator tessellator = Tesselator.getInstance();
@@ -232,22 +237,24 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
          * 对于层，若层数为0（渲染数值小于16），则直接将渲染数值设为额外层数值。
          */
         for (int i = hFloors; i >= 0; i--) {
-            //i为流程控制码，若i=0则代表高度层已全部渲染完毕，此时若额外层高度为0（渲染高度参数本来就是16的整数倍）则跳出
-            if (i == 0 && extraHeight == 0) break;
+            // i为流程控制码，若i=0则代表高度层已全部渲染完毕，此时若额外层高度为0（渲染高度参数本来就是16的整数倍）则跳出
+            if (i == 0 && extraHeight == 0)
+                break;
             float yStart = y - ((hFloors - i) * 16);
-            //获取本层/额外层的高度，若高度层渲染完毕则设为额外层高度
+            // 获取本层/额外层的高度，若高度层渲染完毕则设为额外层高度
             float yOffset = i == 0 ? (float) extraHeight : 16;
-            //获取v1
+            // 获取v1
             float v1 = i == 0 ? FLUID.getV0() + ((FLUID.getV1() - v0) * ((float) extraHeight / 16f)) : FLUID.getV1();
 
-            //x层以此类推
+            // x层以此类推
             for (int j = wFloors; j >= 0; j--) {
-                if (j == 0 && extraWidth == 0) break;
+                if (j == 0 && extraWidth == 0)
+                    break;
                 float xStart = x + (wFloors - j) * 16;
                 float xOffset = j == 0 ? (float) extraWidth : 16;
                 float u1 = j == 0 ? FLUID.getU0() + ((FLUID.getU1() - u0) * ((float) extraWidth / 16f)) : FLUID.getU1();
 
-                //渲染主代码
+                // 渲染主代码
                 builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 buildMatrix(matrix, builder, xStart, yStart - yOffset, 0.0f, u0, v0, color);
                 buildMatrix(matrix, builder, xStart, yStart, 0.0f, u0, v1, color);
@@ -256,12 +263,12 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 tessellator.end();
             }
         }
-
+        RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.disableBlend();
     }
 
 
-    protected void renderLabels(GuiGraphics  graphics, int mouseX, int mouseY) {
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
         graphics.drawString(this.font, this.title.getString(), 8.0F, 6.0F, 4210752, false);
         graphics.drawString(this.font, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752, false);
         graphics.drawString(this.font, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752, false);
@@ -272,7 +279,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
             amount = Integer.MAX_VALUE;
-//        每个数量级3.0f
+        //        每个数量级3.0f
         if (amount > 10000000) {
             amountLabel = "∞";
             textWidth = font.width(amountLabel);
@@ -291,13 +298,13 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int guiX = (this.width - this.imageWidth) / 2;
         int guiY = (this.height - this.imageHeight) / 2;
         graphics.blit(this.background, guiX, guiY, 0, 0, this.imageWidth, this.imageHeight);
-//        List<Slot> storageSlots = ((ContainerFluiDrawer)this.menu).getStorageSlots();
-//        Iterator var8 = storageSlots.iterator();
-//
-//        while(var8.hasNext()) {
-//            Slot slot = (Slot)var8.next();
-//            this.blit(stack, guiX + slot.x, guiY + slot.y, 176, 0, 16, 16);
-//        }
+        //        List<Slot> storageSlots = ((ContainerFluiDrawer)this.menu).getStorageSlots();
+        //        Iterator var8 = storageSlots.iterator();
+        //
+        //        while(var8.hasNext()) {
+        //            Slot slot = (Slot)var8.next();
+        //            this.blit(stack, guiX + slot.x, guiY + slot.y, 176, 0, 16, 16);
+        //        }
 
         List<Slot> upgradeSlots = ((ContainerFluiDrawer) this.menu).getUpgradeSlots();
         Iterator var12 = upgradeSlots.iterator();
@@ -318,7 +325,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
-        if (capacity < amount) amount = capacity;
+        if (capacity < amount)
+            amount = capacity;
         float h = 0.0f;
         h = (float) amount / (float) capacity;
         if (((float) amount / (float) capacity) <= 0.0625 && ((float) amount / (float) capacity) >= 0.01)
@@ -328,11 +336,14 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int h0 = (int) (h * 16.0f);
         if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
             h0 = 16;
-//        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
-
-        renderFluidStackInGUI(graphics.pose().last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
+        //        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
 
 
+        PoseStack poseStack = graphics.pose();
+        poseStack.pushPose();
+        // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
+        renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
+        poseStack.popPose();
     }
 
     protected boolean isHovering(int x, int y, int width, int height, double originX, double originY) {
