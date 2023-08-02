@@ -66,7 +66,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     protected void init() {
         super.init();
         if (storageGuiGraphics == null && minecraft != null) {
-            storageGuiGraphics = new StorageGuiGraphics(minecraft, MultiBufferSource.immediate(Tesselator.getInstance().getBuilder()));
+            storageGuiGraphics  = new StorageGuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
         }
 
     }
