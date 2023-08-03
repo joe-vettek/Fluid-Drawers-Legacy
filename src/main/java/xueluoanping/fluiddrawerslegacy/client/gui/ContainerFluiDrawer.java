@@ -35,8 +35,8 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
     private List<Slot> upgradeSlots;
     private List<Slot> playerSlots;
     private List<Slot> hotbarSlots;
-    @OnlyIn(Dist.CLIENT)
-    public StorageGuiGraphics activeGuiGraphics;
+    // @OnlyIn(Dist.CLIENT)
+    // public StorageGuiGraphics activeGuiGraphics;
     // public StorageRenderItem activeRenderItem;
     private boolean isRemote;
 
@@ -91,12 +91,12 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
         this.isRemote = playerInventory.player.getCommandSenderWorld().isClientSide();
     }
 
-    public void setLastAccessedItem(ItemStack stack) {
-        if (this.isRemote && this.activeGuiGraphics != null) {
-            this.activeGuiGraphics.overrideStack = stack;
-        }
-
-    }
+    // public void setLastAccessedItem(ItemStack stack) {
+    //     if (this.isRemote && this.activeGuiGraphics != null) {
+    //         this.activeGuiGraphics.overrideStack = stack;
+    //     }
+    //
+    // }
 
     protected int getStorageSlotX(int slot) {
         return slotCoordinates[slot][0];

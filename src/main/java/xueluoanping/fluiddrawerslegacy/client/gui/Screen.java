@@ -51,7 +51,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     private static final int smDisabledX = 176;
     private static final int smDisabledY = 0;
     // private static StorageRenderItem storageItemRender;
-    private static StorageGuiGraphics storageGuiGraphics;
+    // private static StorageGuiGraphics storageGuiGraphics;
     private final ResourceLocation background;
     private final Inventory inventory;
 
@@ -65,21 +65,20 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
     protected void init() {
         super.init();
-        if (storageGuiGraphics == null && minecraft != null) {
-            storageGuiGraphics  = new StorageGuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
-        }
+        // if (storageGuiGraphics == null && minecraft != null) {
+        //     storageGuiGraphics  = new StorageGuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
+        // }
 
     }
 
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        ((ContainerFluiDrawer) this.menu).activeGuiGraphics = storageGuiGraphics;
+        // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = storageGuiGraphics;
+        // super.render(storageGuiGraphics, mouseX, mouseY, partialTicks);
+        // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = null;
+        // storageGuiGraphics.overrideStack = ItemStack.EMPTY;
 
-        super.render(storageGuiGraphics, mouseX, mouseY, partialTicks);
-
-        ((ContainerFluiDrawer) this.menu).activeGuiGraphics = null;
-        storageGuiGraphics.overrideStack = ItemStack.EMPTY;
-
+        super.render(graphics, mouseX, mouseY, partialTicks);
 
         renderTooltip(graphics, mouseX, mouseY);
         //        this.font.draw(stack, mouseY + "|" + mouseX, mouseX, mouseY, 4210752);
