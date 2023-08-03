@@ -173,24 +173,23 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                                         }
                                     }
                                 });
-                    }
-                    else if (tile.hasNoFluid()) {
+                    } else if (tile.hasNoFluid()) {
                         if (bucketItem.getFluid() == Fluids.EMPTY)
                             return InteractionResult.FAIL;
                         else {
                             tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
                                     .ifPresent(handler -> {
                                         int amount = handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
-                                        if (!player.isCreative() && amount == FluidType.BUCKET_VOLUME) {
+                                        if (amount == FluidType.BUCKET_VOLUME) {
                                             handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                            player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
+                                            if (!player.isCreative())
+                                                player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
                                         }
 
                                     });
                             return InteractionResult.SUCCESS;
                         }
-                    }
-                    else {
+                    } else {
                         if (tile.getTankFLuid().getAmount() + FluidType.BUCKET_VOLUME <= tile.getTankEffectiveCapacity()
                                 && tile.getTankFLuid().getFluid() == bucketItem.getFluid()) {
                             tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)

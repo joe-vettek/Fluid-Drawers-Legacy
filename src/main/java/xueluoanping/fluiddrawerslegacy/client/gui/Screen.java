@@ -342,6 +342,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         poseStack.pushPose();
         // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
         renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
+        if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
+        graphics.fill(guiX + upgradeSlots.get(3).x, guiY + 36, guiX + upgradeSlots.get(3).x+16, guiY + 52,0, 0x88FFFFFF);
+
         poseStack.popPose();
     }
 

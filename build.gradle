@@ -147,15 +147,17 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_min_version}-${forge_version}"
 
-    implementation fg.deobf("curse.maven:storage-drawers-223852:4667201")
+    implementation fg.deobf("curse.maven:storage-drawers-223852:4668552")
     implementation fg.deobf("curse.maven:jei-238222:4644453")
     implementation fg.deobf("curse.maven:jade-324717:4654448")
 
-//    implementation fg.deobf("curse.maven:crafttweaker-239197:3680605")
+//    implementation fg.deobf("curse.maven:cyclic-239286:4661938")
+//    implementation fg.deobf("curse.maven:flib-661261:4661080")
+//    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
+
 //    implementation fg.deobf("curse.maven:minemenu-222378:3544634")
 //    implementation fg.deobf("curse.maven:configured-457570:3721946")
     //implementation fg.deobf("curse.maven:journeymap-32274:3696405")
-    //implementation fg.deobf("curse.maven:cyclic-239286:3708026")
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
