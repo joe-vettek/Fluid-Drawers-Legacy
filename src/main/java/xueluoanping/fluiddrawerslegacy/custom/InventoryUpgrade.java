@@ -5,6 +5,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
@@ -95,4 +97,10 @@ public class InventoryUpgrade extends com.jaquadro.minecraft.storagedrawers.inve
     public boolean canRemoveStorageUpgrade(int slot) {
         return this.tile.upgrades().canRemoveUpgrade(slot);
     }
+
+    // new add in 1.20
+    public boolean canSwapUpgrade(int slot, @NotNull ItemStack item) {
+        return this.tile.upgrades().canSwapUpgrade(slot, item);
+    }
+
 }

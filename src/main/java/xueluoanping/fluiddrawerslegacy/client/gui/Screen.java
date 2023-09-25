@@ -71,12 +71,19 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
     }
 
+    public boolean hasFluidInfo() {
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
+        return fluidStackDown.getFluid() != Fluids.EMPTY;
+    }
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = storageGuiGraphics;
         // super.render(storageGuiGraphics, mouseX, mouseY, partialTicks);
         // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = null;
         // storageGuiGraphics.overrideStack = ItemStack.EMPTY;
+
+        // can not render empty
+
 
         super.render(graphics, mouseX, mouseY, partialTicks);
 
@@ -90,7 +97,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderTooltip(graphics, mouseX, mouseY);
-        if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
+        if (hasFluidInfo()&&isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
             FluidType attributes = fluidStackDown.getFluid().getFluidType();
@@ -115,12 +122,12 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             ModList modList = ModList.get();
             FluidStack finalFluidStackDown = fluidStackDown;
 
-            Optional<Map.Entry<ResourceKey<Fluid>, Fluid>> fluidInfo=  ForgeRegistries.FLUIDS.getEntries().stream()
-                    .filter(resourceKeyFluidEntry -> resourceKeyFluidEntry.getValue()== finalFluidStackDown.getFluid())
+            Optional<Map.Entry<ResourceKey<Fluid>, Fluid>> fluidInfo = ForgeRegistries.FLUIDS.getEntries().stream()
+                    .filter(resourceKeyFluidEntry -> resourceKeyFluidEntry.getValue() == finalFluidStackDown.getFluid())
                     .findFirst();
 
             fluidInfo.ifPresent(resourceKeyFluidEntry -> {
-                String modId=resourceKeyFluidEntry.getKey().registry().getNamespace();
+                String modId = resourceKeyFluidEntry.getKey().registry().getNamespace();
                 // String modId = finalFluidStackDown.getTranslationKey().split("\\.")[1];
                 Optional<String> modName = modList.getMods().stream().filter((modInfo) -> modInfo.getModId().equals(modId))
                         .map(IModInfo::getDisplayName)
@@ -316,13 +323,14 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         }
 
 
-        FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
 
-        FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
-        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
+        // FluidType attributes = fluidStackDown.getFluid().getFluidType();
+        // TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+        // int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
+
+        int capacity = this.menu.getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount)
             amount = capacity;
@@ -341,9 +349,10 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
+        if(hasFluidInfo())
         renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
-        graphics.fill(guiX + upgradeSlots.get(3).x, guiY + 36, guiX + upgradeSlots.get(3).x+16, guiY + 52,0, 0x88FFFFFF);
+            graphics.fill(guiX + upgradeSlots.get(3).x, guiY + 36, guiX + upgradeSlots.get(3).x + 16, guiY + 52, 0, 0x88FFFFFF);
 
         poseStack.popPose();
     }
