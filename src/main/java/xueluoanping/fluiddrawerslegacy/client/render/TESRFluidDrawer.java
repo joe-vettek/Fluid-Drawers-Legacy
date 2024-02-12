@@ -31,7 +31,6 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import org.joml.Quaternionf;
 import org.joml.Vector3d;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
@@ -243,7 +242,9 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
         int capacity = tile.getTankEffectiveCapacity();
-        int amount = fluidStackDown.getAmount();
+//        int amount = fluidStackDown.getAmount();
+        int amount=tile.getAndUpdateLastFluidAmount(animationTime);
+        // FluidDrawersLegacyMod.logger(""+animationTime);
         if (capacity < amount) amount = capacity;
         float r = (float) amount / (float) capacity;
         if (tile.upgrades().hasVendingUpgrade()) r = 1f;

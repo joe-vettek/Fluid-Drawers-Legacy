@@ -57,6 +57,10 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
 
+    private int lastFluidAmount = 0;
+    private int cacheFluidAmount = 0;
+    private boolean isFluidAnimating = false;
+    private double lastAnimationTime = 0d;
 
     public TileEntityFluidDrawer(BlockPos pos, BlockState state) {
         super(ModContents.tankTileEntityType.get(), pos, state);
@@ -68,16 +72,17 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
 //        FluidDrawersLegacyMod.logger("create tile");
     }
 
+
     private static int getCapacityStandard() {
         return General.volume.get();
     }
 
-//    @Override
+    //    @Override
     public IDrawerGroup getGroup() {
         return this.groupData;
     }
 
-//    @Override
+    //    @Override
     protected void onAttributeChanged() {
 //        super.onAttributeChanged();
         this.requestModelDataUpdate();
@@ -107,7 +112,7 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
     @NotNull
     @Override
     public IDrawer getDrawer(int i) {
-        return new StandardDrawerData((StandardDrawerGroup) getGroup(),0);
+        return new StandardDrawerData((StandardDrawerGroup) getGroup(), 0);
     }
 
     @NotNull
@@ -115,6 +120,45 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
     public int[] getAccessibleDrawerSlots() {
         return new int[0];
     }
+
+
+    public int getAndUpdateLastFluidAmount(double animationTime) {
+        int expectFluidAmount = this.groupData.tank.getFluidAmount();
+        if (expectFluidAmount != this.lastFluidAmount) {
+            int fluidAmountChange = (expectFluidAmount - this.lastFluidAmount);
+            boolean isFluidUpdate = expectFluidAmount != cacheFluidAmount;
+            boolean hasEnoughFluidAmount = Math.abs(fluidAmountChange) > 200;
+            boolean isTooQuickAnimaition = isFluidUpdate && animationTime - this.lastAnimationTime <3;
+            FluidDrawersLegacyMod.logger(lastFluidAmount+""+isFluidUpdate+"Fluid Update,"+isTooQuickAnimaition+ "" + "," + this.lastAnimationTime);
+            boolean shouldAnimation = hasEnoughFluidAmount && !isTooQuickAnimaition;
+            if (shouldAnimation) {
+                // this.lastFluidAmount += fluidAmountChange > 0 ? 50 : -50;
+                this.lastFluidAmount += fluidAmountChange * 0.125f;
+                this.isFluidAnimating = true;
+
+            } else {
+                this.lastFluidAmount = expectFluidAmount;
+                this.isFluidAnimating = false;
+            }
+            if (isFluidUpdate) {
+                this.lastAnimationTime = animationTime;
+            }
+        }
+//        else{
+//            this.isFluidAnimating=false;
+//        }
+        this.cacheFluidAmount = expectFluidAmount;
+        return lastFluidAmount;
+    }
+
+    public void setLastFluidAmount(int lastFluidAmount) {
+//        if (lastFluidAmount != this.lastFluidAmount) {
+//
+//
+//        }
+//        FluidDrawersLegacyMod.logger(lastFluidAmount+"");
+    }
+
 
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
@@ -173,14 +217,14 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
 
     }
 
-//    @Override
+    //    @Override
     public IDrawerAttributes getDrawerAttributes() {
         return this.drawerAttributes;
     }
 
     protected void syncClientCount(int slot, int count) {
         if (this.getLevel() == null || !this.getLevel().isClientSide) {
-            PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double)this.getBlockPos().getX(), (double)this.getBlockPos().getY(), (double)this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
+            PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double) this.getBlockPos().getX(), (double) this.getBlockPos().getY(), (double) this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
             MessageHandler.INSTANCE.send(PacketDistributor.NEAR.with(() -> {
                 return point;
             }), new CountUpdateMessage(this.getBlockPos(), slot, count));
@@ -246,12 +290,12 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
         return (int) (((float) getTankFLuid().getAmount() / (float) getTankEffectiveCapacity()) * 15);
     }
 
-//    @Override
+    //    @Override
     public boolean isRedstone() {
         return upgrades().getRedstoneType() != null;
     }
 
-//    @Override
+    //    @Override
     public UpgradeData upgrades() {
         return this.upgradeData;
     }
@@ -336,6 +380,8 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
             if (nbt.contains("tank")) {
                 tank.deserializeNBT((CompoundTag) nbt.get("tank"));
             }
+
+            setLastFluidAmount(tank.getFluidAmount());
 //            inventoryChanged();
 
             super.read(nbt);

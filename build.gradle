@@ -7,7 +7,7 @@ plugins {
 
 version = "${minecraft_min_version}-forge-${mod_version}"
 group = "${mod_base_package}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = mod_name
+archivesBaseName = mod_name_s
 
 // Mojang ships Java 17 to end users in 1.18+, so your mod should target Java 17.
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
@@ -151,8 +151,10 @@ dependencies {
     implementation fg.deobf("curse.maven:jei-238222:4644453")
     implementation fg.deobf("curse.maven:jade-324717:4654448")
 
-//    implementation fg.deobf("curse.maven:cyclic-239286:4661938")
-//    implementation fg.deobf("curse.maven:flib-661261:4661080")
+    implementation fg.deobf("curse.maven:cyclic-239286:4661938")
+    implementation fg.deobf("curse.maven:flib-661261:4661080")
+
+    implementation fg.deobf("curse.maven:create-328085:4835191")
 //    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
 
 //    implementation fg.deobf("curse.maven:minemenu-222378:3544634")
