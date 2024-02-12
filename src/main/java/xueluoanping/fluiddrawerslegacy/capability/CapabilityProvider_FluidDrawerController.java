@@ -364,29 +364,13 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             lockALL--;
             FluidStack result = FluidStack.EMPTY;
             FluidStack resourceCopy = resource.copy();
-//            FluidDrawersLegacyMod.logger(action.simulate()+""+action.execute());
             if (!resource.isEmpty() && resource.getAmount() > 0)
+            {
                 for (int i = 0; i < drawerDataList.size(); i++) {
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                         continue;
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
                             && drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
-//                         if (resource.getAmount() < drawerDataList.get(i).getTank().getFluid().getAmount()) {
-//                             result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), resource.getAmount());
-//                            // if (action.execute()) {
-//                            //     drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
-//                            // }
-//                            //  not use fluid
-//                             drawerDataList.get(i).getTank().drain(result,action);
-//                         } else {
-//                             //    try to use more than one tank to provide
-//                             result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), drawerDataList.get(i).getTank().getFluid().getAmount());
-// //                            if (action.execute()) {
-// //                                drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
-// //                            }
-//                             drawerDataList.get(i).getTank().drain(result, action);
-//
-//                         }
                         FluidStack temp = drawerDataList.get(i).getTank().drain(resourceCopy, action);
                         if (temp.getAmount() > 0) {
                             if (result == FluidStack.EMPTY)
@@ -396,6 +380,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                         }
                     }
                 }
+            }
             // RebuildLock_drain0 = false;
             lockALL++;
             return result;
@@ -414,27 +399,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 for (int i = 0; i < drawerDataList.size(); i++) {
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                         continue;
-                    //                FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + i+drawerDataList.get(i).getTank().getFluidAmount());
                     if (drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
-                        // if (drawerDataList.get(i).getTank().getFluidAmount() >= maxDrain) {
-                        //     result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), maxDrain);
-                        //     // if (action.execute()) {
-                        //     //     drawerDataList.get(i).getTank().drain(result, FluidAction.EXECUTE);
-                        //     // }
-                        //     result = drawerDataList.get(i).getTank().drain(result, action);
-                        //     if (result.getAmount() > 0) {
-                        //         break;
-                        //     }
-                        // } else {
-                        //     result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), drawerDataList.get(i).getTank().getFluidAmount());
-                        //     // if (action.execute()) {
-                        //     //     drawerDataList.get(i).getTank().drain(result, FluidAction.EXECUTE);
-                        //     // }
-                        //     result = drawerDataList.get(i).getTank().drain(result, action);
-                        //     if (result.getAmount() > 0) {
-                        //         break;
-                        //     }
-                        // }
                         if (fluidType == Fluids.EMPTY) {
                             fluidType = drawerDataList.get(i).getTank().getFluid().getFluid();
                         }

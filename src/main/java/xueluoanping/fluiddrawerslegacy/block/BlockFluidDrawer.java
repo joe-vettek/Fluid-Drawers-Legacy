@@ -344,6 +344,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             if (stack.getOrCreateTag().contains("tank")) {
+                tile.setCutStartAnimation(true);
                 TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }
