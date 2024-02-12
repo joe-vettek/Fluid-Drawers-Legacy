@@ -181,9 +181,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                             tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
                                     .ifPresent(handler -> {
                                         int amount = handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
-                                        if (!player.isCreative() && amount == FluidType.BUCKET_VOLUME) {
+                                        if (amount == FluidType.BUCKET_VOLUME) {
                                             handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                            player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
+                                            if (!player.isCreative())
+                                                player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
                                         }
 
                                     });
@@ -345,6 +346,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             if (stack.getOrCreateTag().contains("tank")) {
+                tile.setCutStartAnimation(true);
                 TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }

@@ -237,7 +237,9 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
         int capacity = tile.getTankEffectiveCapacity();
-        int amount = fluidStackDown.getAmount();
+//        int amount = fluidStackDown.getAmount();
+        int amount=tile.getAndUpdateLastFluidAmount(animationTime);
+
         if (capacity < amount) amount = capacity;
         float r = (float) amount / (float) capacity;
         if (tile.upgrades().hasVendingUpgrade()) r = 1f;
