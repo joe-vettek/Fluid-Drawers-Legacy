@@ -171,11 +171,15 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                             tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
                                     .ifPresent(handler -> {
                                         int amount = handler.fill(new FluidStack(bucketItem.getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
-                                        if (!player.isCreative() && amount == FluidAttributes.BUCKET_VOLUME) {
+                                        // if (!player.isCreative() && amount == FluidAttributes.BUCKET_VOLUME) {
+                                        //     handler.fill(new FluidStack(bucketItem.getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
+                                        //     player.setItemInHand(hand, heldStack.getContainerItem());
+                                        // }
+                                        if (amount == FluidAttributes.BUCKET_VOLUME) {
                                             handler.fill(new FluidStack(bucketItem.getFluid(), FluidAttributes.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                            player.setItemInHand(hand, heldStack.getContainerItem());
+                                            if (!player.isCreative())
+                                                player.setItemInHand(hand, heldStack.getContainerItem());
                                         }
-
                                     });
                             return InteractionResult.SUCCESS;
                         }
@@ -333,6 +337,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             if (stack.getOrCreateTag().contains("tank")) {
+                tile.setCutStartAnimation(true);
                 TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }

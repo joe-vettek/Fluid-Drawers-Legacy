@@ -10,6 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -351,36 +352,33 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             return result;
         }
 
-
+        // backport from 1.20.1
         // when action.execute ,can't give out the fluidstack ,or something bad would happen
         // note it's just a address ,so can't let others can change value directly
         @Nonnull
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
-            //            FluidDrawersLegacyMod.logger("Drainresource" + resource.writeToNBT(new CompoundNBT()));
             // RebuildLock_drain0 = true;
             lockALL--;
             FluidStack result = FluidStack.EMPTY;
+            FluidStack resourceCopy = resource.copy();
             if (!resource.isEmpty() && resource.getAmount() > 0)
+            {
                 for (int i = 0; i < drawerDataList.size(); i++) {
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                         continue;
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
                             && drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
-                        if (resource.getAmount() < drawerDataList.get(i).getTank().getFluid().getAmount()) {
-                            result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), resource.getAmount());
-                            if (action.execute()) {
-                                drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
-                            }
-                        } else {
-                            //    try to use more than one tank to provide
-                            result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), drawerDataList.get(i).getTank().getFluid().getAmount());
-                            if (action.execute()) {
-                                drawerDataList.get(i).getTank().drain(fluid, FluidAction.EXECUTE);
-                            }
+                        FluidStack temp = drawerDataList.get(i).getTank().drain(resourceCopy, action);
+                        if (temp.getAmount() > 0) {
+                            if (result == FluidStack.EMPTY)
+                                result = temp;
+                            else result.grow(temp.getAmount());
+                            resourceCopy.shrink(temp.getAmount());
                         }
                     }
                 }
+            }
             // RebuildLock_drain0 = false;
             lockALL++;
             return result;
@@ -389,40 +387,30 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         @Nonnull
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
-            //            FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + maxDrain);
             // RebuildLock_drain = true;
             lockALL--;
             FluidStack result = FluidStack.EMPTY;
+            Fluid fluidType = Fluids.EMPTY;
             // Strange , 0<0 ,but for will ingroe it.
             if (maxDrain > 0 && drawerDataList.size() > 0)
                 for (int i = 0; i < drawerDataList.size(); i++) {
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                         continue;
-                    //                FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + i+drawerDataList.get(i).getTank().getFluidAmount());
-                    if (drawerDataList.get(i).getTank().getFluidAmount() >= maxDrain) {
-                        result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), maxDrain);
-                        if (action.execute()) {
-                            drawerDataList.get(i).getTank().drain(result, FluidAction.EXECUTE);
+                    if (drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
+                        if (fluidType == Fluids.EMPTY) {
+                            fluidType = drawerDataList.get(i).getTank().getFluid().getFluid();
                         }
-                        if (result.getAmount() > 0) {
-                            break;
-                        }
-                    } else {
-                        result = new FluidStack(drawerDataList.get(i).getTank().getFluid().getFluid(), drawerDataList.get(i).getTank().getFluidAmount());
-                        if (action.execute()) {
-                            drawerDataList.get(i).getTank().drain(result, FluidAction.EXECUTE);
-                        }
-                        if (result.getAmount() > 0) {
-                            break;
+                        FluidStack temp = new FluidStack(fluidType, maxDrain);
+                        temp = drawerDataList.get(i).getTank().drain(temp, action);
+                        if (temp.getAmount() > 0) {
+                            if (result == FluidStack.EMPTY)
+                                result = temp;
+                            else result.grow(temp.getAmount());
+                            maxDrain-=temp.getAmount();
                         }
                     }
-                }
 
-            // if (result.getAmount() <= 0) {
-            //     // RebuildLock_drain = false;
-            //     result= FluidStack.EMPTY;
-            // }
-            // RebuildLock_drain = false;
+                }
             lockALL++;
             return result;
         }

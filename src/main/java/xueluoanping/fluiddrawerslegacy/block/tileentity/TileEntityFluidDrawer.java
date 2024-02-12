@@ -55,6 +55,10 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
 
+    private int lastFluidAmount = 0;
+    private int cacheFluidAmount = 0;
+    private double lastAnimationTime = 0d;
+    private boolean cutStartAnimation = false;
 
     public TileEntityFluidDrawer(BlockPos pos, BlockState state) {
         super(ModContents.tankTileEntityType, pos, state);
@@ -112,6 +116,34 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
     @Override
     public int[] getAccessibleDrawerSlots() {
         return new int[0];
+    }
+
+    public void setCutStartAnimation(boolean cutStartAnimation) {
+        this.cutStartAnimation = cutStartAnimation;
+    }
+
+    public int getAndUpdateLastFluidAmount(double animationTime) {
+        int expectFluidAmount = this.groupData.tank.getFluidAmount();
+        if (expectFluidAmount != this.lastFluidAmount) {
+            int fluidAmountChange = (expectFluidAmount - this.lastFluidAmount);
+            boolean isFluidUpdate = expectFluidAmount != cacheFluidAmount;
+            boolean hasEnoughFluidAmount = Math.abs(fluidAmountChange) > 200;
+            boolean isTooQuickAnimation = isFluidUpdate && animationTime - this.lastAnimationTime < 3;
+            // FluidDrawersLegacyMod.logger(lastFluidAmount+""+isFluidUpdate+"Fluid Update,"+isTooQuickAnimation+ "" + "," + this.lastAnimationTime);
+            boolean shouldAnimation = hasEnoughFluidAmount && !isTooQuickAnimation && !cutStartAnimation;
+            if (shouldAnimation) {
+                // this.lastFluidAmount += fluidAmountChange > 0 ? 50 : -50;
+                this.lastFluidAmount += fluidAmountChange * 0.125f;
+            } else {
+                this.lastFluidAmount = expectFluidAmount;
+            }
+            if (isFluidUpdate) {
+                this.lastAnimationTime = animationTime;
+            }
+            cutStartAnimation=false;
+        }
+        this.cacheFluidAmount = expectFluidAmount;
+        return lastFluidAmount;
     }
 
     @Nonnull
