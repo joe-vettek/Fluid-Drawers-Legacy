@@ -7,6 +7,7 @@
   "waila.fluiddrawerslegacy.conceal": "§o<..Hold shift to see more..>",
   "config.jade.plugin_fluiddrawerslegacy.fluiddrawer": "Fluid Drawers Legacy",
   "config.jade.plugin_fluiddrawerslegacy.controller": "Fluid Drawers Legacy Controller Fix",
-  "config.jade.plugin_fluiddrawerslegacy.controller_slave": "Fluid Drawers Legacy Controller Slave Fix"
+  "config.jade.plugin_fluiddrawerslegacy.controller_slave": "Fluid Drawers Legacy Controller Slave Fix",
+  "config.jade.plugin_fluiddrawerslegacy.trim": "Fluid Drawers Legacy Trim Fix"
 }
 

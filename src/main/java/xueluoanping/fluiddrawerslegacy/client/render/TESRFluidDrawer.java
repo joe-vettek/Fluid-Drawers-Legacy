@@ -74,7 +74,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
         matrixStackIn.pushPose();
 
-        if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY &&
+        if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY &&
                 tile.getDrawerAttributes().isConcealed()) {
 
             FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
@@ -95,7 +95,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+            if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
                 FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 Font fontRenderer = this.font;
 //                matrixStackIn.translate(0.5, 0.15, 1);
@@ -122,7 +122,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isShowingQuantity()) {
-            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+            if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
 
                 FluidStack fluidStackDown = betterFluidHandler.getFluid();
                 Font fontRenderer = this.font;
@@ -218,7 +218,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
             TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
             if (fluidStackDown.getAmount() <= 0)
-                if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
 
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
 //                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
@@ -243,7 +243,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 
         int capacity = tile.getTankEffectiveCapacity();
 //        int amount = fluidStackDown.getAmount();
-        int amount=tile.getAndUpdateLastFluidAmount(animationTime);
+        int amount=tile.fluidAnimation.getAndUpdateLastFluidAmount( tile.getTankFLuid().getAmount(),animationTime);
         // FluidDrawersLegacyMod.logger(""+animationTime);
         if (capacity < amount) amount = capacity;
         float r = (float) amount / (float) capacity;

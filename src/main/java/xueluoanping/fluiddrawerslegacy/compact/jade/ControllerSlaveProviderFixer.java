@@ -47,7 +47,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
                     .getList("Views", CompoundTag.TAG_COMPOUND);
             // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0)).getList("Views", CompoundTag.TAG_COMPOUND).toString());
 
-            Map<Fluid, List<Integer>> fluidMap = new HashMap<>();
+            Map<FluidStack, List<Integer>> fluidMap = new HashMap<>();
             list.forEach(
                     (ele) -> {
                         ((CompoundTag) ele).putString("FluidName",((CompoundTag) ele).getString("fluid"));
@@ -56,15 +56,18 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
                         int capacity = ((CompoundTag) ele).getInt("capacity");
                         List<Integer> integerList = new ArrayList<>();
                         if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY) {
-                            if (fluidMap.containsKey(fluidStack.getFluid())) {
-                                integerList = fluidMap.get(fluidStack.getFluid());
+                            FluidStack fluidStackKey = fluidStack.copy();
+                            // not 0, empty
+                            fluidStackKey.setAmount(1);
+                            if (fluidMap.containsKey(fluidStackKey)) {
+                                integerList = fluidMap.get(fluidStackKey);
                                 integerList.set(0,integerList.get(0)+fluidStack.getAmount());
                                 integerList.set(1,integerList.get(1)+capacity);
-                                fluidMap.replace(fluidStack.getFluid(), fluidMap.get(fluidStack.getFluid()), integerList);
+                                fluidMap.replace(fluidStackKey, fluidMap.get(fluidStackKey), integerList);
                             } else {
                                 integerList.add(fluidStack.getAmount());
                                 integerList.add(capacity);
-                                fluidMap.put(fluidStack.getFluid(),integerList);
+                                fluidMap.put(fluidStackKey,integerList);
                             }
                         }
                     }
@@ -78,7 +81,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
                 {
                     IElementHelper helper = tooltip.getElementHelper();
                     FluidStack fluidStack= new FluidStack(fluid, integerList.get(0));
-                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid, integerList.get(0))));
+                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid.getFluid(), integerList.get(0),fluid.getTag())));
                     String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
 
                     Component text=Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);

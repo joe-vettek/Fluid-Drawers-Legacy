@@ -4,6 +4,7 @@ package xueluoanping.fluiddrawerslegacy.compact.jade;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.BlockSlave;
 
+import com.jaquadro.minecraft.storagedrawers.block.BlockTrim;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
 import net.minecraft.world.entity.monster.Slime;
@@ -33,7 +34,8 @@ public class JadeCompact implements IWailaPlugin {
         registration.registerBlockComponent(FluidDrawerProvider.INSTANCE,  BlockFluidDrawer.class);
         registration.registerBlockComponent(ControllerProviderFixer.INSTANCE, BlockController.class);
         registration.registerBlockComponent(ControllerSlaveProviderFixer.INSTANCE,  BlockSlave.class);
-
+        // registration.registerBlockComponent(TrimProviderFixer.INSTANCE,  BlockTrim.class);
+// 11.3
         // registration.usePickedResult(ModContents.fluiddrawer.get());
     }
 }

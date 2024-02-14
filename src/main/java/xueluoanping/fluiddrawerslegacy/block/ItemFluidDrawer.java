@@ -40,14 +40,13 @@ public class ItemFluidDrawer extends BlockItem {
     @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer) {
         super.initializeClient(consumer);
-        consumer.accept(new IClientItemExtensions()
-                    {
-                        @Override
-                        public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                            return new FluidDrawerItemStackTileEntityRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+        consumer.accept(new IClientItemExtensions() {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+                return new FluidDrawerItemStackTileEntityRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
 
-                        }
-                    });
+            }
+        });
     }
 
     // @Override
@@ -78,12 +77,13 @@ public class ItemFluidDrawer extends BlockItem {
         if (level instanceof ClientLevel) {
             TooltipKey key = SafeClientAccess.getTooltipKey();
             if (key == TooltipKey.SHIFT || key == TooltipKey.UNKNOWN) {
+                boolean hasFluid = false;
                 if (stack.getOrCreateTag().contains("tank")) {
                     FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
-
+                    if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+                        fluidStack.setAmount(Integer.MAX_VALUE);
                     if (fluidStack.getAmount() > 0) {
-                        if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
-                            fluidStack.setAmount(Integer.MAX_VALUE);
+                        hasFluid = true;
                         componentList.add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1")
                                 .append(String.valueOf(fluidStack.getAmount()))
 //                                .append("/" + TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) + "mB")
@@ -94,8 +94,18 @@ public class ItemFluidDrawer extends BlockItem {
                 if (stack.getOrCreateTag().contains("Lock")) {
                     Byte b = stack.getOrCreateTag().getByte("Lock");
                     EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(b);
-                    if (attrs.contains(LockAttribute.LOCK_EMPTY))
-                        componentList.add(Component.translatable(" §7(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") "));
+                    if (attrs.contains(LockAttribute.LOCK_EMPTY)) {
+                        String fluidNameShow="";
+                        if (!hasFluid) {
+                            if (stack.getOrCreateTag().contains("tank")&&stack.getOrCreateTag().getCompound("tank").contains("cache")) {
+                                FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(stack.getOrCreateTag().getCompound("tank").getCompound("cache"));
+                                fluidNameShow=fluidStack.getDisplayName().getString()+" ";
+                            }
+                        }
+
+                        componentList.add(Component.translatable(" §7("+fluidNameShow + I18n.get("tooltip.storagedrawers.waila.locked") + ") "));
+
+                    }
                 }
             }
         }

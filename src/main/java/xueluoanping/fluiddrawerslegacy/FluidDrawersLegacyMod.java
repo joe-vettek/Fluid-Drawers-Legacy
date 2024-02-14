@@ -1,7 +1,6 @@
 package xueluoanping.fluiddrawerslegacy;
 
 
-
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.NonNullList;
@@ -20,12 +19,14 @@ import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
+
+import java.util.List;
 //import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(FluidDrawersLegacyMod.MOD_ID)
 public class FluidDrawersLegacyMod {
-//     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab("fluiddrawers") {
+    //     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab("fluiddrawers") {
 //         @Override
 //         public ItemStack makeIcon() {
 //             return ModContents.itemBlock.get().getDefaultInstance();
@@ -40,18 +41,42 @@ public class FluidDrawersLegacyMod {
     public static final String MOD_ID = "fluiddrawerslegacy";
 
 
-
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger(FluidDrawersLegacyMod.MOD_ID);
     private static boolean DebugMode = false;
 
     public static void logger(String x) {
-        if (General.bool.get())
-        {
+        if (General.bool.get()) {
 //            LOGGER.debug(x);
             LOGGER.info(x);
         }
     }
+
+    public static void logger(Object... x) {
+
+        if (General.bool.get()) {
+            StringBuilder output = new StringBuilder();
+            for (Object i : x) {
+                if (i.getClass().isArray()) {
+                    output.append(", [");
+                    for (Object c : (int[]) i) {
+                        output.append(c + ",");
+                    }
+                    output.append("]");
+                } else if (i instanceof List) {
+                    output.append(", [");
+                    for (Object c : (List) i) {
+                        output.append(c);
+                    }
+                    output.append("]");
+                } else
+                    output.append(", [").append(i).append("]");
+            }
+            LOGGER.info(output.toString().substring(1));
+        }
+
+    }
+
 
     public FluidDrawersLegacyMod() {
 
@@ -68,7 +93,7 @@ public class FluidDrawersLegacyMod {
         ModContents.DRMenuType.register(FMLJavaModLoadingContext.get().getModEventBus());
     }
 
-    public static ResourceLocation rl(String id){
-        return new ResourceLocation(MOD_ID,id);
+    public static ResourceLocation rl(String id) {
+        return new ResourceLocation(MOD_ID, id);
     }
 }

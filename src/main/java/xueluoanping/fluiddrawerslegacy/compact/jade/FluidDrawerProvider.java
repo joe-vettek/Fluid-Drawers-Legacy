@@ -15,7 +15,6 @@ import snownee.jade.api.ui.IProgressStyle;
 import net.minecraft.client.resources.language.I18n;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 // import snownee.jade.VanillaPlugin;
@@ -43,7 +42,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
                             TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
-                            Fluid cache = betterFluidHandler.getCacheFluid();
+                            FluidStack cache = betterFluidHandler.getCacheFluid();
 
                             appendTank(tooltip, fluidStack, capacity, cache, isLocked);
                         });
@@ -51,7 +50,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
         }
     }
 
-    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, Fluid cacheFluid, boolean isLocked) {
+    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, FluidStack cacheFluid, boolean isLocked) {
         if (capacity > 0) {
             IElementHelper helper = tooltip.getElementHelper();
             Component text;
@@ -68,7 +67,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
             }
 
-            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(),fluidStack.getAmount())));
+            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(),fluidStack.getAmount(),fluidStack.getTag())));
             // tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, text, progressStyle, helper.borderStyle()).tag(VanillaPlugin.FORGE_FLUID));
             tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, (Component)text, progressStyle, BoxStyle.DEFAULT, true));
         }

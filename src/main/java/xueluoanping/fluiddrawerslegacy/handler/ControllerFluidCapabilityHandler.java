@@ -87,7 +87,7 @@ public class ControllerFluidCapabilityHandler {
                                 IDrawer drawer = handler.getDrawer(i);
                                 if (drawer instanceof TileEntityFluidDrawer.StandardDrawerData fluiddrawer) {
                                     if (!fluiddrawer.getTank().isFull()
-                                            && (fluiddrawer.getTank().getCacheFluid().isSame(fluidStack.getFluid())))
+                                            && (fluiddrawer.getTank().getCacheFluid().isFluidEqual(fluidStack)))
                                         if (handleTankInteraction(world.getBlockEntity(pos), face, event.getEntity(), event.getHand()).get()) {
                                             event.setCanceled(true);
                                             event.setCancellationResult(InteractionResult.SUCCESS);

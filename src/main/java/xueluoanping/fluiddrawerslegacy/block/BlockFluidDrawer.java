@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BucketItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -157,17 +158,17 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
                                 .ifPresent(handler -> {
                                     FluidStack fluidStack = handler.drain(new FluidStack(tile.getTankFLuid().getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                    Fluid fluid = fluidStack.getFluid();
+                                    Item fluidBucket = fluidStack.getFluid().getBucket();
 
                                     if (heldStack.getCount() > 1) {
-                                        if (!player.addItem(new ItemStack(fluid.getBucket())))
+                                        if (!player.addItem(new ItemStack(fluidBucket)))
 
-                                            Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), new ItemStack(fluid.getBucket()));
+                                            Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), new ItemStack(fluidBucket));
                                         if (!player.isCreative())
                                             heldStack.shrink(1);
                                     } else {
                                         if (!player.isCreative()) {
-                                            player.setItemInHand(hand, ItemUtils.createFilledResult(heldStack, player, new ItemStack(fluid.getBucket())));
+                                            player.setItemInHand(hand, ItemUtils.createFilledResult(heldStack, player, new ItemStack(fluidBucket)));
                                         } else {
                                             //                                            player.addItem(new ItemStack(fluid.getBucket()));
                                         }
@@ -344,7 +345,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             if (stack.getOrCreateTag().contains("tank")) {
-                tile.setCutStartAnimation(true);
+                tile.fluidAnimation.setCutStartAnimation(true);
                 TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }

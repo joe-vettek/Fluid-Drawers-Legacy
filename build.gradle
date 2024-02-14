@@ -149,12 +149,16 @@ dependencies {
 
     implementation fg.deobf("curse.maven:storage-drawers-223852:4668552")
     implementation fg.deobf("curse.maven:jei-238222:4644453")
-    implementation fg.deobf("curse.maven:jade-324717:4654448")
+//    implementation fg.deobf("curse.maven:jade-324717:4654448")
+    implementation fg.deobf("curse.maven:jade-324717:5072729")
 
     implementation fg.deobf("curse.maven:cyclic-239286:4661938")
     implementation fg.deobf("curse.maven:flib-661261:4661080")
 
     implementation fg.deobf("curse.maven:create-328085:4835191")
+
+    implementation fg.deobf("curse.maven:caupona-656147:5001135")
+
 //    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
 
 //    implementation fg.deobf("curse.maven:minemenu-222378:3544634")
