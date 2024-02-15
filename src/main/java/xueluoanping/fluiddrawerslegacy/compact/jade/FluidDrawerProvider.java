@@ -2,6 +2,7 @@ package xueluoanping.fluiddrawerslegacy.compact.jade;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import snownee.jade.addon.universal.FluidStorageProvider;
@@ -44,16 +45,16 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
                             FluidStack cache = betterFluidHandler.getCacheFluid();
 
-                            appendTank(tooltip, fluidStack, capacity, cache, isLocked);
+                            appendTank(tooltip,accessor, fluidStack, capacity, cache, isLocked);
                         });
             }
         }
     }
 
-    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, FluidStack cacheFluid, boolean isLocked) {
+    public static void appendTank(ITooltip tooltip, BlockAccessor accessor, FluidStack fluidStack, int capacity, FluidStack cacheFluid, boolean isLocked) {
         if (capacity > 0) {
             IElementHelper helper = tooltip.getElementHelper();
-            Component text;
+            MutableComponent text;
             if (fluidStack.isEmpty()) {
                 text =  Component.translatable("jade.fluid.empty");
                 if (isLocked) {
@@ -65,6 +66,11 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                 text = isLocked ?
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText).append(" §e(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") ") :
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
+                if(accessor.getPlayer().isShiftKeyDown())
+                {
+                    String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double)capacity, "B", true);
+                    text.append("§7 / "+capacityText);
+                }
             }
 
             IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(),fluidStack.getAmount(),fluidStack.getTag())));

@@ -63,14 +63,6 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                         listNew.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
                     }
                 }
-                // for(int j=0;j<100000;j++){
-                //     for (int i=0;i<size;i++){
-                //         List<TileEntityFluidDrawer.StandardDrawerData> list2=new ArrayList<>();
-                //         if (handler.getDrawer(i) instanceof TileEntityFluidDrawer.StandardDrawerData) {
-                //             list2.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
-                //         }
-                //     }
-                // }
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 // FluidDrawersLegacyMod.logger("Cost: " + duration + "Millis");
@@ -99,7 +91,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     }
 
     public List<FluidHolder> getFluidMap(List<TileEntityFluidDrawer.StandardDrawerData> listNew) {
-        Map<FluidStack, List<Integer>> fluidMap = new HashMap<>();
+        Map<FluidStack, List<Integer>> fluidMap = new LinkedHashMap<>();
         long startTime = System.currentTimeMillis();
         listNew.forEach(
                 (ele) -> {
@@ -108,10 +100,23 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                     int capacity = ele.getMaxCapacity();
                     List<Integer> integerList = new ArrayList<>();
                     // indeed we not need to think about the fill because that's different
-                    if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY) {
+                    // Todo: add empty Lock
+                    boolean isEmptyLockWithFluid = ele.isLock() && fluidStack.isEmpty() && !ele.getTank().getCacheFluid().isEmpty();
+                    boolean notEmpty = fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY;
+                    if (isEmptyLockWithFluid) {
+                        fluidStack = ele.getTank().getCacheFluid();
+                        fluidStack.setAmount(0);
+                    }
+
+                    // if (isEmptyLockWithFluid||notEmpty)
+                    {
                         FluidStack fluidStackKey = fluidStack.copy();
                         // not 0, empty
-                        fluidStackKey.setAmount(1);
+                        if (notEmpty&&!isEmptyLockWithFluid)
+                            fluidStackKey.setAmount(1);
+                        if(!notEmpty&&!isEmptyLockWithFluid)
+                            fluidStackKey=FluidStack.EMPTY;
+
                         if (fluidMap.containsKey(fluidStackKey)) {
                             integerList = fluidMap.get(fluidStackKey);
                             integerList.set(0, integerList.get(0) + fluidStack.getAmount());
@@ -129,6 +134,13 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         fluidRecord.removeIf(a -> fluidMap.keySet().stream().noneMatch(b -> b.equals(a)));
         fluidRecord.addAll(fluidMap.keySet());
         fluidRecord = fluidRecord.stream().distinct().collect(Collectors.toList());
+        // must in the last position
+        boolean removeEmptyKey=fluidRecord.removeIf(FluidStack::isEmpty);
+        if(removeEmptyKey)
+        {
+            fluidRecord.add(FluidStack.EMPTY);
+        }
+
         List<FluidHolder> fluidHolderList = new ArrayList<>();
         fluidRecord.forEach(fluidStack -> {
             FluidHolder holder = new FluidHolder();
@@ -333,7 +345,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             // FluidDrawersLegacyMod.logger(action, resource.writeToNBT(new CompoundTag()));
 
             List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
-            FluidDrawersLegacyMod.logger(getFluidMap(drawerDataList));
+            // FluidDrawersLegacyMod.logger(getFluidMap(drawerDataList));
             FluidStack result = FluidStack.EMPTY;
             FluidStack resourceCopy = resource.copy();
             // if (action.execute()) return result;

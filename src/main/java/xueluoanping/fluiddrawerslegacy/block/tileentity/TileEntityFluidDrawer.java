@@ -419,8 +419,9 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
     public class betterFluidHandler extends FluidTank {
         private FluidStack cacheFluid = FluidStack.EMPTY;
 
+        // not allow change here
         public FluidStack getCacheFluid() {
-            return cacheFluid;
+            return cacheFluid.copy();
         }
 
         private void setCacheFluid(FluidStack cacheFluid) {
