@@ -157,7 +157,9 @@ dependencies {
 
     implementation fg.deobf("curse.maven:create-328085:4835191")
 
+    implementation fg.deobf("curse.maven:create-enchantment-industry-688768:4962850")
     implementation fg.deobf("curse.maven:caupona-656147:5001135")
+
 
 //    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
 

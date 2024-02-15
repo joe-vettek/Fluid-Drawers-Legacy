@@ -61,6 +61,9 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
                     (ele) -> {
                         ((CompoundTag) ele).putString("FluidName",((CompoundTag) ele).getString("fluid"));
                         ((CompoundTag) ele).putInt("Amount",((CompoundTag) ele).getInt("amount"));
+                        if (((CompoundTag) ele).contains("tag"))
+                            ((CompoundTag) ele).put("Tag", ((CompoundTag) ele).getCompound("tag"));
+
                         FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
                         int capacity = ((CompoundTag) ele).getInt("capacity");
                         List<Integer> integerList = new ArrayList<>();

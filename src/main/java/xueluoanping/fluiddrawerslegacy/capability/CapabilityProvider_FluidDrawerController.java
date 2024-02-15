@@ -245,7 +245,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundTag()), action);
+            // FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundTag()), action);
             List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
             int result = 0;
             int amount = resource.getAmount();
@@ -264,7 +264,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
                 if (drawerDataList.size() == priorityList.size() && drawerDataList.size() > 0)
                     for (int j = 0; j < ModConstants.PRI_DISABLED; j++) {
-                        //                这里需要确认，到底是什么情况(这里是个备份，不担心）
+                        //
                         //                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
                         amount -= fillByOrder(drawerDataList, priorityList, resource, action, j);
                         //                amount=resource.getAmount();
@@ -330,7 +330,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         public FluidStack drain(FluidStack resource, FluidAction action) {
             //            FluidDrawersLegacyMod.logger("Drainresource" + resource.writeToNBT(new CompoundNBT()));
             // RebuildLock_drain0 = true;
-            FluidDrawersLegacyMod.logger(action, resource.writeToNBT(new CompoundTag()));
+            // FluidDrawersLegacyMod.logger(action, resource.writeToNBT(new CompoundTag()));
 
             List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
             FluidDrawersLegacyMod.logger(getFluidMap(drawerDataList));
