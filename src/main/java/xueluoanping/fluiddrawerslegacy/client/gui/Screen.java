@@ -44,6 +44,8 @@ import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
+
 
 public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     private static final ResourceLocation guiTextures1 = new ResourceLocation("storagedrawers", "textures/gui/drawers_1.png");
@@ -97,14 +99,15 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderTooltip(graphics, mouseX, mouseY);
-        if (hasFluidInfo()&&isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
+
+        if (hasFluidInfo() && isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
-            FluidType attributes = fluidStackDown.getFluid().getFluidType();
-            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-
-
-            int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
+            // FluidType attributes = fluidStackDown.getFluid().getFluidType();
+            // TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+            //
+            //
+            // int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
             int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
@@ -114,7 +117,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid() .getRawFluid()!= Fluids.EMPTY) {
+                        betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 }
             }
@@ -210,12 +213,14 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
 
         //        注意color要这样写，后面的是无效的
-        int color = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor();
+        // int color = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor();
+        int color = IClientFluidTypeExtensions.of(fluid.getFluid()).getTintColor(fluid);
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;
         float b = (color & 0xFF) / 255f;
         float a = ((color >> 24) & 0xFF) / 255f;
         RenderSystem.setShaderColor(r, g, b, a);
+
 
         /*
          * 获取横向和纵向层数
@@ -226,6 +231,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int extraWidth = wFloors == 0 ? width : width % 16;
         int hFloors = height / 16;
         int extraHeight = hFloors == 0 ? height : height % 16;
+        extraHeight=Math.max(1,extraHeight);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
@@ -349,8 +355,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
-        if(hasFluidInfo())
-        renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
+        if (hasFluidInfo())
+            renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
             graphics.fill(guiX + upgradeSlots.get(3).x, guiY + 36, guiX + upgradeSlots.get(3).x + 16, guiY + 52, 0, 0x88FFFFFF);
 

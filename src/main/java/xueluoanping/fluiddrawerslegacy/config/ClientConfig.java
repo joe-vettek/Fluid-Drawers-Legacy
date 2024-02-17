@@ -13,7 +13,7 @@ public class ClientConfig {
         CLIENT_BUILDER.pop();
 
         CLIENT_BUILDER.comment("Waila settings").push("Display");
-        showlimit = CLIENT_BUILDER.comment("Set the direct show amounts limit.").defineInRange("showlimit",9,3,24);
+        showlimit = CLIENT_BUILDER.comment("Set the fluid show amounts limit with controller and slave.").defineInRange("showlimit",9,3,24);
         CLIENT_BUILDER.pop();
         CLIENT_CONFIG = CLIENT_BUILDER.build();
     }

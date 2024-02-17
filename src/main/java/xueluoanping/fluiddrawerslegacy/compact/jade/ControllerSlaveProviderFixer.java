@@ -21,6 +21,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import snownee.jade.api.fluid.JadeFluidObject;
 import snownee.jade.api.ui.BoxStyle;
+import snownee.jade.api.ui.IElement;
 import snownee.jade.api.ui.IElementHelper;
 import snownee.jade.api.ui.IProgressStyle;
 import snownee.jade.overlay.DisplayHelper;
@@ -38,86 +39,97 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
 
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig iPluginConfig) {
-        tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
-        if (!(accessor.getBlockEntity() instanceof BlockEntitySlave))
-            return;
-
-        // FluidDrawersLegacyMod.logger(accessor.getServerData().toString());
-        if (accessor.getServerData().contains("JadeFluidStorage")) {
-            ListTag list =
-                    ((CompoundTag) accessor.getServerData().getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
-                            .getList("Views", CompoundTag.TAG_COMPOUND);
-            // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0)).getList("Views", CompoundTag.TAG_COMPOUND).toString());
-
-            Map<FluidStack, List<Integer>> fluidMap = new LinkedHashMap<>();
-            list.forEach(
-                    (ele) -> {
-                        // add this to add
-                        ((CompoundTag) ele).putString("FluidName", ((CompoundTag) ele).getString("fluid"));
-                        ((CompoundTag) ele).putInt("Amount", ((CompoundTag) ele).getInt("amount"));
-                        if (((CompoundTag) ele).contains("tag"))
-                            ((CompoundTag) ele).put("Tag", ((CompoundTag) ele).getCompound("tag"));
-
-                        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
-                        int capacity = ((CompoundTag) ele).getInt("capacity");
-                        List<Integer> integerList = new ArrayList<>();
-                        // if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY)
-                        {
-                            FluidStack fluidStackKey = fluidStack.copy();
-                            // not 0, empty
-                            if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY)
-                                fluidStackKey.setAmount(1);
-
-                            // FluidDrawersLegacyMod.logger(fluidStack.writeToNBT(new CompoundTag()));
-                            if (fluidMap.containsKey(fluidStackKey)) {
-                                integerList = fluidMap.get(fluidStackKey);
-                                integerList.set(0, integerList.get(0) + fluidStack.getAmount());
-                                integerList.set(1, integerList.get(1) + capacity);
-                                fluidMap.replace(fluidStackKey, fluidMap.get(fluidStackKey), integerList);
-                            } else {
-                                integerList.add(fluidStack.getAmount());
-                                integerList.add(capacity);
-                                fluidMap.put(fluidStackKey, integerList);
-                            }
-                        }
-                    }
-            );
-            if(fluidMap.containsKey(FluidStack.EMPTY)){
-                List<Integer> integerList = fluidMap.remove(FluidStack.EMPTY);
-                fluidMap.put(FluidStack.EMPTY,integerList);
-
+        // tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
+        // if (!(accessor.getBlockEntity() instanceof BlockEntitySlave))
+        //     return;
+        //
+        // // FluidDrawersLegacyMod.logger(accessor.getServerData().toString());
+        // if (accessor.getServerData().contains("JadeFluidStorage")) {
+        //     ListTag list =
+        //             ((CompoundTag) accessor.getServerData().getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
+        //                     .getList("Views", CompoundTag.TAG_COMPOUND);
+        //     // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0)).getList("Views", CompoundTag.TAG_COMPOUND).toString());
+        //
+        //     Map<FluidStack, List<Integer>> fluidMap = new LinkedHashMap<>();
+        //     list.forEach(
+        //             (ele) -> {
+        //                 // add this to add
+        //                 ((CompoundTag) ele).putString("FluidName", ((CompoundTag) ele).getString("fluid"));
+        //                 ((CompoundTag) ele).putInt("Amount", ((CompoundTag) ele).getInt("amount"));
+        //                 if (((CompoundTag) ele).contains("tag"))
+        //                     ((CompoundTag) ele).put("Tag", ((CompoundTag) ele).getCompound("tag"));
+        //
+        //                 FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
+        //                 int capacity = ((CompoundTag) ele).getInt("capacity");
+        //                 List<Integer> integerList = new ArrayList<>();
+        //                 // if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY)
+        //                 {
+        //                     FluidStack fluidStackKey = fluidStack.copy();
+        //                     // not 0, empty
+        //                     if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY)
+        //                         fluidStackKey.setAmount(1);
+        //
+        //                     // FluidDrawersLegacyMod.logger(fluidStack.writeToNBT(new CompoundTag()));
+        //                     if (fluidMap.containsKey(fluidStackKey)) {
+        //                         integerList = fluidMap.get(fluidStackKey);
+        //                         integerList.set(0, integerList.get(0) + fluidStack.getAmount());
+        //                         integerList.set(1, integerList.get(1) + capacity);
+        //                         fluidMap.replace(fluidStackKey, fluidMap.get(fluidStackKey), integerList);
+        //                     } else {
+        //                         integerList.add(fluidStack.getAmount());
+        //                         integerList.add(capacity);
+        //                         fluidMap.put(fluidStackKey, integerList);
+        //                     }
+        //                 }
+        //             }
+        //     );
+        //     if(fluidMap.containsKey(FluidStack.EMPTY)){
+        //         List<Integer> integerList = fluidMap.remove(FluidStack.EMPTY);
+        //         fluidMap.put(FluidStack.EMPTY,integerList);
+        //
+        //     }
+        //     AtomicInteger i = new AtomicInteger();
+        //     fluidMap.forEach((fluid, integerList) -> {
+        //         i.getAndIncrement();
+        //         if (accessor.getPlayer().isShiftKeyDown() ||
+        //                 (!accessor.getPlayer().isShiftKeyDown()
+        //                         && i.get() < ClientConfig.showlimit.get())) {
+        //             IElementHelper helper = tooltip.getElementHelper();
+        //             FluidStack fluidStack = new FluidStack(fluid, integerList.get(0));
+        //             IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid.getFluid(), integerList.get(0), fluid.getTag())));
+        //             String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
+        //             String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double) integerList.get(1), "B", true);
+        //
+        //             MutableComponent text = !fluidStack.isEmpty()
+        //                     ? Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText)
+        //                     : Component.translatable("tooltip.jade.empty");
+        //
+        //             if (accessor.getPlayer().isShiftKeyDown()&&!fluidStack.isEmpty() )
+        //                 text.append("§7 / " + capacityText);
+        //             else if (fluidStack.isEmpty()) {
+        //                 text.append("§7 " + capacityText);
+        //             }
+        //             tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) integerList.get(1), text, progressStyle, BoxStyle.DEFAULT, true));
+        //
+        //             // FluidStorageProvider.append(tooltip, new FluidStack(fluid, integerList.get(0)), integerList.get(1));
+        //         }
+        //     });
+        //     if (i.get() >= ClientConfig.showlimit.get() && !accessor.getPlayer().isShiftKeyDown())
+        //         tooltip.add(Component.translatable(ModTranslateKey.getWailaHide()));
+        //
+        //
+        // }
+        List<IElement> iElementList = tooltip.get(Identifiers.UNIVERSAL_FLUID_STORAGE);
+        if (iElementList.size()>ClientConfig.showlimit.get() && !accessor.getPlayer().isShiftKeyDown()){
+            List<IElement> noNeed =iElementList.subList(ClientConfig.showlimit.get(),iElementList.size());
+            iElementList.removeAll(noNeed);
+            tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
+            for (IElement iElement : iElementList) {
+                tooltip.add(iElement);
             }
-            AtomicInteger i = new AtomicInteger();
-            fluidMap.forEach((fluid, integerList) -> {
-                i.getAndIncrement();
-                if (accessor.getPlayer().isShiftKeyDown() ||
-                        (!accessor.getPlayer().isShiftKeyDown()
-                                && i.get() < ClientConfig.showlimit.get())) {
-                    IElementHelper helper = tooltip.getElementHelper();
-                    FluidStack fluidStack = new FluidStack(fluid, integerList.get(0));
-                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluid.getFluid(), integerList.get(0), fluid.getTag())));
-                    String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
-                    String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double) integerList.get(1), "B", true);
-
-                    MutableComponent text = !fluidStack.isEmpty()
-                            ? Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText)
-                            : Component.translatable("tooltip.jade.empty");
-
-                    if (accessor.getPlayer().isShiftKeyDown()&&!fluidStack.isEmpty() )
-                        text.append("§7 / " + capacityText);
-                    else if (fluidStack.isEmpty()) {
-                        text.append("§7 " + capacityText);
-                    }
-                    tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) integerList.get(1), text, progressStyle, BoxStyle.DEFAULT, true));
-
-                    // FluidStorageProvider.append(tooltip, new FluidStack(fluid, integerList.get(0)), integerList.get(1));
-                }
-            });
-            if (i.get() >= ClientConfig.showlimit.get() && !accessor.getPlayer().isShiftKeyDown())
-                tooltip.add(Component.translatable(ModTranslateKey.getWailaHide()));
-
-
+            tooltip.add(Component.translatable(ModTranslateKey.getWailaHide()));
         }
+
     }
 
 
@@ -139,6 +151,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
             ListTag list =
                     ((CompoundTag) compoundTag.getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
                             .getList("Views", CompoundTag.TAG_COMPOUND);
+            if(list.size()<=1)return;
 
             Optional<IFluidHandler> a = accessor.getBlockEntity().getCapability(ForgeCapabilities.FLUID_HANDLER).resolve();
             if (a.isPresent()) {
@@ -153,7 +166,7 @@ public class ControllerSlaveProviderFixer implements IBlockComponentProvider, IS
                             compoundTag1.putLong("amount", 0);
                             compoundTag1.putLong("capacity", handler.getTankCapacity(tanks - 1));
                             // compoundTag.put("emptyCapacity",compoundTag1);
-                            list.add(0,compoundTag1);
+                            list.addTag(list.size(), compoundTag1);
 
                             // list.add(compoundTag1);
                         }

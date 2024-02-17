@@ -13,7 +13,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-// import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.*;
@@ -21,10 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUtils;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -38,28 +34,26 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.SoundAction;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
-// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
+import xueluoanping.fluiddrawerslegacy.compact.create.CreateHandler;
+import xueluoanping.fluiddrawerslegacy.config.General;
+
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -209,7 +203,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
                     // System.out.println(FluidUtil.interactWithFluidHandler(player, hand, tile.getTank()));
                     return InteractionResult.SUCCESS;
-                } else if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
+                }
+                else if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
                     heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
                             .ifPresent((handler) -> {
 
@@ -245,7 +240,16 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                             });
                     return InteractionResult.SUCCESS;
                 }
-
+                else if(General.createPotion.get()){
+                    if (heldStack.getItem() instanceof PotionItem) {
+                        if (CreateHandler.interactWithPotion(tile, player,heldStack))
+                            return InteractionResult.SUCCESS;
+                    }
+                    else if (heldStack.getItem() instanceof BottleItem) {
+                        if (CreateHandler.interactWithBottle(tile, player,heldStack))
+                            return InteractionResult.SUCCESS;
+                    }
+                }
             }
 
 

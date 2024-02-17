@@ -362,6 +362,10 @@ public class TileEntityFluidDrawer extends BaseBlockEntity implements IDrawerGro
             this.slot = slot;
         }
 
+        public BlockPos getDrawerPos(){
+            return getBlockPos();
+        }
+
         public betterFluidHandler getTank() {
             return TileEntityFluidDrawer.this.groupData.tank;
         }

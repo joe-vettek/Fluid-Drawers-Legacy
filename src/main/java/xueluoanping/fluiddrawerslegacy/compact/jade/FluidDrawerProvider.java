@@ -35,7 +35,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
 
         if (accessor.getBlock() instanceof BlockFluidDrawer) {
             BlockEntity tileEntity = accessor.getLevel().getBlockEntity(((BlockAccessor) accessor).getPosition());
-            if (tileEntity instanceof TileEntityFluidDrawer tile ) {
+            if (tileEntity instanceof TileEntityFluidDrawer tile) {
                 tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                         .ifPresent(handler -> {
                             int capacity = tile.getTankEffectiveCapacity();
@@ -45,7 +45,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
                             FluidStack cache = betterFluidHandler.getCacheFluid();
 
-                            appendTank(tooltip,accessor, fluidStack, capacity, cache, isLocked);
+                            appendTank(tooltip, accessor, fluidStack, capacity, cache, isLocked);
                         });
             }
         }
@@ -56,28 +56,33 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
             IElementHelper helper = tooltip.getElementHelper();
             MutableComponent text;
             if (fluidStack.isEmpty()) {
-                text =  Component.translatable("jade.fluid.empty");
+                text = Component.translatable("jade.fluid.empty");
+                String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double) capacity, "B", true);
+                text.append("§7 " + capacityText);
                 if (isLocked) {
                     // String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
-                    text =  Component.translatable(I18n.get(new FluidStack(cacheFluid, 1).getTranslationKey()) + " 0B §e(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") ");
+                    text = Component.translatable(I18n.get(new FluidStack(cacheFluid, 1).getTranslationKey()) + " 0B §e(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") ");
                 }
+
+
+
             } else {
                 String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
                 text = isLocked ?
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText).append(" §e(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") ") :
                         Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
-                if(accessor.getPlayer().isShiftKeyDown())
-                {
-                    String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double)capacity, "B", true);
-                    text.append("§7 / "+capacityText);
+                if (accessor.getPlayer().isShiftKeyDown()) {
+                    String capacityText = DisplayHelper.INSTANCE.humanReadableNumber((double) capacity, "B", true);
+                    text.append("§7 / " + capacityText);
                 }
             }
 
-            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(),fluidStack.getAmount(),fluidStack.getTag())));
+            IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(JadeFluidObject.of(fluidStack.getFluid(), fluidStack.getAmount(), fluidStack.getTag())));
             // tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, text, progressStyle, helper.borderStyle()).tag(VanillaPlugin.FORGE_FLUID));
-            tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, (Component)text, progressStyle, BoxStyle.DEFAULT, true));
+            tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) capacity, (Component) text, progressStyle, BoxStyle.DEFAULT, true));
         }
     }
+
     @Override
     public ResourceLocation getUid() {
         return FluidDrawersLegacyMod.rl("fluiddrawer");
@@ -85,6 +90,6 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
 
     @Override
     public int getDefaultPriority() {
-        return FluidStorageProvider.INSTANCE.getDefaultPriority()+1000;
+        return FluidStorageProvider.INSTANCE.getDefaultPriority() + 1000;
     }
 }
