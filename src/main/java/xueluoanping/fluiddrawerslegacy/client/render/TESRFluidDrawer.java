@@ -32,16 +32,15 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import org.joml.Vector3d;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.util.MathUtil;
 
 import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
 // Thanks to WaterSource
-public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawer> {
+public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDrawer> {
 
     public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
     private static final String BELL_BODY = "bell_body";
@@ -56,7 +55,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 
 
     @Override
-    public void render(TileEntityFluidDrawer tile, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlay) {
+    public void render(BlockEntityFluidDrawer tile, float partialTicks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlay) {
 //        FluidDrawersLegacyMod.logger(""+tile.getBlockState());
         if (!tile.hasLevel())
             return;
@@ -71,7 +70,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         renderFluid(tile, matrixStackIn, bufferIn, combinedLightIn, animationTime);
         matrixStackIn.popPose();
 
-        TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+        BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
         matrixStackIn.pushPose();
 
         if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY &&
@@ -201,7 +200,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
         this.bellBody.render(poseStack, vertexconsumer, p_112237_, p_112238_);
     }
 
-    private void renderFluid(TileEntityFluidDrawer tile, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
+    private void renderFluid(BlockEntityFluidDrawer tile, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
 //        FluidStack fluidStackDown = new FluidStack(Fluids.WATER, 30000);
         FluidStack fluidStackDown = null;
         final FluidStack[] fluidStack = new FluidStack[1];
@@ -216,7 +215,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<TileEntityFluidDrawe
 //        FluidDrawersLegacyMod.logger(((TileEntityFluidDrawer.betterFluidHandler) tile.getTank()).getCacheFluid().getDisplayName().toString());
 
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-            TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
             if (fluidStackDown.getAmount() <= 0)
                 if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
 

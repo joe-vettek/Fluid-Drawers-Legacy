@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.compact.jade;
+package xueluoanping.fluiddrawerslegacy.compat.jade;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import net.minecraft.network.chat.Component;
@@ -22,7 +22,7 @@ import net.minecraftforge.fluids.FluidStack;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 
 public class FluidDrawerProvider implements IBlockComponentProvider {
@@ -35,13 +35,13 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
 
         if (accessor.getBlock() instanceof BlockFluidDrawer) {
             BlockEntity tileEntity = accessor.getLevel().getBlockEntity(((BlockAccessor) accessor).getPosition());
-            if (tileEntity instanceof TileEntityFluidDrawer tile) {
+            if (tileEntity instanceof BlockEntityFluidDrawer tile) {
                 tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                         .ifPresent(handler -> {
                             int capacity = tile.getTankEffectiveCapacity();
 
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
+                            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) handler;
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
                             FluidStack cache = betterFluidHandler.getCacheFluid();
 
@@ -63,9 +63,6 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                     // String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
                     text = Component.translatable(I18n.get(new FluidStack(cacheFluid, 1).getTranslationKey()) + " 0B §e(" + I18n.get("tooltip.storagedrawers.waila.locked") + ") ");
                 }
-
-
-
             } else {
                 String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
                 text = isLocked ?

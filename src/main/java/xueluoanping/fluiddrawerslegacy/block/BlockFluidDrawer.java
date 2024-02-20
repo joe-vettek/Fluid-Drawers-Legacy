@@ -42,17 +42,14 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModContents;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
-import xueluoanping.fluiddrawerslegacy.compact.create.CreateHandler;
-import xueluoanping.fluiddrawerslegacy.config.General;
+import xueluoanping.fluiddrawerslegacy.compat.ModHandlerManager;
 
 
 import javax.annotation.Nullable;
@@ -97,10 +94,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         if (hit.getDirection() == Direction.UP || hit.getDirection() == Direction.DOWN)
             return InteractionResult.PASS;
 
-        // FluidDrawersLegacyMod.logger("ss2s22");
         BlockEntity tileEntity = world.getBlockEntity(pos);
         // Must be a FluidDrawer
-        if (tileEntity instanceof TileEntityFluidDrawer tile) {
+        if (tileEntity instanceof BlockEntityFluidDrawer tile) {
 
             ItemStack heldStack = player.getItemInHand(hand);
             ItemStack offhandStack = player.getOffhandItem();
@@ -113,7 +109,6 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         public Component getDisplayName() {
                             return Component.translatable("gui.fluiddrawerslegacy.tittle");
                         }
-
                         @Nullable
                         @Override
                         public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
@@ -143,117 +138,14 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             }
             // need an empty left hand
             else if (offhandStack == ItemStack.EMPTY) {
-                // deal with bucket
-                // FluidDrawersLegacyMod.logger("0"+heldStack.getItem()+(heldStack.getItem() instanceof BucketItem ));
-                // System.out.println(FluidUtil.interactWithFluidHandler(player, hand, tile.getTank()));
-                if (heldStack.getItem() instanceof BucketItem bucketItem) {
-                    if (bucketItem.getFluid() == Fluids.EMPTY
-                            && tile.getTankFLuid().getAmount() >= FluidType.BUCKET_VOLUME) {
-                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                .ifPresent(handler -> {
-                                    FluidStack fluidStack = handler.drain(new FluidStack(tile.getTankFLuid().getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                    Item fluidBucket = fluidStack.getFluid().getBucket();
-
-                                    if (heldStack.getCount() > 1) {
-                                        if (!player.addItem(new ItemStack(fluidBucket)))
-
-                                            Containers.dropItemStack(world, player.getX(), player.getY(), player.getZ(), new ItemStack(fluidBucket));
-                                        if (!player.isCreative())
-                                            heldStack.shrink(1);
-                                    } else {
-                                        if (!player.isCreative()) {
-                                            player.setItemInHand(hand, ItemUtils.createFilledResult(heldStack, player, new ItemStack(fluidBucket)));
-                                        } else {
-                                            //                                            player.addItem(new ItemStack(fluid.getBucket()));
-                                        }
-                                    }
-                                });
-                    } else if (tile.hasNoFluid()) {
-                        if (bucketItem.getFluid() == Fluids.EMPTY)
-                            return InteractionResult.FAIL;
-                        else {
-                            tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                    .ifPresent(handler -> {
-                                        int amount = handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.SIMULATE);
-                                        if (amount == FluidType.BUCKET_VOLUME) {
-                                            handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-                                            if (!player.isCreative())
-                                                player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
-                                        }
-
-                                    });
-                            return InteractionResult.SUCCESS;
-                        }
-                    } else {
-                        if (tile.getTankFLuid().getAmount() + FluidType.BUCKET_VOLUME <= tile.getTankEffectiveCapacity()
-                                && tile.getTankFLuid().getFluid() == bucketItem.getFluid()) {
-                            tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                    .ifPresent(handler -> {
-                                        handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME), IFluidHandler.FluidAction.EXECUTE);
-
-                                    });
-                            if (!player.isCreative())
-                                player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
-                            return InteractionResult.SUCCESS;
-                        }
-                    }
+                if (ModHandlerManager.tryHandleByMod(tile, player, hand))
                     return InteractionResult.SUCCESS;
-                }
-                // Maybe so simple
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
-                    // System.out.println(FluidUtil.interactWithFluidHandler(player, hand, tile.getTank()));
                     return InteractionResult.SUCCESS;
-                }
-                else if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
-                    heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-                            .ifPresent((handler) -> {
-
-                                if (tile.hasNoFluid()) {
-                                    if (tile.getTankEffectiveCapacity() > handler.getTankCapacity(0)) {
-                                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                                .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(handler.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                                                });
-
-                                    } else {
-                                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                                .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(tile.getTankEffectiveCapacity(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                                                });
-                                    }
-                                } else if (tile.getTankFLuid().getFluid() == handler.drain(1, IFluidHandler.FluidAction.SIMULATE).getFluid()) {
-                                    if (tile.getTankEffectiveCapacity() < handler.getTankCapacity(0) + tile.getTankFLuid().getAmount()) {
-                                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                                .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(handler.getTankCapacity(0), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                                                    //                                               if(!player.isCreative())
-
-                                                });
-                                    } else {
-                                        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                                                .ifPresent(TEhandler -> {
-                                                    TEhandler.fill(handler.drain(tile.getTankEffectiveCapacity() - tile.getTankFLuid().getAmount(), IFluidHandler.FluidAction.EXECUTE), IFluidHandler.FluidAction.EXECUTE);
-                                                });
-                                    }
-                                }
-
-                            });
-                    return InteractionResult.SUCCESS;
-                }
-                else if(General.createPotion.get()){
-                    if (heldStack.getItem() instanceof PotionItem) {
-                        if (CreateHandler.interactWithPotion(tile, player,heldStack))
-                            return InteractionResult.SUCCESS;
-                    }
-                    else if (heldStack.getItem() instanceof BottleItem) {
-                        if (CreateHandler.interactWithBottle(tile, player,heldStack))
-                            return InteractionResult.SUCCESS;
-                    }
                 }
             }
-
-
         }
+
         return InteractionResult.PASS;
     }
 
@@ -267,15 +159,15 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         ItemStack stack = ModContents.itemBlock.get().getDefaultInstance();
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer) {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
+        if (tileEntity instanceof BlockEntityFluidDrawer) {
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
             final FluidStack[] fluidStackDown = new FluidStack[1];
             tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
                     .ifPresent(handler -> {
                         fluidStackDown[0] = handler.getFluidInTank(0);
                         CompoundTag nbt = new CompoundTag();
                         handler.getFluidInTank(0).writeToNBT(nbt);
-                        stack.addTagElement("tank", ((TileEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
+                        stack.addTagElement("tank", ((BlockEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
 
                     });
             stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
@@ -309,9 +201,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer &&
+        if (tileEntity instanceof BlockEntityFluidDrawer &&
                 stack.hasTag()) {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
 
             if (stack.getTag().contains("Upgrades")) {
                 CompoundTag nbt = new CompoundTag();
@@ -350,7 +242,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             }
             if (stack.getOrCreateTag().contains("tank")) {
                 tile.fluidAnimation.setCutStartAnimation(true);
-                TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+                BlockEntityFluidDrawer.betterFluidHandler tank = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }
         }
@@ -374,10 +266,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction side) {
-        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
+        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof BlockEntityFluidDrawer)) {
             return 0;
         } else {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) blockAccess.getBlockEntity(pos);
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) blockAccess.getBlockEntity(pos);
             //            FluidDrawersLegacyMod.logger("get"+tile.isRedstone()+tile.getRedstoneLevel() +tile.upgrades().serializeNBT());
             return tile != null && tile.isRedstone() ? tile.getRedstoneLevel() : 0;
         }
@@ -391,6 +283,6 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     @org.jetbrains.annotations.Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TileEntityFluidDrawer(pos, state);
+        return new BlockEntityFluidDrawer(pos, state);
     }
 }

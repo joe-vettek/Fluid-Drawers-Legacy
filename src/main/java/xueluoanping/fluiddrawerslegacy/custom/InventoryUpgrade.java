@@ -2,21 +2,19 @@ package xueluoanping.fluiddrawerslegacy.custom;
 
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
 
 // need extend InventoryUpgrade
 public class InventoryUpgrade extends com.jaquadro.minecraft.storagedrawers.inventory.InventoryUpgrade {
     private static final int upgradeCapacity = 7;
-    private TileEntityFluidDrawer tile;
+    private BlockEntityFluidDrawer tile;
 
-    public InventoryUpgrade(TileEntityFluidDrawer tileEntity) {
+    public InventoryUpgrade(BlockEntityFluidDrawer tileEntity) {
         super(null);
         this.tile = tileEntity;
     }

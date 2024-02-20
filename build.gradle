@@ -160,8 +160,8 @@ dependencies {
     implementation fg.deobf("curse.maven:embeddium-908741:4949986")
     implementation fg.deobf("curse.maven:oculus-581495:4952626")
 //    implementation fg.deobf("curse.maven:create-enchantment-industry-688768:4962850")
-//    implementation fg.deobf("curse.maven:caupona-656147:5001135")
-
+    implementation fg.deobf("curse.maven:caupona-656147:5001135")
+    implementation fg.deobf("curse.maven:convivium-905776:4743580")
 
 //    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
 

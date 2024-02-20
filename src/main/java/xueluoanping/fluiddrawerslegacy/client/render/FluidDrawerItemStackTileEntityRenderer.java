@@ -10,15 +10,12 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +23,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
-import org.joml.AxisAngle4d;
-import org.joml.Quaterniond;
-import org.joml.Quaternionf;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 
 import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
@@ -123,7 +117,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
         int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
-        int capacity = TileEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
+        int capacity = BlockEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float height = (float) amount / (float) capacity * 0.875f;

@@ -19,6 +19,7 @@ import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
+import xueluoanping.fluiddrawerslegacy.handler.Levelhandler;
 
 import java.util.List;
 //import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
@@ -26,24 +27,9 @@ import java.util.List;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(FluidDrawersLegacyMod.MOD_ID)
 public class FluidDrawersLegacyMod {
-    //     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab("fluiddrawers") {
-//         @Override
-//         public ItemStack makeIcon() {
-//             return ModContents.itemBlock.get().getDefaultInstance();
-//         }
-//
-// //         @Override
-// //         public void fillItemList(NonNullList<ItemStack> itemStackNonNullList) {
-// // //            itemStackNonNullList.add(0, RegistryEvents.fluiddrawer.asItem().getDefaultInstance());
-// //             super.fillItemList(itemStackNonNullList);
-// //         }
-//     };
     public static final String MOD_ID = "fluiddrawerslegacy";
-
-
     // Directly reference a log4j logger.
     public static final Logger LOGGER = LogManager.getLogger(FluidDrawersLegacyMod.MOD_ID);
-    private static boolean DebugMode = false;
 
     public static void logger(String x) {
         if (General.bool.get()) {
@@ -56,11 +42,13 @@ public class FluidDrawersLegacyMod {
 
         if (General.bool.get()) {
             StringBuilder output = new StringBuilder();
+
             for (Object i : x) {
-                if (i.getClass().isArray()) {
+                if (i == null) output.append(", ").append("null");
+                else if (i.getClass().isArray()) {
                     output.append(", [");
                     for (Object c : (int[]) i) {
-                        output.append(c + ",");
+                        output.append(c).append(",");
                     }
                     output.append("]");
                 } else if (i instanceof List) {
@@ -70,9 +58,9 @@ public class FluidDrawersLegacyMod {
                     }
                     output.append("]");
                 } else
-                    output.append(", [").append(i).append("]");
+                    output.append(", ").append(i);
             }
-            LOGGER.info(output.toString().substring(1));
+            LOGGER.info(output.substring(1));
         }
 
     }
@@ -84,6 +72,8 @@ public class FluidDrawersLegacyMod {
         MinecraftForge.EVENT_BUS.register(this);
 
         MinecraftForge.EVENT_BUS.register(ControllerFluidCapabilityHandler.instance);
+        MinecraftForge.EVENT_BUS.register(Levelhandler.instance);
+
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, General.COMMON_CONFIG);
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ClientConfig.CLIENT_CONFIG);
 
