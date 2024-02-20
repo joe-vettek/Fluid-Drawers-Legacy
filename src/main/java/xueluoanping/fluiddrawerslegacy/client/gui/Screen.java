@@ -118,7 +118,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                     .findFirst();
 
             fluidInfo.ifPresent(resourceKeyFluidEntry -> {
-                String modId = resourceKeyFluidEntry.getKey().registry().getNamespace();
+                String modId = resourceKeyFluidEntry.getKey().location().getNamespace();
+                // ForgeRegistries.FLUIDS.getKey(finalFluidStackDown.getFluid()).namespace
                 // String modId = finalFluidStackDown.getTranslationKey().split("\\.")[1];
                 Optional<String> modName = modList.getMods().stream().filter((modInfo) -> modInfo.getModId().equals(modId))
                         .map(IModInfo::getDisplayName)
@@ -194,7 +195,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         // 获取sprite
         FluidType attributes = fluid.getFluid().getFluidType();
-        TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture());
+        TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture(fluid));
 
         // 绑atlas
         //        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);

@@ -18,7 +18,7 @@ public class ConviviumExchangeHandler implements ModExchangeHandler {
         if (General.cauponaSoupBowl.get()) {
             manager.registerFluidItem(
                     (item) -> item.getItem() instanceof BeverageItem? Utils.extractFluid(item):FluidStack.EMPTY,
-                    (fluidStack) -> Items.BOWL.getDefaultInstance());
+                    (fluidStack) -> Items.GLASS_BOTTLE.getDefaultInstance());
         }
     }
 }
