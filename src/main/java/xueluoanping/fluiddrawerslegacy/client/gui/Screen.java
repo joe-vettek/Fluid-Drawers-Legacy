@@ -80,7 +80,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                        ! betterFluidHandler.getCacheFluid().isEmpty()) {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 }
             }

@@ -10,7 +10,6 @@ import mcp.mobius.waila.api.ui.IProgressStyle;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import snownee.jade.VanillaPlugin;
@@ -35,7 +34,7 @@ public class DrawerCompenProvider implements IComponentProvider {
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
                             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) handler;
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
-                            Fluid cache = betterFluidHandler.getCacheFluid();
+                            FluidStack cache = betterFluidHandler.getCacheFluid();
 
                             appendTank(tooltip, fluidStack, capacity, cache, isLocked);
                         });
@@ -43,7 +42,7 @@ public class DrawerCompenProvider implements IComponentProvider {
         }
     }
 
-    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, Fluid cacheFluid, boolean isLocked) {
+    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, FluidStack cacheFluid, boolean isLocked) {
         if (capacity > 0) {
             IElementHelper helper = tooltip.getElementHelper();
             TranslatableComponent text;

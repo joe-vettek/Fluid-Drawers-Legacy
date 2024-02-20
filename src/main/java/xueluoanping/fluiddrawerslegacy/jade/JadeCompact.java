@@ -22,14 +22,14 @@ public class JadeCompact implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(ComponentProvider.INSTANCE, TileEntityController.class);
-        registration.registerBlockDataProvider(SlaveCompoentProvider.INSTANCE, TileEntitySlave.class);
+        registration.registerBlockDataProvider(ComponentProvider.INSTANCE, TileEntitySlave.class);
     }
 
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerComponentProvider(DrawerCompenProvider.INSTANCE, TooltipPosition.BODY, BlockFluidDrawer.class);
         registration.registerComponentProvider(ComponentProvider.INSTANCE, TooltipPosition.BODY, BlockController.class);
-        registration.registerComponentProvider(SlaveCompoentProvider.INSTANCE, TooltipPosition.BODY, BlockSlave.class);
+        registration.registerComponentProvider(ComponentProvider.INSTANCE, TooltipPosition.BODY, BlockSlave.class);
         registration.usePickedResult(ModContents.fluiddrawer);
     }
 }

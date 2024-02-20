@@ -71,7 +71,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
         matrixStackIn.pushPose();
 
-        if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY &&
+        if (! betterFluidHandler.getCacheFluid().isEmpty() &&
                 tile.getDrawerAttributes().isConcealed()) {
 
             FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
@@ -91,7 +91,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+            if (! betterFluidHandler.getCacheFluid().isEmpty()) {
                 FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 Font fontRenderer = this.font;
 //                matrixStackIn.translate(0.5, 0.15, 1);
@@ -118,7 +118,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         matrixStackIn.pushPose();
 
         if (tile.getDrawerAttributes().isShowingQuantity()) {
-            if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+            if (! betterFluidHandler.getCacheFluid().isEmpty()) {
 
                 FluidStack fluidStackDown = betterFluidHandler.getFluid();
                 Font fontRenderer = this.font;
@@ -210,7 +210,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
             if (fluidStackDown.getAmount() <= 0)
-                if (betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                if (! betterFluidHandler.getCacheFluid().isEmpty()) {
 
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
 //                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
