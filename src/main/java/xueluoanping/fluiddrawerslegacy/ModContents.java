@@ -22,7 +22,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.ItemFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 
 
@@ -33,7 +33,7 @@ import static xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod.CREATIVE_TAB
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModContents {
     public static Block fluiddrawer = null;
-    public static BlockEntityType<TileEntityFluidDrawer> tankTileEntityType = null;
+    public static BlockEntityType<BlockEntityFluidDrawer> tankTileEntityType = null;
     public static BlockItem itemBlock = null;
     public static MenuType<ContainerFluiDrawer> containerType = null;
 
@@ -56,7 +56,7 @@ public class ModContents {
     @SubscribeEvent
     public static void registerTileEntities(RegistryEvent.Register<BlockEntityType<?>> event) {
         FluidDrawersLegacyMod.logger("Register Block Entity");
-        tankTileEntityType = (BlockEntityType<TileEntityFluidDrawer>) BlockEntityType.Builder.of(TileEntityFluidDrawer::new, fluiddrawer).build((Type) null).setRegistryName(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawer"));
+        tankTileEntityType = (BlockEntityType<BlockEntityFluidDrawer>) BlockEntityType.Builder.of(BlockEntityFluidDrawer::new, fluiddrawer).build((Type) null).setRegistryName(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawer"));
         event.getRegistry().register(tankTileEntityType);
 
     }

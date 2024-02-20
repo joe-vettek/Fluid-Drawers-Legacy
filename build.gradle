@@ -168,6 +168,10 @@ dependencies {
 //    implementation fg.deobf("curse.maven:configured-457570:3721946")
     implementation fg.deobf("curse.maven:journeymap-32274:3696405")
     implementation fg.deobf("curse.maven:cyclic-239286:3708026")
+
+    implementation fg.deobf("curse.maven:create-328085:4762214-deobf-sources-api")
+//    implementation fg.deobf("curse.maven:create-328085:4835191-deobf-sources-api")
+
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
     // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency

@@ -15,7 +15,7 @@ import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import snownee.jade.VanillaPlugin;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 
 public class DrawerCompenProvider implements IComponentProvider {
@@ -26,14 +26,14 @@ public class DrawerCompenProvider implements IComponentProvider {
         tooltip.remove(VanillaPlugin.FORGE_FLUID);
         if (accessor.getBlock() instanceof BlockFluidDrawer) {
             BlockEntity tileEntity = accessor.getLevel().getBlockEntity(((BlockAccessor) accessor).getPosition());
-            if (tileEntity instanceof TileEntityFluidDrawer tile &&
+            if (tileEntity instanceof BlockEntityFluidDrawer tile &&
                     config.get(VanillaPlugin.FORGE_FLUID)) {
                 tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, null)
                         .ifPresent(handler -> {
                             int capacity = tile.getTankEffectiveCapacity();
 
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
+                            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) handler;
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
                             Fluid cache = betterFluidHandler.getCacheFluid();
 

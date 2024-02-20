@@ -23,7 +23,7 @@ import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.util.ListUtil;
 
 import javax.annotation.Nonnull;
@@ -42,7 +42,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     private Stack<BlockPos> posStack = new Stack<>();
     final TileEntityController tile;
     private static final List<Timer> timerList = new ArrayList<>();
-    private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
+    private List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
     private final List<Integer> priorityList = new ArrayList<>();
     // private boolean RebuildLock_fill = false;
     // private boolean RebuildLock_drain = false;
@@ -121,10 +121,10 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                                     //             drawerDataList.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
                                     //         }
                                     // } else {
-                                    List<TileEntityFluidDrawer.StandardDrawerData> listNew = new ArrayList<>();
+                                    List<BlockEntityFluidDrawer.StandardDrawerData> listNew = new ArrayList<>();
                                     for (int i = 0; i < handler.getDrawerCount(); i++)
-                                        if (handler.getDrawer(i) instanceof TileEntityFluidDrawer.StandardDrawerData) {
-                                            listNew.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
+                                        if (handler.getDrawer(i) instanceof BlockEntityFluidDrawer.StandardDrawerData) {
+                                            listNew.add((BlockEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
                                         }
                                     boolean needToAlert = false;
                                     if (!ListUtil.isSameList(listNew, drawerDataList))
@@ -249,7 +249,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             return 0;
         }
 
-        private int getFluidDrawerPriority(TileEntityFluidDrawer.StandardDrawerData data) {
+        private int getFluidDrawerPriority(BlockEntityFluidDrawer.StandardDrawerData data) {
             if (data.getTank().isFull())
                 return ModConstants.PRI_DISABLED;
             if (data.getTank().isEmpty()) {
