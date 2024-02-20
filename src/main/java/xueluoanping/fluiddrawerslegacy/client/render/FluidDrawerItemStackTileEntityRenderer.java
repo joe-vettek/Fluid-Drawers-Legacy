@@ -89,10 +89,9 @@ public class FluidDrawerItemStackTileEntityRenderer extends ItemStackTileEntityR
         if(stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))fluidStackDown.setAmount(Integer.MAX_VALUE);
 
         Minecraft mc = Minecraft.getInstance();
-        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture(fluidStackDown));
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), stack.getFrame().level, new BlockPos(0,0,0));
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
-
+        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
         int capacity = TileEntityFluidDrawer.calcultaeCapacitybyStack(stack);
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;

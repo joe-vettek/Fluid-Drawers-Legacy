@@ -54,6 +54,9 @@ minecraft {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
             mods {
                 fluiddrawerslegacy {
                     source sourceSets.main
@@ -75,6 +78,10 @@ minecraft {
             // You can set various levels here.
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             property 'forge.logging.console.level', 'debug'
+
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             mods {
                 fluiddrawerslegacy {
@@ -99,7 +106,10 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'fluiddrawerslegacy', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             mods {
                 fluiddrawerslegacy {
@@ -142,6 +152,9 @@ dependencies {
 //    implementation fg.deobf("curse.maven:patchouli-306770:3459118")
     implementation fg.deobf("curse.maven:thermal-foundation-222880:3621736")
     implementation fg.deobf("curse.maven:cofh-core-69162:3621734")
+
+    implementation fg.deobf("curse.maven:create-328085:3536025")
+    implementation fg.deobf("curse.maven:flywheel-486392:3535459")
 
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"

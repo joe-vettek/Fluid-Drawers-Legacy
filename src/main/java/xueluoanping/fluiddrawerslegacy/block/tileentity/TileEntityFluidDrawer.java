@@ -27,6 +27,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.ModelDataManager;
@@ -428,37 +429,64 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
             return upgrades().serializeNBT().toString().contains("void");
         }
 
+        public BlockPos getDrawerPos() {
+            return TileEntityFluidDrawer.this.getBlockPos();
+        }
+
+        @Override
+        public int getMaxCapacity() {
+            return getEffectiveCapacity();
+        }
     }
 
     public class betterFluidHandler extends FluidTank {
-        private Fluid cacheFluid = Fluids.EMPTY;
+        private FluidStack cacheFluid = FluidStack.EMPTY;
 
-        public Fluid getCacheFluid() {
-            return cacheFluid;
+        // not allow change here
+        public FluidStack getCacheFluid() {
+            return cacheFluid.copy();
         }
 
-        private void setCacheFluid(Fluid cacheFluid) {
-            this.cacheFluid = cacheFluid;
+        private void setCacheFluid(FluidStack cacheFluid) {
+            FluidStack cacheFluidCopy = cacheFluid.copy();
+            if (!cacheFluidCopy.isEmpty())
+                cacheFluidCopy.setAmount(1);
+            this.cacheFluid = cacheFluidCopy;
         }
 
         public betterFluidHandler(int capacity) {
             super(capacity);
         }
 
+
+        @Override
+        public FluidStack getFluid() {
+            if (upgrades().hasVendingUpgrade() && this.fluid.getFluid() != Fluids.EMPTY) {
+//                FluidStack stack = fluid.copy();
+//                stack.setAmount(Integer.MAX_VALUE);
+                return new FluidStack(super.getFluid().getFluid(), Integer.MAX_VALUE);
+            }
+            return super.getFluid();
+        }
+
         public CompoundNBT serializeNBT() {
-            //            发送信息时调整容量大小
+            // resize capacity when sending message
             if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
                 this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
             CompoundNBT nbt = new CompoundNBT();
-            if (getCacheFluid() != Fluids.EMPTY && fluid.getFluid() != Fluids.EMPTY && getCacheFluid() != fluid.getFluid()) {
-                setCacheFluid(getFluid().getFluid());
+            if (getCacheFluid().getRawFluid() != Fluids.EMPTY &&
+                    fluid.getFluid() != Fluids.EMPTY &&
+                    getCacheFluid().getRawFluid() != fluid.getFluid()) {
+                setCacheFluid(getFluid());
+            }
+            if (getCacheFluid().getRawFluid() == Fluids.EMPTY &&
+                    getFluid().getAmount() > 0) {
+                setCacheFluid(getFluid());
 
             }
-            if (getCacheFluid() == Fluids.EMPTY && getFluid().getAmount() > 0) {
-                setCacheFluid(getFluid().getFluid());
-            }
-            //            FluidDrawersLegacyMod.logger(fluid.getTranslationKey().toString());
-            nbt.putString("cache", cacheFluid.getRegistryName().toString());
+
+            // nbt.putString("cache", cacheFluid.getFluidType().toString());
+            nbt.put("cache", cacheFluid.writeToNBT(new CompoundNBT()));
             return writeToNBT(nbt);
         }
 
@@ -466,26 +494,25 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
             if (this.getCapacity() != TileEntityFluidDrawer.this.getEffectiveCapacity())
                 this.setCapacity(TileEntityFluidDrawer.this.getEffectiveCapacity());
             if (tank.contains("cache")) {
-                String[] x = tank.getString("cache").split(":");
-                ResourceLocation res = new ResourceLocation(x[0], x[1]);
+                FluidStack cacheTempStack = FluidStack.loadFluidStackFromNBT(tank.getCompound("cache"));
+                // String[] x = tank.getString("cache").split(":");
+                // ResourceLocation res = new ResourceLocation(x[0], x[1]);
+                //
+                // Fluid fluid = ForgeRegistries.FLUIDS.getValue(res);
 
-                Fluid fluid = ForgeRegistries.FLUIDS.getValue(res);
-                setCacheFluid(cacheFluid);
+                setCacheFluid(cacheTempStack);
             }
+
+//            FluidDrawersLegacyMod.LOGGER.info(cacheFluid.getRegistryName()+""+getLevel()+""+drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY));
+//            FluidStack fluid = FluidStack.loadFluidStackFromNBT(tank);
+//            setFluid(fluid);
+//            FluidDrawersLegacyMod.logger(fluid.getAmount()+"");
             readFromNBT(tank);
         }
 
         //        need to override ,or not sync
         @Override
         protected void onContentsChanged() {
-
-
-            if (this.getFluid().getAmount() > 0 && getFluid() != FluidStack.EMPTY && getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                setCacheFluid(getFluid().getFluid());
-            } else {
-                //                setCacheFluid(Fluids.EMPTY);
-            }
-
 
             inventoryChanged();
 
@@ -498,15 +525,36 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
+
             if (upgrades().hasVendingUpgrade())
                 return 0;
+//            if(!getLevel().isClientSide())
+//            FluidDrawersLegacyMod.logger(
+//                    "server:"+getCacheFluid().getRegistryName()+";"
+//                    +resource.getFluid().getRegistryName()
+//                    +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
+//            if(getLevel().isClientSide())
+//                FluidDrawersLegacyMod.logger(
+//                        "client:"+getCacheFluid().getRegistryName()+";"
+//                                +resource.getFluid().getRegistryName()
+//                                +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
             if (getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                //                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
-                if (getCacheFluid().getFluid() != Fluids.EMPTY && getCacheFluid() != resource.getFluid()) {
+//                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
+                if (getCacheFluid().getRawFluid() != Fluids.EMPTY
+                        && !getCacheFluid().isFluidEqual(resource)) {
                     return 0;
                 }
+                if (getCacheFluid().getRawFluid() == Fluids.EMPTY) {
+                    if (resource.getAmount() > 0) {
+                        if (action.execute())
+                            setCacheFluid(resource);
+                        return super.fill(resource, action);
+                    } else return 0;
+
+                }
             }
-            if ((this.getCapacity() - fluid.getAmount() - resource.getAmount()) < 0 && upgrades().write(new CompoundNBT()).toString().contains("storagedrawers:void_upgrade")) {
+            if ((this.getCapacity() - fluid.getAmount() - resource.getAmount()) < 0
+                    && upgrades().write(new CompoundNBT()).toString().contains("storagedrawers:void_upgrade")) {
                 if (resource.isEmpty() || !isFluidValid(resource)) {
                     return 0;
                 }
@@ -532,7 +580,9 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
             if (upgrades().hasVendingUpgrade())
-                return resource.getFluid() == fluid.getFluid() ? new FluidStack(fluid.getFluid(), resource.getAmount()) : FluidStack.EMPTY;
+                return resource.getFluid() == fluid.getFluid() ?
+                        new FluidStack(fluid.getFluid(), resource.getAmount()) :
+                        FluidStack.EMPTY;
             return super.drain(resource, action);
         }
 
@@ -546,7 +596,6 @@ public class TileEntityFluidDrawer extends ChamTileEntity implements IDrawerGrou
 
 
     }
-
     //    extra attributes, not very useful
     private class DrawerAttributes extends BasicDrawerAttributes {
         private DrawerAttributes() {

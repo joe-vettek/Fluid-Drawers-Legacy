@@ -92,7 +92,7 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
                 TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                        ! betterFluidHandler.getCacheFluid().isEmpty()) {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluid(), 1000);
                 }
             }
@@ -167,12 +167,12 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
 
         //获取sprite
         FluidAttributes attributes = fluid.getFluid().getAttributes();
-        TextureAtlasSprite FLUID = getBlockSprite(attributes.getStillTexture());
+        TextureAtlasSprite FLUID = getBlockSprite(attributes.getStillTexture(fluid));
 
         //绑atlas
         Minecraft.getInstance().getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
 
-        int color = fluid.getFluid().getAttributes().getColor();
+        int color = fluid.getFluid().getAttributes().getColor(fluid);
 
         /*
          * 获取横向和纵向层数
