@@ -20,6 +20,8 @@ import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
+
+import java.util.List;
 //import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -53,6 +55,32 @@ public class FluidDrawersLegacyMod {
         }
     }
 
+    public static void logger(Object... x) {
+
+        if (General.bool.get()) {
+            StringBuilder output = new StringBuilder();
+
+            for (Object i : x) {
+                if (i == null) output.append(", ").append("null");
+                else if (i.getClass().isArray()) {
+                    output.append(", [");
+                    for (Object c : (int[]) i) {
+                        output.append(c).append(",");
+                    }
+                    output.append("]");
+                } else if (i instanceof List) {
+                    output.append(", [");
+                    for (Object c : (List) i) {
+                        output.append(c);
+                    }
+                    output.append("]");
+                } else
+                    output.append(", ").append(i);
+            }
+            LOGGER.info(output.substring(1));
+        }
+
+    }
     public FluidDrawersLegacyMod() {
 
         // Register ourselves for server and other game events we are interested in

@@ -1,35 +1,26 @@
 package xueluoanping.fluiddrawerslegacy;
 
 
-import com.jaquadro.minecraft.storagedrawers.inventory.ContainerDrawers;
-import com.mojang.datafixers.types.Type;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.IContainerFactory;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
 import net.minecraftforge.registries.RegistryObject;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.ItemFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 
 
@@ -60,8 +51,8 @@ public class ModContents {
             .sound(SoundType.GLASS).strength(5.0F)
             .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse)));
     public static final RegistryObject<Item> itemBlock = DREntityBlockItems.register("fluiddrawer", () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties().tab(CREATIVE_TAB)));
-    public static final RegistryObject<BlockEntityType<TileEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register("fluiddrawer",
-            () ->  BlockEntityType.Builder.of(TileEntityFluidDrawer::new, fluiddrawer.get()).build( null));
+    public static final RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register("fluiddrawer",
+            () ->  BlockEntityType.Builder.of(BlockEntityFluidDrawer::new, fluiddrawer.get()).build( null));
 
     public static final RegistryObject<MenuType<ContainerFluiDrawer>> containerType = DRMenuType.register("fluid_drawer_container_1", () -> IForgeMenuType.create( ContainerFluiDrawer::new));
 

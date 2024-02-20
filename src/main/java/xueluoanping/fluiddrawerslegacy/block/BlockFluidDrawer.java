@@ -44,20 +44,17 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.SoundAction;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidUtil;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 
 import javax.annotation.Nullable;
@@ -105,7 +102,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         // FluidDrawersLegacyMod.logger("ss2s22");
         BlockEntity tileEntity = world.getBlockEntity(pos);
         // Must be a FluidDrawer
-        if (tileEntity instanceof TileEntityFluidDrawer tile) {
+        if (tileEntity instanceof BlockEntityFluidDrawer tile) {
 
             ItemStack heldStack = player.getItemInHand(hand);
             ItemStack offhandStack = player.getOffhandItem();
@@ -264,15 +261,15 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         ItemStack stack = ModContents.itemBlock.get().getDefaultInstance();
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer) {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
+        if (tileEntity instanceof BlockEntityFluidDrawer) {
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
             final FluidStack[] fluidStackDown = new FluidStack[1];
             tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
                     .ifPresent(handler -> {
                         fluidStackDown[0] = handler.getFluidInTank(0);
                         CompoundTag nbt = new CompoundTag();
                         handler.getFluidInTank(0).writeToNBT(nbt);
-                        stack.addTagElement("tank", ((TileEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
+                        stack.addTagElement("tank", ((BlockEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
 
                     });
             stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
@@ -306,9 +303,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof TileEntityFluidDrawer &&
+        if (tileEntity instanceof BlockEntityFluidDrawer &&
                 stack.hasTag()) {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) tileEntity;
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
 
             if (stack.getTag().contains("Upgrades")) {
                 CompoundTag nbt = new CompoundTag();
@@ -347,7 +344,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             }
             if (stack.getOrCreateTag().contains("tank")) {
                 tile.setCutStartAnimation(true);
-                TileEntityFluidDrawer.betterFluidHandler tank = (TileEntityFluidDrawer.betterFluidHandler) tile.getTank();
+                BlockEntityFluidDrawer.betterFluidHandler tank = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
                 tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
             }
         }
@@ -371,10 +368,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction side) {
-        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
+        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof BlockEntityFluidDrawer)) {
             return 0;
         } else {
-            TileEntityFluidDrawer tile = (TileEntityFluidDrawer) blockAccess.getBlockEntity(pos);
+            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) blockAccess.getBlockEntity(pos);
             //            FluidDrawersLegacyMod.logger("get"+tile.isRedstone()+tile.getRedstoneLevel() +tile.upgrades().serializeNBT());
             return tile != null && tile.isRedstone() ? tile.getRedstoneLevel() : 0;
         }
@@ -388,6 +385,6 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     @org.jetbrains.annotations.Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new TileEntityFluidDrawer(pos, state);
+        return new BlockEntityFluidDrawer(pos, state);
     }
 }

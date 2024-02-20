@@ -2,7 +2,6 @@ package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
-import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import net.minecraft.core.BlockPos;
@@ -14,12 +13,10 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.custom.InventoryUpgrade;
 
 import javax.annotation.Nonnull;
@@ -40,14 +37,14 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
 
 
 
-    private TileEntityFluidDrawer tileEntityFluidDrawer;
+    private BlockEntityFluidDrawer tileEntityFluidDrawer;
 
     public ContainerFluiDrawer(int windowId, Inventory playerInv, FriendlyByteBuf data) {
         this(ModContents.containerType.get(),windowId, playerInv, getTileEntity(playerInv, data.readBlockPos()));
     }
 
-    public static TileEntityFluidDrawer getTileEntity(Inventory playerInv, BlockPos pos) {
-        if (!(playerInv.player.getCommandSenderWorld().getBlockEntity(pos) instanceof TileEntityFluidDrawer tile)) {
+    public static BlockEntityFluidDrawer getTileEntity(Inventory playerInv, BlockPos pos) {
+        if (!(playerInv.player.getCommandSenderWorld().getBlockEntity(pos) instanceof BlockEntityFluidDrawer tile)) {
             StorageDrawers.log.error("Expected a drawers tile entity at " + pos.toString());
             return null;
         } else {
@@ -56,11 +53,11 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
     }
 
 
-    public TileEntityFluidDrawer getTileEntityFluidDrawer() {
+    public BlockEntityFluidDrawer getTileEntityFluidDrawer() {
         return tileEntityFluidDrawer;
     }
 
-    public ContainerFluiDrawer(@Nullable MenuType<?> type, int windowId, Inventory playerInventory, TileEntityFluidDrawer tileEntity) {
+    public ContainerFluiDrawer(@Nullable MenuType<?> type, int windowId, Inventory playerInventory, BlockEntityFluidDrawer tileEntity) {
         super(type, windowId);
         this.tileEntityFluidDrawer=tileEntity;
         int drawerCount = 1;

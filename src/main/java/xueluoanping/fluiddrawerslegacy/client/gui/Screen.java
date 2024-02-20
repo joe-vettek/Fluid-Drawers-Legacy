@@ -24,7 +24,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -84,9 +84,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             if (capacity < amount) amount = capacity;
             List<Component> list = new ArrayList<>();
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
+                BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
                 if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid() != Fluids.EMPTY) {
+                        ! betterFluidHandler.getCacheFluid().isEmpty()) {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
                 }
             }

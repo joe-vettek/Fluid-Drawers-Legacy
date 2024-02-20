@@ -1,7 +1,5 @@
 package xueluoanping.fluiddrawerslegacy.util;
 
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
-
 import java.util.List;
 
 public class ListUtil {

@@ -4,6 +4,7 @@ package xueluoanping.fluiddrawerslegacy.compact.jade;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
@@ -39,67 +40,12 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
     static final ControllerProviderFixer INSTANCE = new ControllerProviderFixer();
 
 
+    // TODO: reduce the code and it not need more (just keep hide)
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE);
-        if (!(accessor.getBlockEntity() instanceof BlockEntityController))
-            return;
-
-        if (accessor.getServerData().contains("JadeFluidStorage")) {
-            ListTag list =
-                    ((CompoundTag) accessor.getServerData().getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
-                            .getList("Views", CompoundTag.TAG_COMPOUND);
-            // FluidDrawersLegacyMod.logger(((CompoundTag)list.get(0)).getList("Views", CompoundTag.TAG_COMPOUND).toString());
-
-            Map<Fluid, List<Integer>> fluidMap = new HashMap<>();
-            list.forEach(
-                    (ele) -> {
-
-                        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) ele);
-                        int capacity = ((CompoundTag) ele).getInt("Capacity");
-                        List<Integer> integerList = new ArrayList<>();
-                        if (fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY) {
-                            if (fluidMap.containsKey(fluidStack.getFluid())) {
-                                integerList = fluidMap.get(fluidStack.getFluid());
-                                integerList.set(0, integerList.get(0) + fluidStack.getAmount());
-                                integerList.set(1, integerList.get(1) + capacity);
-                                fluidMap.replace(fluidStack.getFluid(), fluidMap.get(fluidStack.getFluid()), integerList);
-                            } else {
-                                integerList.add(fluidStack.getAmount());
-                                integerList.add(capacity);
-                                fluidMap.put(fluidStack.getFluid(), integerList);
-                            }
-                        }
-                    }
-            );
-            AtomicInteger i = new AtomicInteger();
-            fluidMap.forEach((fluid, integerList) -> {
-                i.getAndIncrement();
-                if (accessor.getPlayer().isShiftKeyDown() ||
-                        (!accessor.getPlayer().isShiftKeyDown()
-                                && i.get() < ClientConfig.showlimit.get())) {
-                    IElementHelper helper = tooltip.getElementHelper();
-                    FluidStack fluidStack = new FluidStack(fluid, integerList.get(0));
-                    IProgressStyle progressStyle = helper.progressStyle().overlay(helper.fluid(fluidStack));
-                    String amountText = DisplayHelper.INSTANCE.humanReadableNumber((double) fluidStack.getAmount(), "B", true);
-
-                    Component text = Component.translatable("jade.fluid", fluidStack.getDisplayName(), amountText);
-                    tooltip.add(helper.progress((float) fluidStack.getAmount() / (float) integerList.get(1), (Component) text, progressStyle, BoxStyle.DEFAULT, true));
-
-                    // FluidStorageProvider.append(tooltip, new FluidStack(fluid, integerList.get(0)), integerList.get(1));
-                }
-            });
-            if (i.get() >= ClientConfig.showlimit.get() && !accessor.getPlayer().isShiftKeyDown())
-                tooltip.add(Component.translatable(ModTranslateKey.getWailaHide()));
-
-        }
-
+        JadeFluidHandler.resortTooltip(tooltip,accessor,config);
     }
 
-    @Override
-    public void appendServerData(CompoundTag compoundTag, ServerPlayer serverPlayer, Level level, BlockEntity blockEntity, boolean b) {
-
-    }
 
     @Override
     public ResourceLocation getUid() {
@@ -109,5 +55,14 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
     @Override
     public int getDefaultPriority() {
         return FluidStorageProvider.INSTANCE.getDefaultPriority() + 1000;
+    }
+
+
+    @Override
+    public void appendServerData(CompoundTag compoundTag, ServerPlayer serverPlayer, Level level, BlockEntity blockEntity, boolean b) {
+        if (!(blockEntity instanceof BlockEntityController)
+                &&!(blockEntity instanceof BlockEntitySlave))
+            return;
+        JadeFluidHandler.appendServerDataIfWithNotEmpty(compoundTag,  blockEntity);
     }
 }

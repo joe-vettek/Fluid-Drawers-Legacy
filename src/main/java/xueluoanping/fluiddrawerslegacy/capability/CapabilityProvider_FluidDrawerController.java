@@ -1,176 +1,228 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
-import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.material.Fluid;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.level.LevelEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.util.ListUtil;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider {
+public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider, INBTSerializable<CompoundTag> {
 
     public final betterFluidHandler tank;
     private final LazyOptional<betterFluidHandler> tankHandler;
     public static final int Capacity = 32000;
     public static BlockPos tilePos = null;
-    private Stack<BlockPos> posStack = new Stack<>();
     final BlockEntityController tile;
-    private static final List<Timer> timerList = new ArrayList<>();
-    private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
-    private final List<Integer> priorityList = new ArrayList<>();
-    // private boolean RebuildLock_fill = false;
-    // private boolean RebuildLock_drain = false;
-    // private boolean RebuildLock_drain0 = false;
-    // private int RebuildLock_query = 3;
-    private int lockALL = 0;
-    private Timer timer;
+    // private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
+    private List<FluidStack> fluidRecord = new ArrayList<>();
 
     public CapabilityProvider_FluidDrawerController(final BlockEntityController tile) {
         this.tile = tile;
         tank = createFuildHandler();
         tankHandler = LazyOptional.of(() -> tank);
         tilePos = tile.getBlockPos();
+        FluidDrawerControllerData fluidDrawerControllerData = new FluidDrawerControllerData();
+        fluidDrawerControllerData.setCapabilityProvider(this);
+        this.tile.injectData(fluidDrawerControllerData);
+        // tank.setFluid(FluidDrawerControllerSave.fluidDrawerControllerSave.);
+    }
 
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            public void run() {
-                // if null, then cancel
-                //  sometimes maybe a empty tile
-                if (!hasLock()) {
-                    // drawerDataList.clear();
-                } else {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (Exception exception) {
-                        exception.printStackTrace();
+    @Override
+    public CompoundTag serializeNBT() {
+        return tank.writeToNBT(new CompoundTag());
+    }
+
+    @Override
+    public void deserializeNBT(CompoundTag nbt) {
+        // FluidDrawersLegacyMod.logger(22554, nbt);
+        // if (nbt.contains("Fluid"))
+        tank.setFluid(FluidStack.loadFluidStackFromNBT(nbt));
+    }
+
+    public void invalidate() {
+        tankHandler.invalidate();
+    }
+
+    public static class DrawerDistanceBook implements Comparable<DrawerDistanceBook> {
+
+
+        private final BlockEntityFluidDrawer.StandardDrawerData fluidDrawerData;
+        private final int distance;
+
+        public DrawerDistanceBook(BlockEntityFluidDrawer.StandardDrawerData fluidDrawerData, int d) {
+            this.fluidDrawerData = fluidDrawerData;
+            this.distance = d;
+        }
+
+        @Override
+        public int compareTo(@NotNull DrawerDistanceBook o) {
+            return this.distance - o.distance;
+        }
+    }
+
+    public int getDistance(BlockPos pos1, BlockPos pos2) {
+        return Math.abs(pos1.getX() - pos2.getX()) + Math.abs(pos1.getY() - pos2.getY()) + Math.abs(pos1.getZ() - pos2.getZ());
+    }
+
+
+    public List<BlockEntityFluidDrawer.StandardDrawerData> getFluidDrawerDataList() {
+        try {
+
+            // try {
+            //     // Class<?> clazz = Class.forName("com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController");
+            //
+            //     Field field = tile.getClass().getDeclaredField("drawerSlotList");
+            //
+            //     field.setAccessible(true);
+            //     Object o = (((List) field.get(tile)).get(0));
+            //     Field field2 = o.getClass().getDeclaredField("coord");
+            //
+            //     FluidDrawersLegacyMod.logger(field2.get(o), tile.getDrawerCount());
+            //     // FluidDrawersLegacyMod.logger( tile.drawerSlotList);
+            //     // FluidDrawersLegacyMod.logger(tile.getDrawers());
+            // } catch (Exception e) {
+            //     e.printStackTrace();
+            // }
+
+            long startTime = System.currentTimeMillis();
+            List<Integer> dList = new ArrayList<>();
+            List<BlockEntityFluidDrawer.StandardDrawerData> listNew = new ArrayList<>();
+            List<DrawerDistanceBook> listW = new ArrayList<>();
+            // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent());
+            if (tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent()) {
+                // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get().getDrawerCount()+"");
+                IDrawerGroup handler = tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get();
+                int size = handler.getDrawerCount();
+                for (int i = 0; i < size; i++) {
+
+                    if (handler.getDrawer(i) instanceof BlockEntityFluidDrawer.StandardDrawerData fluidDrawerData) {
+                        // listNew.add(fluidDrawerData);
+                        int d = getDistance(tile.getBlockPos(), fluidDrawerData.getDrawerPos());
+                        // dList.add(d);
+                        listW.add(new DrawerDistanceBook(fluidDrawerData, d));
                     }
                 }
+                Collections.sort(listW);
+                listNew = listW.stream().map(drawerDistanceBook -> drawerDistanceBook.fluidDrawerData).toList();
 
-                if (tile == null) {
-                    return;
-                }
+                long endTime = System.currentTimeMillis();
+                long duration = endTime - startTime;
+                // FluidDrawersLegacyMod.logger("Cost: " + duration + "Millis");
 
-
-                if (((IDrawerGroup) tile).getDrawerCount() == 0) {
-                    //  FluidDrawersLegacyMod.logger("Not Found Drawer in " + tile.getLevel() + tile.getBlockPos() + ", Stop Now");
-                    //  FluidDrawersLegacyMod.logger(""+ timerList.size());
-                    if (tile.isRemoved() || tile.getLevel().isClientSide()) {
-                        //      FluidDrawersLegacyMod.logger("Not Run in" + tile.getLevel());
-                        //      System.gc();
-                        cleanAndCancelTimer();
-
-                    }
-                    return;
-                }
-                // 优先处理不加载的区块
-                // FluidDrawersLegacyMod.logger("Chunk " + tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4) );
-                // tile.getLevel().isLoaded()判断区块是否加载，不确定有没有问题,似乎has就够了
-                if (!tile.getLevel().hasChunk(tile.getBlockPos().getX() >> 4, tile.getBlockPos().getZ() >> 4)) {
-                    FluidDrawersLegacyMod.logger("Not Chunk Cancel " + tile.getLevel() + tile.getBlockPos());
-                    cleanAndCancelTimer();
-                    return;
-                }
-                //  问题在于如何处置服务器上被移除的entity的计时器
-                //                说明，必须要延时处理，否则坐标是0，0，0
-                if (!(tile.getLevel().getBlockState(tile.getBlockPos()).getBlock() instanceof BlockController)) {
-                    //  FluidDrawersLegacyMod.logger("null Cancel" + tile.getLevel());
-                    cleanAndCancelTimer();
-                    return;
-                }
-                //  long start = System.currentTimeMillis();
-                //  searchNode(tile.getLevel(), tile.getBlockPos(), tile.getBlockPos());
-
-                posStack = new Stack<>();
-                //  FluidDrawersLegacyMod.LOGGER.info(System.currentTimeMillis() - start);
-
-                tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
-                        .ifPresent((handler -> {
-                            if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
-
-                                try {
-                                    // if (!hasLock()) {
-                                    //     drawerDataList.clear();
-                                    //     for (int i = 0; i < handler.getDrawerCount(); i++)
-                                    //         if (handler.getDrawer(i) instanceof TileEntityFluidDrawer.StandardDrawerData) {
-                                    //             drawerDataList.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
-                                    //         }
-                                    // } else {
-                                    List<TileEntityFluidDrawer.StandardDrawerData> listNew = new ArrayList<>();
-                                    for (int i = 0; i < handler.getDrawerCount(); i++)
-                                        if (handler.getDrawer(i) instanceof TileEntityFluidDrawer.StandardDrawerData) {
-                                            listNew.add((TileEntityFluidDrawer.StandardDrawerData) handler.getDrawer(i));
-                                        }
-                                    boolean needToAlert = false;
-                                    if (!ListUtil.isSameList(listNew, drawerDataList))
-                                        needToAlert = true;
-                                    if (needToAlert) {
-                                        if (hasLock()) {
-                                            new Thread(() -> {
-                                                try {
-                                                    Thread.sleep(1000);
-                                                } catch (InterruptedException e) {
-                                                    throw new RuntimeException(e);
-                                                }
-                                                if (!hasLock())
-                                                    CapabilityProvider_FluidDrawerController.this.drawerDataList = listNew;
-                                            }).start();
-                                        } else
-                                            drawerDataList = listNew;
-                                    }
-                                    // }
-                                } catch (Exception ex) {
-                                    ex.printStackTrace();
-                                }
-
-                            }
-                        }));
-
+                return listNew;
             }
-        }, 7000, 5000);// 这里百毫秒
-        timerList.add(timer);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
     }
 
-    private void cleanAndCancelTimer() {
-        this.timer.cancel();
-        this.drawerDataList.clear();
-        this.priorityList.clear();
+    // Add NBT mechanism to allow judgment based on NBT, using the isFluidEqual method (Jade is not currently supported there)
+    // Add fluidMap memory mechanism and automatically remove 0 items.
+
+    public static class FluidHolder {
+        FluidStack fluid = FluidStack.EMPTY;
+        int fluidAmount = 0;
+        int tankCapacity = 0;
+
+        @Override
+        public String toString() {
+            return ForgeRegistries.FLUIDS.getKey(fluid.getFluid()) + ":" + fluidAmount + "/" + tankCapacity;
+        }
     }
 
-    private boolean hasLock() {
-        // return this.RebuildLock_fill
-        //         || this.RebuildLock_drain
-        //         || this.RebuildLock_drain0
-        //         || RebuildLock_query != 3;
-        return lockALL != 0;
-    }
+    public List<FluidHolder> getFluidMap(List<BlockEntityFluidDrawer.StandardDrawerData> listNew) {
 
+        Map<FluidStack, List<Integer>> fluidMap = new LinkedHashMap<>();
+        long startTime = System.currentTimeMillis();
+        listNew.forEach(
+                (ele) -> {
+                    FluidStack fluidStack = ele.getTank().getFluid();
+
+                    int capacity = ele.getMaxCapacity();
+                    List<Integer> integerList = new ArrayList<>();
+                    // indeed we not need to think about the fill because that's different
+                    // Todo: add empty Lock
+                    boolean isEmptyLockWithFluid = ele.isLock() && fluidStack.isEmpty() && !ele.getTank().getCacheFluid().isEmpty();
+                    boolean notEmpty = fluidStack.getAmount() > 0 && fluidStack != FluidStack.EMPTY;
+                    if (isEmptyLockWithFluid) {
+                        fluidStack = ele.getTank().getCacheFluid();
+                        fluidStack.setAmount(0);
+                    }
+
+                    // if (isEmptyLockWithFluid||notEmpty)
+                    {
+                        FluidStack fluidStackKey = fluidStack.copy();
+                        // not 0, empty
+                        if (notEmpty && !isEmptyLockWithFluid)
+                            fluidStackKey.setAmount(1);
+                        if (!notEmpty && !isEmptyLockWithFluid)
+                            fluidStackKey = FluidStack.EMPTY;
+
+                        if (fluidMap.containsKey(fluidStackKey)) {
+                            integerList = fluidMap.get(fluidStackKey);
+                            integerList.set(0, integerList.get(0) + fluidStack.getAmount());
+                            integerList.set(1, integerList.get(1) + capacity);
+                            fluidMap.replace(fluidStackKey, fluidMap.get(fluidStackKey), integerList);
+                        } else {
+                            integerList.add(fluidStack.getAmount());
+                            integerList.add(capacity);
+                            fluidMap.put(fluidStackKey, integerList);
+                        }
+                    }
+                }
+        );
+
+        fluidRecord.removeIf(a -> fluidMap.keySet().stream().noneMatch(b -> b.equals(a)));
+        fluidRecord.addAll(fluidMap.keySet());
+        fluidRecord = new ArrayList<>(fluidMap.keySet());
+        fluidRecord = fluidRecord.stream().distinct().collect(Collectors.toList());
+
+
+        // must in the last position
+        boolean removeEmptyKey = fluidRecord.removeIf(FluidStack::isEmpty);
+        if (removeEmptyKey) {
+            fluidRecord.add(FluidStack.EMPTY);
+        }
+
+
+        List<FluidHolder> fluidHolderList = new ArrayList<>();
+        fluidRecord.forEach(fluidStack -> {
+            FluidHolder holder = new FluidHolder();
+            holder.fluid = fluidStack;
+            holder.fluidAmount = fluidMap.get(fluidStack).get(0);
+            holder.tankCapacity = fluidMap.get(fluidStack).get(1);
+            fluidHolderList.add(holder);
+        });
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+        // FluidDrawersLegacyMod.logger("Cost: " + duration + "Millis");
+        return fluidHolderList;
+    }
 
     @Nonnull
     @Override
@@ -207,7 +259,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         // this function is used by others, so not need to lock it
         // note: there should use cacheFluid as a standard to check if allowed fill
         // while drain should use the fluid it has to assure no conflict problems
-        protected int fillByOrder(FluidStack resource, FluidAction action, int order) {
+        protected int fillByOrder(List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList, List<Integer> priorityList, FluidStack resource, FluidAction action, int order) {
             if (drawerDataList.size() == 0)
                 return 0;
             for (int i = 0; i < drawerDataList.size(); i++) {
@@ -215,20 +267,17 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 // only find valid and same order
                 if (priorityList.get(i) != order)
                     continue;
+
                 // when locked, need to check cache, or not necessary
+                FluidStack tankCacheFluid = drawerDataList.get(i).getTank().getCacheFluid();
+                if (drawerDataList.get(i).isLock()) {
+                    if (!tankCacheFluid.isEmpty() && !tankCacheFluid.isFluidEqual(resource)) {
+                        continue;
+                    }
+                }
 
-                // if drawer is empty and locked, no need to continue checking
-                if (drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY
-                        && drawerDataList.get(i).isLock())
-                    continue;
-
-                // if drawer not empty and fluids are different, no need to check for lock nor continue checking
-                if (drawerDataList.get(i).getTank().getCacheFluid() != Fluids.EMPTY
-                        && drawerDataList.get(i).getTank().getCacheFluid() != resource.getFluid())
-                    continue;
-
-                if (drawerDataList.get(i).getTank().getCacheFluid() == resource.getFluid()
-                        || drawerDataList.get(i).getTank().getCacheFluid() == Fluids.EMPTY) {
+                FluidStack tankFluid = drawerDataList.get(i).getTank().getFluid();
+                if (tankFluid.isFluidEqual(resource) || tankFluid.isEmpty()) {
                     if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
                             <= drawerDataList.get(i).getTank().getCapacity()) {
                         if (action.execute())
@@ -250,7 +299,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             return 0;
         }
 
-        private int getFluidDrawerPriority(TileEntityFluidDrawer.StandardDrawerData data) {
+        private int getFluidDrawerPriority(BlockEntityFluidDrawer.StandardDrawerData data) {
             if (data.getTank().isFull())
                 return ModConstants.PRI_DISABLED;
             if (data.getTank().isEmpty()) {
@@ -277,10 +326,8 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
         @Override
         public int fill(FluidStack resource, FluidAction action) {
-            //                Exception caught during firing event: Index 3 out of bounds for length 0
-            //            FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundNBT()) + RebuildLock);
-            // RebuildLock_fill = true;
-            lockALL--;
+            // FluidDrawersLegacyMod.logger("" + resource.writeToNBT(new CompoundTag()), action);
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
             int result = 0;
             int amount = resource.getAmount();
             final int amountF = amount;
@@ -289,7 +336,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             if (amountF > 0) {
                 int i = 0;
                 //            rember to clear it
-                priorityList.clear();
+                List<Integer> priorityList = new ArrayList<>();
                 while (i < drawerDataList.size()) {
                     priorityList.add(getFluidDrawerPriority(drawerDataList.get(i)));
                     //                FluidDrawersLegacyMod.logger("priorityList"+priorityList.get(priorityList.size()-1));
@@ -298,9 +345,9 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
                 if (drawerDataList.size() == priorityList.size() && drawerDataList.size() > 0)
                     for (int j = 0; j < ModConstants.PRI_DISABLED; j++) {
-                        //                这里需要确认，到底是什么情况(这里是个备份，不担心）
+                        //
                         //                FluidDrawersLegacyMod.logger(resource.getAmount()+"fillByOrder"+j);
-                        amount -= fillByOrder(resource, action, j);
+                        amount -= fillByOrder(drawerDataList, priorityList, resource, action, j);
                         //                amount=resource.getAmount();
                         if (amount == 0) {
                             //  FluidDrawersLegacyMod.logger(resource.getAmount()+"break"+j);
@@ -315,13 +362,14 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
             }
 
             // RebuildLock_fill = false;
-            lockALL++;
+
             return result;
         }
 
         @Override
         public int getTanks() {
-            return CapabilityProvider_FluidDrawerController.this.drawerDataList.size();
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+            return getFluidMap(drawerDataList).size();
         }
 
         // the following three function must be treated cautiously
@@ -331,89 +379,132 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         @Nonnull
         @Override
         public FluidStack getFluidInTank(int tank) {
-            lockALL--;
-            FluidStack stack = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getFluid();
-            lockALL++;
-            return stack;
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+            FluidHolder fluidHolder = getFluidMap(drawerDataList).get(tank);
+            // FluidStack stack = drawerDataList.get(tank).getTank().getFluid().copy();
+            // long startTime=System.currentTimeMillis();
+            // // for (int i = 0; i < 10000*1; i++) {
+            // //     getFluidDrawerDataList();
+            // //     // getFluidMap(getFluidDrawerDataList());
+            // // }
+            // long endTime = System.currentTimeMillis();
+            // long duration = endTime - startTime;
+            // FluidDrawersLegacyMod.logger("Cost: " + duration + "Millis");
+
+            return new FluidStack(fluidHolder.fluid, fluidHolder.fluidAmount);
         }
 
         @Override
         public int getTankCapacity(int tank) {
-            lockALL--;
-            int amount = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().getCapacity();
-            lockALL++;
-            return amount;
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+            FluidHolder fluidHolder = getFluidMap(drawerDataList).get(tank);
+            // int amount = drawerDataList.get(tank).getTank().getCapacity();
+            return fluidHolder.tankCapacity;
         }
 
         @Override
         public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {
-            lockALL--;
-            boolean result = CapabilityProvider_FluidDrawerController.this.drawerDataList.get(tank).getTank().isFluidValid(0, stack);
-            lockALL++;
-            return result;
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+            FluidHolder fluidHolder = getFluidMap(drawerDataList).get(tank);
+            // boolean result = drawerDataList.get(tank).getTank().isFluidValid(tank, stack);
+
+            return stack.isFluidEqual(fluidHolder.fluid) && stack.getAmount() + fluidHolder.fluidAmount <= fluidHolder.tankCapacity;
         }
 
 
-        // backport from 1.20.1
         // when action.execute ,can't give out the fluidstack ,or something bad would happen
         // note it's just a address ,so can't let others can change value directly
         @Nonnull
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
+            //            FluidDrawersLegacyMod.logger("Drainresource" + resource.writeToNBT(new CompoundNBT()));
             // RebuildLock_drain0 = true;
-            lockALL--;
+            // FluidDrawersLegacyMod.logger(action, resource.writeToNBT(new CompoundTag()));
+
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+
+            // FluidDrawersLegacyMod.logger(getFluidMap(drawerDataList));
             FluidStack result = FluidStack.EMPTY;
             FluidStack resourceCopy = resource.copy();
-            if (!resource.isEmpty() && resource.getAmount() > 0)
-            {
+            // if (action.execute()) return result;
+            if (!resourceCopy.isEmpty() && resourceCopy.getAmount() > 0) {
                 for (int i = 0; i < drawerDataList.size(); i++) {
-                    if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
+                    if (resourceCopy.getAmount() <= 0) break;
+                    int drawerFluidAmount = drawerDataList.get(i).getTank().getFluid().getAmount();
+                    if (drawerDataList.get(i).getTank().getFluid().isEmpty())
                         continue;
-                    if (drawerDataList.get(i).getTank().getFluid().getFluid() == resource.getFluid()
-                            && drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
+                    if (drawerDataList.get(i).getTank().getFluid().isFluidEqual(resourceCopy) && drawerFluidAmount > 0) {
+                        // FluidStack temp = new FluidStack(drawerFluid, Math.min(drawerFluidAmount, resourceCopy.getAmount()));
+                        //
+                        // // FluidStack temp =
+                        // if (action.execute())
                         FluidStack temp = drawerDataList.get(i).getTank().drain(resourceCopy, action);
                         if (temp.getAmount() > 0) {
                             if (result == FluidStack.EMPTY)
                                 result = temp;
                             else result.grow(temp.getAmount());
                             resourceCopy.shrink(temp.getAmount());
+                            // break;
                         }
                     }
                 }
             }
             // RebuildLock_drain0 = false;
-            lockALL++;
+
             return result;
         }
 
         @Nonnull
         @Override
         public FluidStack drain(int maxDrain, FluidAction action) {
+            //            FluidDrawersLegacyMod.LOGGER.info("Drainmmmm" + maxDrain);
             // RebuildLock_drain = true;
-            lockALL--;
+            // FluidDrawersLegacyMod.logger(action, maxDrain);
+            List<BlockEntityFluidDrawer.StandardDrawerData> drawerDataList = getFluidDrawerDataList();
+            List<FluidHolder> fluidHolder = getFluidMap(drawerDataList);
+
             FluidStack result = FluidStack.EMPTY;
-            Fluid fluidType = Fluids.EMPTY;
+            // FluidStack fluidType = FluidStack.EMPTY;
             // Strange , 0<0 ,but for will ingroe it.
-            if (maxDrain > 0 && drawerDataList.size() > 0)
+            if (maxDrain > 0 && drawerDataList.size() > 0 && fluidHolder.size() > 0) {
+
+                // tile.getLevel().dimensionTypeId
+                if (tile.getLevel() instanceof ServerLevel) {
+                    // FluidDrawerControllerSave fluidDrawerControllerSave = FluidDrawerControllerSave.get(tile.getLevel());
+                    // this.fluid = fluidDrawerControllerSave.get(tile.getBlockPos());
+                    if (this.fluid.isEmpty() || !fluidRecord.contains(this.fluid))
+                        this.fluid = fluidHolder.get(0).fluid;
+                    // fluidDrawerControllerSave.update(tile.getBlockPos(), this.fluid);
+                }
                 for (int i = 0; i < drawerDataList.size(); i++) {
+                    if (maxDrain <= 0) break;
                     if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                         continue;
                     if (drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
-                        if (fluidType == Fluids.EMPTY) {
-                            fluidType = drawerDataList.get(i).getTank().getFluid().getFluid();
-                        }
-                        FluidStack temp = new FluidStack(fluidType, maxDrain);
+                        if (!result.isEmpty() && !result.isFluidEqual(drawerDataList.get(i).getTank().getFluid()))
+                            continue;
+
+
+                        // FluidStack temp = new FluidStack(!result.isEmpty() ? result : drawerDataList.get(i).getTank().getFluid(), maxDrain);
+                        FluidStack temp = new FluidStack(!result.isEmpty() ? result : this.fluid, maxDrain);
                         temp = drawerDataList.get(i).getTank().drain(temp, action);
                         if (temp.getAmount() > 0) {
                             if (result == FluidStack.EMPTY)
                                 result = temp;
                             else result.grow(temp.getAmount());
-                            maxDrain-=temp.getAmount();
+                            maxDrain -= temp.getAmount();
                         }
                     }
 
                 }
-            lockALL++;
+            }
+
+            // if (result.getAmount() <= 0) {
+            //     // RebuildLock_drain = false;
+            //     result= FluidStack.EMPTY;
+            // }
+            // RebuildLock_drain = false;
+
             return result;
         }
 
@@ -475,93 +566,93 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     //
     //    }
 
-    @SubscribeEvent
-    public static void StopForSave(LevelEvent.Unload event) {
-        if (timerList.size() == 0)
-            return;
-        for (int i = 0; i < timerList.size(); i++) {
-            timerList.get(i).cancel();
-            FluidDrawersLegacyMod.logger("TRY CLOSE" + i);
-        }
-        timerList.clear();
-    }
+    // @SubscribeEvent
+    // public static void StopForSave(LevelEvent.Unload event) {
+    //     if (timerList.size() == 0)
+    //         return;
+    //     for (int i = 0; i < timerList.size(); i++) {
+    //         timerList.get(i).cancel();
+    //         FluidDrawersLegacyMod.logger("TRY CLOSE" + i);
+    //     }
+    //     timerList.clear();
+    // }
 
 
     // use to find all nodes
-    public void searchNode(Level world, BlockPos originPos, BlockPos basePos) {
+    // public void searchNode(Level world, BlockPos originPos, BlockPos basePos) {
+    //
+    //     if (!world.hasChunk(originPos.getX() >> 4, originPos.getZ() >> 4))
+    //         return;
+    //     // above
+    //     BlockPos p1 = originPos.above();
+    //     if (withinRange(p1, basePos))
+    //         if (testBlock(world.getBlockState(p1).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p1) + p1.toString() +
+    //                     (Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getZ() - basePos.getZ())));
+    //             searchNode(world, p1, basePos);
+    //         }
+    //     //        east
+    //     BlockPos p2 = originPos.east();
+    //     if (withinRange(p2, basePos)) {
+    //         if (testBlock(world.getBlockState(p2).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p2).toString());
+    //
+    //             searchNode(world, p2, basePos);
+    //         }
+    //     }
+    //     //        south
+    //     BlockPos p3 = originPos.south();
+    //     if (withinRange(p3, basePos)) {
+    //         if (testBlock(world.getBlockState(p3).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p3).toString());
+    //             searchNode(world, p3, basePos);
+    //         }
+    //     }
+    //     //        west
+    //     BlockPos p4 = originPos.west();
+    //     if (withinRange(p4, basePos)) {
+    //         if (testBlock(world.getBlockState(p4).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p4).toString());
+    //             searchNode(world, p4, basePos);
+    //         }
+    //     }
+    //     //        north
+    //     BlockPos p5 = originPos.north();
+    //     if (withinRange(p5, basePos)) {
+    //         if (testBlock(world.getBlockState(p5).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p5).toString());
+    //             searchNode(world, p5, basePos);
+    //         }
+    //     }
+    //     //        below
+    //     BlockPos p6 = originPos.below();
+    //     if (withinRange(p6, basePos)) {
+    //         if (testBlock(world.getBlockState(p6).getBlock())) {
+    //             FluidDrawersLegacyMod.logger(world.getBlockState(p6).toString());
+    //             searchNode(world, p6, basePos);
+    //         }
+    //     }
+    // }
+    //
+    // private boolean testBlock(Block block) {
+    //     if (block instanceof INetworked)
+    //         return true;
+    //     return false;
+    // }
 
-        if (!world.hasChunk(originPos.getX() >> 4, originPos.getZ() >> 4))
-            return;
-        // above
-        BlockPos p1 = originPos.above();
-        if (withinRange(p1, basePos))
-            if (testBlock(world.getBlockState(p1).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p1) + p1.toString() +
-                        (Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getY() - basePos.getY()) + Math.abs(p1.getZ() - basePos.getZ())));
-                searchNode(world, p1, basePos);
-            }
-        //        east
-        BlockPos p2 = originPos.east();
-        if (withinRange(p2, basePos)) {
-            if (testBlock(world.getBlockState(p2).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p2).toString());
-
-                searchNode(world, p2, basePos);
-            }
-        }
-        //        south
-        BlockPos p3 = originPos.south();
-        if (withinRange(p3, basePos)) {
-            if (testBlock(world.getBlockState(p3).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p3).toString());
-                searchNode(world, p3, basePos);
-            }
-        }
-        //        west
-        BlockPos p4 = originPos.west();
-        if (withinRange(p4, basePos)) {
-            if (testBlock(world.getBlockState(p4).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p4).toString());
-                searchNode(world, p4, basePos);
-            }
-        }
-        //        north
-        BlockPos p5 = originPos.north();
-        if (withinRange(p5, basePos)) {
-            if (testBlock(world.getBlockState(p5).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p5).toString());
-                searchNode(world, p5, basePos);
-            }
-        }
-        //        below
-        BlockPos p6 = originPos.below();
-        if (withinRange(p6, basePos)) {
-            if (testBlock(world.getBlockState(p6).getBlock())) {
-                FluidDrawersLegacyMod.logger(world.getBlockState(p6).toString());
-                searchNode(world, p6, basePos);
-            }
-        }
-    }
-
-    private boolean testBlock(Block block) {
-        if (block instanceof INetworked)
-            return true;
-        return false;
-    }
-
-    private boolean withinRange(BlockPos checkPos, BlockPos basePos) {
-        if (posStack.search(checkPos) != -1)
-            return false;
-        posStack.push(checkPos);
-        if (checkPos.getY() > 256 || checkPos.getY() < 0)
-            return false;
-        if (Math.max(Math.abs(checkPos.getY() - basePos.getY()),
-                Math.max(
-                        Math.abs(checkPos.getY() - basePos.getY())
-                        , Math.abs(checkPos.getZ() - basePos.getZ())))
-                < (CommonConfig.GENERAL.controllerRange.get() / 2 + 1))
-            return true;
-        return false;
-    }
+    // private boolean withinRange(BlockPos checkPos, BlockPos basePos) {
+    //     if (posStack.search(checkPos) != -1)
+    //         return false;
+    //     posStack.push(checkPos);
+    //     if (checkPos.getY() > 256 || checkPos.getY() < 0)
+    //         return false;
+    //     if (Math.max(Math.abs(checkPos.getY() - basePos.getY()),
+    //             Math.max(
+    //                     Math.abs(checkPos.getY() - basePos.getY())
+    //                     , Math.abs(checkPos.getZ() - basePos.getZ())))
+    //             < (CommonConfig.GENERAL.controllerRange.get() / 2 + 1))
+    //         return true;
+    //     return false;
+    // }
 
 }

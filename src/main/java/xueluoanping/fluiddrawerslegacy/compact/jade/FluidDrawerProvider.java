@@ -14,14 +14,13 @@ import snownee.jade.api.ui.IProgressStyle;
 import net.minecraft.client.resources.language.I18n;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.fluids.FluidStack;
 
 // import snownee.jade.VanillaPlugin;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 
 public class FluidDrawerProvider implements IBlockComponentProvider {
@@ -34,15 +33,15 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
 
         if (accessor.getBlock() instanceof BlockFluidDrawer) {
             BlockEntity tileEntity = accessor.getLevel().getBlockEntity(((BlockAccessor) accessor).getPosition());
-            if (tileEntity instanceof TileEntityFluidDrawer tile ) {
+            if (tileEntity instanceof BlockEntityFluidDrawer tile ) {
                 tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                         .ifPresent(handler -> {
                             int capacity = tile.getTankEffectiveCapacity();
 
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            TileEntityFluidDrawer.betterFluidHandler betterFluidHandler = (TileEntityFluidDrawer.betterFluidHandler) handler;
+                            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) handler;
                             FluidStack fluidStack = betterFluidHandler.getFluid().copy();
-                            Fluid cache = betterFluidHandler.getCacheFluid();
+                            FluidStack cache = betterFluidHandler.getCacheFluid();
 
                             appendTank(tooltip, fluidStack, capacity, cache, isLocked);
                         });
@@ -50,7 +49,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
         }
     }
 
-    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, Fluid cacheFluid, boolean isLocked) {
+    public static void appendTank(ITooltip tooltip, FluidStack fluidStack, int capacity, FluidStack cacheFluid, boolean isLocked) {
         if (capacity > 0) {
             IElementHelper helper = tooltip.getElementHelper();
             Component text;
