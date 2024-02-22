@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"parent": "minecraft:block/cube",
 	"render_type": "cutout_mipped",
 	"textures": {
 		"glass": "fluiddrawerslegacy:block/glass",

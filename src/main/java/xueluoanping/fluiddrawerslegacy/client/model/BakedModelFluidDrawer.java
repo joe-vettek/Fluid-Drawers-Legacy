@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
 import java.util.List;
 import java.util.Random;
@@ -76,12 +77,16 @@ public class BakedModelFluidDrawer implements BakedModel {
         return this.existingModel.getOverrides();
     }
 
+
+
     @Override
     public BakedModel applyTransform(ItemDisplayContext transformType, PoseStack poseStack, boolean applyLeftHandTransform) {
 
         if (transformType == ItemDisplayContext.NONE ||
                 transformType ==ItemDisplayContext.FIXED)
             return this.existingModel.applyTransform(transformType, poseStack,applyLeftHandTransform);
+        // FluidDrawersLegacyMod.logger(existingModel.getTransforms().gui.translation);
+
         // return this;
         return BakedModel.super.applyTransform(transformType, poseStack, applyLeftHandTransform);
     }

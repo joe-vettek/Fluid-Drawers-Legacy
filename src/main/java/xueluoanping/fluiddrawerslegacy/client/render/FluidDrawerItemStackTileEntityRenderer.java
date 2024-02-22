@@ -10,6 +10,7 @@ import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -17,11 +18,13 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -49,6 +52,8 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         renderFluid(stack, matrixStackIn, bufferIn, combinedLightIn, 0);
         matrixStackIn.translate(0.5F, 0.5F, 0.5F);
         itemRenderer.render(stack, ItemDisplayContext.NONE, false, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay, ibakedmodel.applyTransform(ItemDisplayContext.NONE,matrixStackIn,false));
+        // BlockRenderDispatcher renderer = Minecraft.getInstance().getBlockRenderer();
+        // renderer.renderSingleBlock(((BlockItem) stack.getItem()).getBlock().defaultBlockState(), matrixStackIn, bufferIn, combinedLightIn, combinedOverlay, ModelData.EMPTY, null);
         matrixStackIn.popPose();
 
     }
