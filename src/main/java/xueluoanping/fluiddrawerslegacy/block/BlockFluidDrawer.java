@@ -44,6 +44,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fluids.FluidAttributes;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
@@ -54,6 +55,7 @@ import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.tileentity.TileEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
+import xueluoanping.fluiddrawerslegacy.config.General;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -70,7 +72,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     public static final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
     public static final VoxelShape top = Block.box(0, 15, 0, 16, 16, 16);
 
-    
+
 //    public FluidDrawer(int drawerCount, boolean halfDepth, int storageUnits, Properties properties) {
 //        super(properties);
 //    }
@@ -176,7 +178,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
                                     }
                                 });
                     } else if (tile.hasNoFluid()) {
-                        if(bucketItem.getFluid() == Fluids.EMPTY)
+                        if (bucketItem.getFluid() == Fluids.EMPTY)
                             return ActionResultType.FAIL;
                         else {
                             tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, Direction.DOWN)
@@ -348,7 +350,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext p_196258_1_) {
-        return (BlockState)this.defaultBlockState().setValue(FACING, p_196258_1_.getHorizontalDirection().getOpposite());
+        return (BlockState) this.defaultBlockState().setValue(FACING, p_196258_1_.getHorizontalDirection().getOpposite());
     }
 
     @Override
@@ -401,11 +403,27 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
         super.setPlacedBy(level, pos, state, entity, stack);
     }
 
+    @Override
+    public void playerWillDestroy(World world, BlockPos pos, BlockState state, PlayerEntity playerEntity) {
+        super.playerWillDestroy(world, pos, state, playerEntity);
+        if (world instanceof ServerWorld) {
+            TileEntity tileEntity = world.getBlockEntity(pos);
+            if (!General.retainFluid.get() && tileEntity instanceof TileEntityFluidDrawer) {
+                tileEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).ifPresent(iFluidHandler -> {
+                    for (int i = 0; i < iFluidHandler.getTanks(); i++) {
+                        iFluidHandler.drain(iFluidHandler.getFluidInTank(i), IFluidHandler.FluidAction.EXECUTE);
+                    }
+                });
+            }
+        }
+
+    }
+
 
     @Override
-    public void destroy(IWorld p_176206_1_, BlockPos p_176206_2_, BlockState p_176206_3_) {
-        super.destroy(p_176206_1_, p_176206_2_, p_176206_3_);
-        p_176206_1_.playSound(null, p_176206_2_, Fluids.WATER.getAttributes().getEmptySound(), SoundCategory.BLOCKS, 1.0F, 1.0F);
+    public void destroy(IWorld iWorld, BlockPos pos, BlockState blockState) {
+        super.destroy(iWorld, pos, blockState);
+        iWorld.playSound(null, pos, Fluids.WATER.getAttributes().getEmptySound(), SoundCategory.BLOCKS, 1.0F, 1.0F);
 
     }
 
@@ -414,7 +432,7 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     }
 
     public int getSignal(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction side) {
-        if (!this.isSignalSource(state)||!(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
+        if (!this.isSignalSource(state) || !(blockAccess.getBlockEntity(pos) instanceof TileEntityFluidDrawer)) {
             return 0;
         } else {
             TileEntityFluidDrawer tile = (TileEntityFluidDrawer) blockAccess.getBlockEntity(pos);
@@ -424,6 +442,6 @@ public class BlockFluidDrawer extends HorizontalBlock implements INetworked {
     }
 
     public int getDirectSignal(BlockState state, IBlockReader worldIn, BlockPos pos, Direction side) {
-        return side == Direction.UP ? this.getSignal(state, worldIn, pos, side):0 ;
+        return side == Direction.UP ? this.getSignal(state, worldIn, pos, side) : 0;
     }
 }
