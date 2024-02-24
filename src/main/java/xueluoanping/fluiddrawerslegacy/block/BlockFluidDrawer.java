@@ -14,6 +14,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 // import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.*;
@@ -50,12 +51,14 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
+import xueluoanping.fluiddrawerslegacy.config.General;
 
 import javax.annotation.Nullable;
 import java.util.EnumSet;
@@ -350,6 +353,21 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         }
 
         super.setPlacedBy(level, pos, state, entity, stack);
+    }
+
+
+    @Override
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player playerEntity) {
+        super.playerWillDestroy(level, pos, state, playerEntity);
+        if (level instanceof ServerLevel) {
+            if (!General.retainFluid.get() && level.getBlockEntity(pos) instanceof BlockEntityFluidDrawer blockEntityFluidDrawer) {
+                blockEntityFluidDrawer.getCapability(ForgeCapabilities.FLUID_HANDLER).ifPresent(iFluidHandler -> {
+                    for (int i = 0; i < iFluidHandler.getTanks(); i++) {
+                        iFluidHandler.drain(iFluidHandler.getFluidInTank(i), IFluidHandler.FluidAction.EXECUTE);
+                    }
+                });
+            }
+        }
     }
 
 

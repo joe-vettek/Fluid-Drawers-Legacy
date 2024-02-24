@@ -72,7 +72,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
             FluidType attributes = fluidStackDown.getFluid().getFluidType();
-            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
 
 
 
@@ -161,7 +161,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         //获取sprite
         FluidType attributes = fluid.getFluid().getFluidType();
-        TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture());
+        TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluid.getFluid()).getStillTexture(fluid));
 
         //绑atlas
 //        Minecraft.getInstance().getTextureManager().bindForSetup(InventoryMenu.BLOCK_ATLAS);
@@ -279,7 +279,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
 
         FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
+        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
         int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
         int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
