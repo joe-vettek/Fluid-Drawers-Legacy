@@ -104,7 +104,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         if(stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))fluidStackDown.setAmount(Integer.MAX_VALUE);
 
         Minecraft mc = Minecraft.getInstance();
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture(fluidStackDown));
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
         int colorRGB = fluidStackDown.getFluid().getAttributes().getColor(fluidStackDown);
 

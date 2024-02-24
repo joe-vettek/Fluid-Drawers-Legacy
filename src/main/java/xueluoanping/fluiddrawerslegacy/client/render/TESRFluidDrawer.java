@@ -226,7 +226,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture());
+        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(fluidStackDown.getFluid().getAttributes().getStillTexture(fluidStackDown));
 
 //        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
