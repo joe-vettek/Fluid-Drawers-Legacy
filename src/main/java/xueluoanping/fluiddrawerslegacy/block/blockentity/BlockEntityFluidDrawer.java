@@ -84,10 +84,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         groupData.syncAttributes();
     }
 
-    public boolean hasNoFluid() {
-        return upgrades().write(new CompoundTag()).toString().contains("storagedrawers:void_upgrade") || groupData.tank.getFluidInTank(0).getAmount() == 0;
-    }
-
     public FluidStack getTankFLuid() {
         return groupData.tank.getFluidInTank(0);
     }
@@ -262,7 +258,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
         public final betterFluidHandler tank;
         private final LazyOptional<betterFluidHandler> tankHandler;
-        public DrawerData drawerData;
 
         public GroupData(int slotCount) {
             super(slotCount);
@@ -281,8 +276,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         @Nonnull
         @Override
         protected DrawerData createDrawer(int slot) {
-            drawerData = new StandardDrawerData(this, slot);
-            return drawerData;
+            return new StandardDrawerData(this, slot);
         }
 
         @Override
