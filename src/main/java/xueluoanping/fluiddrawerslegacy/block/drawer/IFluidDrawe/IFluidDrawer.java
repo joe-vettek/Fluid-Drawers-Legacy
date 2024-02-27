@@ -2,6 +2,8 @@ package xueluoanping.fluiddrawerslegacy.block.drawer.IFluidDrawe;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.IFluidTank;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
@@ -33,4 +35,8 @@ public interface IFluidDrawer extends IDrawer {
 
 
     boolean isEmpty();
+
+    IFluidTank getTank();
+
+
 }

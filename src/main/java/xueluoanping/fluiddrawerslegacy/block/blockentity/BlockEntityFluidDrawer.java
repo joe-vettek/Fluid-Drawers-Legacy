@@ -102,7 +102,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     @NotNull
     @Override
-    public IDrawer getDrawer(int i) {
+    public IFluidDrawer getDrawer(int i) {
         return fluidGroupData.getDrawer(i);
     }
 
@@ -291,7 +291,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         }
 
         @Override
-        public @NotNull IDrawer getDrawer(int i) {
+        public @NotNull IFluidDrawer getDrawer(int i) {
             return this.slots[i];
         }
 
@@ -628,9 +628,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
                     if (upgrades().hasOneStackUpgrade())
                         return false;
 
-                    if (BlockEntityFluidDrawer.this.getTank().getFluidInTank(0).getAmount()
-                            >= getCapacityStandard() / 32)
-                        return false;
+                    for (int i = 0; i < getDrawerCount(); i++) {
+                        if (getDrawer(i).getTank().getFluidAmount() >= getCapacityTank() / 32)
+                            return false;
+                    }
+
 //                    int lostStackCapacity = getCapacityStandard() * upgrades().getStorageMultiplier();
 //
 //                    if (!this.stackCapacityCheck(lostStackCapacity)) {
@@ -656,12 +658,14 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
                     if (effectiveStorageMult == storageMult) {
                         --storageMult;
                     }
-                    int amount = getTank().getFluidInTank(0).getAmount();
-                    int capacity = getTank().getTankCapacity(0);
-                    int standardCapacity = getCapacityStandard();
-                    int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
-                    if (afterCapacity < amount) return false;
 
+                    for (int i = 0; i < getDrawerCount(); i++) {
+                        int amount = getDrawer(i).getTank().getFluidAmount();
+                        int standardCapacity = getCapacityTank() ;
+                        int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
+                        if (afterCapacity<amount)
+                            return false;
+                    }
                 }
 
                 return true;
