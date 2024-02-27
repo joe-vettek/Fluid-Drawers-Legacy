@@ -160,94 +160,23 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
         ItemStack stack = asItem().getDefaultInstance();
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof BlockEntityFluidDrawer) {
-            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
-            final FluidStack[] fluidStackDown = new FluidStack[1];
-            tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                    .ifPresent(handler -> {
-                        fluidStackDown[0] = handler.getFluidInTank(0);
-                        CompoundTag nbt = new CompoundTag();
-                        handler.getFluidInTank(0).writeToNBT(nbt);
-                        stack.addTagElement("tank", ((BlockEntityFluidDrawer.betterFluidHandler) handler).serializeNBT());
-
-                    });
-            stack.addTagElement("Upgrades", tile.getUpdateTag().get("Upgrades"));
-
-
-            EnumSet<LockAttribute> attrs = EnumSet.noneOf(LockAttribute.class);
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_EMPTY))
-                attrs.add(LockAttribute.LOCK_EMPTY);
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isItemLocked(LockAttribute.LOCK_POPULATED))
-                attrs.add(LockAttribute.LOCK_POPULATED);
-            if (!attrs.isEmpty()) {
-
-                stack.getOrCreateTag().putByte("Lock", (byte) LockAttribute.getBitfield(attrs));
-            }
-
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isConcealed())
-                stack.getOrCreateTag().putBoolean("Shr", true);
-
-            if (((IDrawerAttributesModifiable) tile.getDrawerAttributes()).isShowingQuantity())
-                stack.getOrCreateTag().putBoolean("Qua", true);
-
+        if (tileEntity instanceof BlockEntityFluidDrawer tile) {
+            tile.writePortable(stack.getOrCreateTag());
         }
         return stack;
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return (BlockState) this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override
     public void setPlacedBy(Level level, BlockPos pos, BlockState state, @Nullable LivingEntity entity, ItemStack stack) {
         BlockEntity tileEntity = level.getBlockEntity(pos);
-        if (tileEntity instanceof BlockEntityFluidDrawer &&
-                stack.hasTag()) {
-            BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
-
-            if (stack.getTag().contains("Upgrades")) {
-                CompoundTag nbt = new CompoundTag();
-                nbt.put("Upgrades", stack.getTag().get("Upgrades"));
-                tile.upgrades().read(nbt);
-            }
-            CompoundTag tag = stack.getOrCreateTag();
-            if (tag.contains("Lock")) {
-                EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(tag.getByte("Lock"));
-                if (attrs != null) {
-                    ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
-                    ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
-                }
-            } else {
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setItemLocked(LockAttribute.LOCK_EMPTY, false);
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setItemLocked(LockAttribute.LOCK_POPULATED, false);
-            }
-            if (stack.getTag().contains("Shr")) {
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setIsConcealed(tag.getBoolean("Shr"));
-            } else {
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setIsConcealed(false);
-            }
-            if (stack.getTag().contains("Qua")) {
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setIsShowingQuantity(tag.getBoolean("Qua"));
-            } else {
-                ((IDrawerAttributesModifiable) tile.getDrawerAttributes()).setIsShowingQuantity(false);
-            }
-            if (entity != null && entity.getOffhandItem().getItem() == ModItems.DRAWER_KEY.get()) {
-                IDrawerAttributes _attrs = (IDrawerAttributes) tile.getCapability(CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY).orElse(new EmptyDrawerAttributes());
-                if (_attrs instanceof IDrawerAttributesModifiable) {
-                    IDrawerAttributesModifiable attrs = (IDrawerAttributesModifiable) _attrs;
-                    attrs.setItemLocked(LockAttribute.LOCK_EMPTY, true);
-                    attrs.setItemLocked(LockAttribute.LOCK_POPULATED, true);
-
-                }
-            }
-            if (stack.getOrCreateTag().contains("tank")) {
-                tile.fluidAnimation.setCutStartAnimation(true);
-                BlockEntityFluidDrawer.betterFluidHandler tank = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
-                tank.deserializeNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
-            }
+        if (tileEntity instanceof BlockEntityFluidDrawer tile) {
+            tile.readPortable(stack.getOrCreateTag());
         }
-
         super.setPlacedBy(level, pos, state, entity, stack);
     }
 

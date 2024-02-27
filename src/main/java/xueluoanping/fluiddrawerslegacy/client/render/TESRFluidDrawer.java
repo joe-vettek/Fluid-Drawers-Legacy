@@ -32,6 +32,7 @@ import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import org.joml.Vector3d;
+import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
@@ -70,7 +71,13 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         renderFluid(tile, matrixStackIn, bufferIn, combinedLightIn, animationTime);
         matrixStackIn.popPose();
 
-        BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
+        BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = null;
+        // FluidStack fluidStackDown = FluidStack.EMPTY;
+        // int capacity = 0;
+        // boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
+        for (BlockEntityFluidDrawer.FluidDrawerData data : tile.getTank().getFluidDrawerDataList()) {
+            betterFluidHandler = data.getTank();
+        }
         matrixStackIn.pushPose();
 
         if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY &&
@@ -79,7 +86,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
             FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
             Font fontRenderer = this.font;
             LocalPlayer player = Minecraft.getInstance().player;
-            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
+            handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(), tile.getBlockState().getValue(BlockFluidDrawer.FACING));
             matrixStackIn.scale(0.007f, 0.007f, 0.007f);
             MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
             int textWidth = fontRenderer.width(I18n.get(fluidStackDown.getTranslationKey()));
@@ -105,7 +112,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
                 String label = "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")";
                 int textWidth = fontRenderer.width(label);
                 LocalPlayer player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(), tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -133,7 +140,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
                 String label = String.valueOf(amount) + "mB";
                 int textWidth = fontRenderer.width(label);
                 LocalPlayer player = Minecraft.getInstance().player;
-                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(),tile.getBlockState().getValue(BlockFluidDrawer.FACING));
+                handleMatrixAngle(matrixStackIn, player, tile.getBlockPos(), tile.getBlockState().getValue(BlockFluidDrawer.FACING));
 //                FluidDrawersLegacyMod.logger(vector3d + ""+d);
                 matrixStackIn.scale(0.007f, 0.007f, 0.007f);
 
@@ -149,7 +156,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
     }
 
 
-    private void handleMatrixAngle(PoseStack matrixStackIn, LocalPlayer player, BlockPos pos,Direction d) {
+    private void handleMatrixAngle(PoseStack matrixStackIn, LocalPlayer player, BlockPos pos, Direction d) {
         Vector3d vector3d = new Vector3d(player.getPosition(1.0f).x() - pos.getX() - 0.5
                 , player.getPosition(0f).y() - pos.getY()
                 , player.getPosition(0f).z() - pos.getZ() - 0.5);
@@ -202,49 +209,32 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
 
     private void renderFluid(BlockEntityFluidDrawer tile, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
 //        FluidStack fluidStackDown = new FluidStack(Fluids.WATER, 30000);
-        FluidStack fluidStackDown = null;
-        final FluidStack[] fluidStack = new FluidStack[1];
-        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
-                .ifPresent(handler -> {
-                    fluidStack[0] = handler.getFluidInTank(0);
-//                    FluidDrawersLegacyMod.LOGGER.info(""+handler.getFluidInTank(0));
-                });
-        if (fluidStack[0] == null || (fluidStack[0].getFluid() == Fluids.EMPTY) && !tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY))
-            return;
-        else fluidStackDown = fluidStack[0];
-//        FluidDrawersLegacyMod.logger(((TileEntityFluidDrawer.betterFluidHandler) tile.getTank()).getCacheFluid().getDisplayName().toString());
-
-        if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) tile.getTank();
-            if (fluidStackDown.getAmount() <= 0)
-                if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
-
-                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
-//                    FluidDrawersLegacyMod.logger(fluidStackDown.getTranslationKey());
-//                FontRenderer fontRenderer = this.renderer.getFont();
-//                matrixStackIn.mulPose(new Quaternion(0, 0, 0, true));
-//                fontRenderer.draw(matrixStackIn, I18n.get(fluidStackDown.getTranslationKey()),0F, 0F, 0xFFFFF);
-                } else {
-                    return;
-                }
+        FluidStack fluidStackDown = FluidStack.EMPTY;
+        int capacity = 0;
+        boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
+        for (BlockEntityFluidDrawer.FluidDrawerData data : tile.getTank().getFluidDrawerDataList()) {
+            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
+            fluidStackDown = betterFluidHandler.getFluid().copy();
+            FluidStack cache = betterFluidHandler.getCacheFluid();
+            if (isLocked && fluidStackDown.isEmpty() && !cache.isEmpty()) {
+                fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+            }
+            capacity=data.getTank().getCapacity();
         }
-//        Minecraft mc = Minecraft.getInstance();
-//        TextureAtlasSprite still = mc.getTextureAtlas(AtlasTexture.LOCATION_BLOCKS).apply(fluidStackDown.getFluid().getFluidType().getStillTexture());
-        FluidType attributes = fluidStackDown.getFluid().getFluidType();
+        if (fluidStackDown.isEmpty()&&capacity>0) return;
+
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
 
-//        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
-//        TextureAtlasSprite still = mc.getBlockRenderer().getBlockModelShaper().getTexture(fluidStackDown.getFluid().defaultFluidState().createLegacyBlock(), tile.getLevel(), tile.getBlockPos());
         int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
-        int capacity = tile.getTankEffectiveCapacity();
 //        int amount = fluidStackDown.getAmount();
-        int amount=tile.fluidAnimation.getAndUpdateLastFluidAmount( tile.getTankFLuid().getAmount(),animationTime);
+        int amount = tile.fluidAnimation.getAndUpdateLastFluidAmount(tile.getTankFLuid().getAmount(), animationTime);
         // FluidDrawersLegacyMod.logger(""+animationTime);
         if (capacity < amount) amount = capacity;
+
         float r = (float) amount / (float) capacity;
         if (tile.upgrades().hasVendingUpgrade()) r = 1f;
         float height = r * 0.875f;

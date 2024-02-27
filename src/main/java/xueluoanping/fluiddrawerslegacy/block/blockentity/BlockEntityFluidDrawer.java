@@ -1,6 +1,5 @@
 package xueluoanping.fluiddrawerslegacy.block.blockentity;
 
-import com.jaquadro.minecraft.storagedrawers.api.event.DrawerPopulatedEvent;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
@@ -10,7 +9,7 @@ import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
-import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
@@ -23,13 +22,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -39,6 +37,8 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.block.drawer.IFluidDrawe.IFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
@@ -51,46 +51,41 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
-    private GroupData groupData ;
-    private  final UpgradeData upgradeData=new BlockEntityFluidDrawer.DrawerUpgradeData() ;
+    private FluidGroupData fluidGroupData;
+    private final UpgradeData upgradeData = new BlockEntityFluidDrawer.DrawerUpgradeData();
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
 
     public FluidAnimation fluidAnimation = new FluidAnimation();
 
 
-    public BlockEntityFluidDrawer(int slotCount,BlockPos pos, BlockState state) {
-        super(ModContents.DRBlockEntities.getEntries().stream().filter(blockEntityTypeRegistryObject -> blockEntityTypeRegistryObject.getId()== RegisterFinderUtil.getBlockKey(state.getBlock())).findFirst().get().get(), pos, state);
-        this.groupData = new GroupData(slotCount);
+    public BlockEntityFluidDrawer(int slotCount, BlockPos pos, BlockState state) {
+        super(ModContents.DRBlockEntities.getEntries().stream().filter(blockEntityTypeRegistryObject -> blockEntityTypeRegistryObject.getId().equals(RegisterFinderUtil.getBlockKey(state.getBlock()))).findFirst().get().get(), pos, state);
+        this.fluidGroupData = new FluidGroupData(slotCount, this);
 
-        this.groupData.setCapabilityProvider(this);
-        this.injectPortableData(groupData);
+        // this.fluidGroupData.setCapabilityProvider(this);
+        this.injectPortableData(fluidGroupData);
 
         this.upgradeData.setDrawerAttributes(this.drawerAttributes);
         this.injectPortableData(this.upgradeData);
 //        FluidDrawersLegacyMod.logger("create tile");
     }
 
-    private static int getCapacityStandard() {
-        return General.volume.get();
-    }
-
-
 
     //    @Override
     public IDrawerGroup getGroup() {
-        return this.groupData;
+        return this.fluidGroupData;
     }
 
     //    @Override
     protected void onAttributeChanged() {
 //        super.onAttributeChanged();
         this.requestModelDataUpdate();
-        groupData.syncAttributes();
+        // fluidGroupData.syncAttributes();
     }
 
     public FluidStack getTankFLuid() {
-        return groupData.tank.getFluidInTank(0);
+        return fluidGroupData.tank.getFluidInTank(0);
     }
 
     public void inventoryChanged() {
@@ -102,13 +97,13 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     @Override
     public int getDrawerCount() {
-        return groupData.getDrawerCount();
+        return fluidGroupData.getDrawerCount();
     }
 
     @NotNull
     @Override
     public IDrawer getDrawer(int i) {
-        return groupData.getDrawer(i);
+        return fluidGroupData.getDrawer(i);
     }
 
     @NotNull
@@ -121,10 +116,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         IDrawerGroup group = this.getGroup();
-        if ( capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
+        if (capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
             return this.capabilityGroup.cast();
         } else {
-            if(getGroup()==null){return super.getCapability(capability, facing);}
+            if (getGroup() == null) {
+                return super.getCapability(capability, facing);
+            }
             LazyOptional<T> cap = this.getGroup().getCapability(capability, facing);
             return cap.isPresent() ? cap : super.getCapability(capability, facing);
         }
@@ -190,19 +187,35 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         }
     }
 
-    public IFluidHandler getTank() {
-        return this.groupData.tank;
+    public betterFluidManager<BlockEntityFluidDrawer> getTank() {
+        return this.fluidGroupData.tank;
     }
 
-    public int getTankEffectiveCapacity() {
+    private static int getCapacityStandard() {
+        return General.volume.get();
+    }
 
+
+    public int getCapacityEffective() {
         if (upgrades().hasVendingUpgrade() || upgrades().hasUnlimitedUpgrade())
             return Integer.MAX_VALUE;
         if (upgrades().hasOneStackUpgrade())
             return getCapacityStandard() / 32;
-
         return getCapacityStandard() * upgrades().getStorageMultiplier();
     }
+
+    public int getCapacityTank() {
+        return getCapacityEffective() / getDrawerCount();
+    }
+
+    public int getCapacityUsed() {
+        int used = 0;
+        for (FluidDrawerData data : fluidGroupData.slots) {
+            used += data.getTank().getFluidAmount();
+        }
+        return used;
+    }
+
 
     public static int calcultaeTankCapacitybyStack(ItemStack stack) {
         if (!stack.getOrCreateTag().contains("Upgrades"))
@@ -227,26 +240,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         }
     }
 
-//    @Override
-//    public int getDrawerCapacity() {
-//        return 0;
-//    }
 
-//    @Override
-//    public int getEffectiveDrawerCapacity() {
-//        return 0;
-//    }
-
-    @Nonnull
-//    @Override
-//    public IDrawer getDrawer(int slot) {
-//        return super.getDrawer(slot);
-//    }
-
-//    @Override
+    //    @Override
     public int getRedstoneLevel() {
 //        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
-        return (int) (((float) getTankFLuid().getAmount() / (float) getTankEffectiveCapacity()) * 15);
+        return (int) (((float) getCapacityUsed() / (float) getCapacityEffective()) * 15);
     }
 
     //    @Override
@@ -259,30 +257,47 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         return this.upgradeData;
     }
 
-    public class GroupData extends StandardDrawerGroup {
+    public class FluidGroupData extends BlockEntityDataShim implements IDrawerGroup {
 
         private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
-        public final betterFluidHandler tank;
-        private final LazyOptional<betterFluidHandler> tankHandler;
+        public final betterFluidManager<BlockEntityFluidDrawer> tank;
+        private final LazyOptional<betterFluidManager<BlockEntityFluidDrawer>> tankHandler;
+        private final FluidDrawerData[] slots;
 
-        public GroupData(int slotCount) {
-            super(slotCount);
-            tank = createFuildHandler();
+        public FluidGroupData(int slotCount, BlockEntityFluidDrawer blockEntityFluidDrawer) {
+            super();
+            this.slots = new FluidDrawerData[slotCount];
+
+            for (int i = 0; i < slotCount; ++i) {
+                this.slots[i] = this.createDrawer(i);
+            }
+            tank = createFuildHandler(blockEntityFluidDrawer);
             tankHandler = LazyOptional.of(() -> tank);
 
         }
 
-
-        private betterFluidHandler createFuildHandler() {
-            return new betterFluidHandler(General.volume.get()) {
-            };
+        private betterFluidManager<BlockEntityFluidDrawer> createFuildHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
+            return new betterFluidManager<>(blockEntityFluidDrawer);
         }
 
 
-        @Nonnull
+        protected FluidDrawerData createDrawer(int slot) {
+            return new FluidDrawerData(this, slot, getCapacityStandard() / this.slots.length);
+        }
+
         @Override
-        protected DrawerData createDrawer(int slot) {
-            return new StandardDrawerData(this, slot);
+        public int getDrawerCount() {
+            return this.slots.length;
+        }
+
+        @Override
+        public @NotNull IDrawer getDrawer(int i) {
+            return this.slots[i];
+        }
+
+        @Override
+        public int[] getAccessibleDrawerSlots() {
+            return new int[0];
         }
 
         @Override
@@ -314,10 +329,14 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         public CompoundTag write(CompoundTag tag) {
 
 //            FluidDrawersLegacyMod.logger(tag.toString());
-            tag.put("tank", tank.serializeNBT());
+//             tag.put("tank", tank.serializeNBT());
+            upgradeData.write(tag);
+            for (FluidDrawerData data : this.slots) {
+                tag.put("tank", data.serializeNBT());
+            }
 //            inventoryChanged();
             //            If want to camouflage, pay attention to setting the capacity first, but we don't need it.
-            return super.write(tag);
+            return tag;
         }
 
 
@@ -328,11 +347,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 //            upgrades must first,to adjust the capacity
             upgrades().read(nbt);
 //            FluidDrawersLegacyMod.logger("read"+nbt.toString());
-            if (nbt.contains("tank")) {
-                tank.deserializeNBT((CompoundTag) nbt.get("tank"));
+
+            for (FluidDrawerData data : this.slots) {
+                data.deserializeNBT(nbt.getCompound("tank"));
             }
 //            inventoryChanged();
-            super.read(nbt);
         }
 
         public boolean idVoidUpgrade() {
@@ -341,53 +360,62 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     }
 
-    public class StandardDrawerData extends StandardDrawerGroup.DrawerData {
+    // IDrawer,
+    public class FluidDrawerData implements IFluidDrawer, INBTSerializable<CompoundTag> {
         private int slot;
-//        private FluidStack fluid = new FluidStack(Fluids.EMPTY, 0);
+        //        private FluidStack fluid = new FluidStack(Fluids.EMPTY, 0);
+        private final FluidGroupData group;
+        public final betterFluidHandler tank;
 
-        public StandardDrawerData(StandardDrawerGroup group, int slot) {
-            super(group);
+        public FluidDrawerData(FluidGroupData group, int slot, int ca) {
+            super();
+            this.group = group;
             this.slot = slot;
+            this.tank = createFluidHandler(ca);
         }
 
-        public BlockPos getDrawerPos(){
+        private betterFluidHandler createFluidHandler(int ca) {
+            return new betterFluidHandler(ca);
+        }
+
+        public BlockPos getDrawerPos() {
             return getBlockPos();
         }
 
         public betterFluidHandler getTank() {
-            return BlockEntityFluidDrawer.this.groupData.tank;
+            return tank;
         }
 
 //        public int getCapacity() {
 //            return getCapacityStandard() * upgrades().getStorageMultiplier();
 //        }
-
-        @Override
-        protected int getStackCapacity() {
-//            return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
-            return 0;
-        }
-
-
-        @Override
-        protected void onItemChanged() {
-            DrawerPopulatedEvent event = new DrawerPopulatedEvent(this);
-            MinecraftForge.EVENT_BUS.post(event);
-
-            if (getLevel() != null && !getLevel().isClientSide()) {
-                setChanged();
-                markBlockForUpdate();
-            }
-        }
-
-        @Override
-        protected void onAmountChanged() {
-            if (getLevel() != null && !getLevel().isClientSide()) {
-                syncClientCount(slot, getStoredItemCount());
-                setChanged();
-
-            }
-        }
+//
+//         @Override
+//         protected int getStackCapacity() {
+// //            return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
+//             return 0;
+//         }
+//
+//
+//         @Override
+//         protected void onItemChanged() {
+//             DrawerPopulatedEvent event = new DrawerPopulatedEvent(this);
+//             MinecraftForge.EVENT_BUS.post(event);
+//
+//             if (getLevel() != null && !getLevel().isClientSide()) {
+//                 setChanged();
+//                 markBlockForUpdate();
+//             }
+//         }
+//
+//         @Override
+//         protected void onAmountChanged() {
+//             if (getLevel() != null && !getLevel().isClientSide()) {
+//                 syncClientCount(slot, getStoredItemCount());
+//                 setChanged();
+//
+//             }
+//         }
 
         public boolean isLock() {
             return BlockEntityFluidDrawer.this.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
@@ -397,14 +425,25 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
             return upgrades().serializeNBT().toString().contains("void");
         }
 
+
         @Override
-        public int getMaxCapacity(@NotNull ItemStack itemPrototype) {
-            return 0;
+        public boolean isEmpty() {
+            return false;
+        }
+
+        // @Override
+        public int getMaxTankCapacity() {
+            return getCapacityTank();
         }
 
         @Override
-        public int getMaxCapacity() {
-            return getTankEffectiveCapacity();
+        public CompoundTag serializeNBT() {
+            return tank.serializeNBT();
+        }
+
+        @Override
+        public void deserializeNBT(CompoundTag nbt) {
+            tank.deserializeNBT(nbt);
         }
     }
 
@@ -439,9 +478,9 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         }
 
         public CompoundTag serializeNBT() {
-           // resize capacity when sending message
-            if (this.getCapacity() != BlockEntityFluidDrawer.this.getTankEffectiveCapacity())
-                this.setCapacity(BlockEntityFluidDrawer.this.getTankEffectiveCapacity());
+            // resize capacity when sending message
+            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTank())
+                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTank());
             CompoundTag nbt = new CompoundTag();
             if (getCacheFluid().getRawFluid() != Fluids.EMPTY &&
                     fluid.getFluid() != Fluids.EMPTY &&
@@ -460,22 +499,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         }
 
         public void deserializeNBT(CompoundTag tank) {
-            if (this.getCapacity() != BlockEntityFluidDrawer.this.getTankEffectiveCapacity())
-                this.setCapacity(BlockEntityFluidDrawer.this.getTankEffectiveCapacity());
+            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTank())
+                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTank());
             if (tank.contains("cache")) {
                 FluidStack cacheTempStack = FluidStack.loadFluidStackFromNBT(tank.getCompound("cache"));
-                // String[] x = tank.getString("cache").split(":");
-                // ResourceLocation res = new ResourceLocation(x[0], x[1]);
-                //
-                // Fluid fluid = ForgeRegistries.FLUIDS.getValue(res);
-
                 setCacheFluid(cacheTempStack);
             }
-
-//            FluidDrawersLegacyMod.LOGGER.info(cacheFluid.getRegistryName()+""+getLevel()+""+drawerAttributes.isItemLocked(LockAttribute.LOCK_EMPTY));
-//            FluidStack fluid = FluidStack.loadFluidStackFromNBT(tank);
-//            setFluid(fluid);
-//            FluidDrawersLegacyMod.logger(fluid.getAmount()+"");
             readFromNBT(tank);
         }
 
@@ -497,18 +526,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
             if (upgrades().hasVendingUpgrade())
                 return 0;
-//            if(!getLevel().isClientSide())
-//            FluidDrawersLegacyMod.logger(
-//                    "server:"+getCacheFluid().getRegistryName()+";"
-//                    +resource.getFluid().getRegistryName()
-//                    +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
-//            if(getLevel().isClientSide())
-//                FluidDrawersLegacyMod.logger(
-//                        "client:"+getCacheFluid().getRegistryName()+";"
-//                                +resource.getFluid().getRegistryName()
-//                                +getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY));
             if (getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-//                FluidDrawersLegacyMod.logger(getCacheFluid().getRegistryName().toString());
                 if (getCacheFluid().getRawFluid() != Fluids.EMPTY
                         && !getCacheFluid().isFluidEqual(resource)) {
                     return 0;
@@ -565,6 +583,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
 
     }
+
 
     //    extra attributes, not very useful
     private class DrawerAttributes extends BasicDrawerAttributes {

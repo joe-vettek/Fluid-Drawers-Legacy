@@ -89,21 +89,21 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         super.renderTooltip(graphics, mouseX, mouseY);
 
         if (hasFluidInfo() && isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
-            FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
-
-            // FluidType attributes = fluidStackDown.getFluid().getFluidType();
-            // TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-            //
-            //
-            // int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
-
-            int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
+            FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
+            int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
             int amount = fluidStackDown.getAmount();
             if (capacity < amount)
                 amount = capacity;
             List<Component> list = new ArrayList<>();
+
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) this.menu.getTileEntityFluidDrawer().getTank();
+                BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = null;
+                // FluidStack fluidStackDown = FluidStack.EMPTY;
+                // int capacity = 0;
+                // boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
+                for (BlockEntityFluidDrawer.FluidDrawerData data : this.menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList()) {
+                    betterFluidHandler = data.getTank();
+                }
                 if (fluidStackDown.getAmount() <= 0 &&
                         betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
                     fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
@@ -325,7 +325,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         // TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
         // int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
-        int capacity = this.menu.getTileEntityFluidDrawer().getTankEffectiveCapacity();
+        int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount)
             amount = capacity;

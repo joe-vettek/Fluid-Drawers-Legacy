@@ -50,7 +50,7 @@ public class ModContents {
     public static void creativeModeTabRegister(RegisterEvent event) {
         event.register(Registries.CREATIVE_MODE_TAB, helper -> {
             helper.register(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawers"),
-                    CreativeModeTab.builder().icon(() -> new ItemStack(BuiltInRegistries.BLOCK.get(FluidDrawersLegacyMod.rl("fluiddrawers"))))
+                    CreativeModeTab.builder().icon(() -> new ItemStack(DREntityBlockItems.getEntries().stream().findFirst().get().get()))
                             .title(Component.translatable("itemGroup.fluiddrawers"))
                             .displayItems((params, output) -> {
                                 DREntityBlockItems.getEntries().forEach((reg) -> {
@@ -84,18 +84,24 @@ public class ModContents {
 
 
     public static void init() {
-        String[] sizelist = {"", "_2", "_4"};
-        int[] sizeclist = {1, 2,4};
-        for (int i = 0; i < sizelist.length; i++) {
-            String path="fluiddrawer"+sizelist[i];
-            int count=sizeclist[i];
+        int[] sizeclist = {1, 2, 4};
+        for (int count : sizeclist) {
+            String path = getend(count);
+
             RegistryObject<Block> fluiddrawer = DREntityBlocks.register(path, () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
                     .sound(SoundType.GLASS).strength(5.0F)
                     .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), count));
-             RegistryObject<Item> itemBlock = DREntityBlockItems.register(path, () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
-             RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
+            RegistryObject<Item> itemBlock = DREntityBlockItems.register(path, () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
+            RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
                     () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(count, pos, state), fluiddrawer.get()).build(null));
         }
+    }
+
+    public static String getend(int s) {
+        String path = "fluiddrawer";
+        if (s == 4) return path + "_4";
+        else if (s == 2) return path + "_2";
+        else return path;
     }
 }
 

@@ -13,7 +13,7 @@ import snownee.jade.api.Identifiers;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElement;
 import xueluoanping.fluiddrawerslegacy.ModTranslateKey;
-import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
+import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 
 import java.util.List;
@@ -30,7 +30,7 @@ public class JadeFluidHandler {
             Optional<IFluidHandler> a = accessor.getBlockEntity().getCapability(ForgeCapabilities.FLUID_HANDLER).resolve();
             if (a.isPresent()) {
                 IFluidHandler iFluidHandler = a.get();
-                if (iFluidHandler instanceof CapabilityProvider_FluidDrawerController.betterFluidHandler handler) {
+                if (iFluidHandler instanceof betterFluidManager handler) {
                     int tanks = handler.getTanks();
                     // FluidDrawersLegacyMod.logger(tanks);
                     if (tanks > 0) {

@@ -1,6 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.compat.jade;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -21,8 +22,11 @@ import net.minecraftforge.fluids.FluidStack;
 // import snownee.jade.VanillaPlugin;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+
+import java.util.List;
 
 
 public class FluidDrawerProvider implements IBlockComponentProvider {
@@ -34,18 +38,23 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
         tooltip.remove(Identifiers.UNIVERSAL_FLUID_STORAGE_DETAILED);
 
         if (accessor.getBlock() instanceof BlockFluidDrawer) {
-            BlockEntity tileEntity = accessor.getLevel().getBlockEntity(((BlockAccessor) accessor).getPosition());
+            BlockEntity tileEntity = accessor.getLevel().getBlockEntity(accessor.getPosition());
             if (tileEntity instanceof BlockEntityFluidDrawer tile) {
                 tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                         .ifPresent(handler -> {
-                            int capacity = tile.getTankEffectiveCapacity();
-
+                            int capacity = tile.getCapacityTank();
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = (BlockEntityFluidDrawer.betterFluidHandler) handler;
-                            FluidStack fluidStack = betterFluidHandler.getFluid().copy();
-                            FluidStack cache = betterFluidHandler.getCacheFluid();
+                            if (handler instanceof betterFluidManager ){
+                                var h=(betterFluidManager<BlockEntityFluidDrawer>)handler;
+                                for (BlockEntityFluidDrawer.FluidDrawerData data : h.getFluidDrawerDataList()) {
+                                    BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
+                                    FluidStack fluidStack = betterFluidHandler.getFluid().copy();
+                                    FluidStack cache = betterFluidHandler.getCacheFluid();
+                                    appendTank(tooltip, accessor, fluidStack, capacity, cache, isLocked);
+                                }
+                            }
 
-                            appendTank(tooltip, accessor, fluidStack, capacity, cache, isLocked);
+
                         });
             }
         }
