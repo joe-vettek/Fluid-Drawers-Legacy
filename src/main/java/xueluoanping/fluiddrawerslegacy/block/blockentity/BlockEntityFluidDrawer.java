@@ -23,6 +23,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.MinecraftForge;
@@ -40,6 +41,7 @@ import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 import xueluoanping.fluiddrawerslegacy.config.General;
+import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -49,16 +51,18 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
-    private GroupData groupData = new GroupData(1);
-    private UpgradeData upgradeData = new BlockEntityFluidDrawer.DrawerUpgradeData();
+    private GroupData groupData ;
+    private  final UpgradeData upgradeData=new BlockEntityFluidDrawer.DrawerUpgradeData() ;
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
 
     public FluidAnimation fluidAnimation = new FluidAnimation();
 
 
-    public BlockEntityFluidDrawer(BlockPos pos, BlockState state) {
-        super(ModContents.tankTileEntityType.get(), pos, state);
+    public BlockEntityFluidDrawer(int slotCount,BlockPos pos, BlockState state) {
+        super(ModContents.DRBlockEntities.getEntries().stream().filter(blockEntityTypeRegistryObject -> blockEntityTypeRegistryObject.getId()== RegisterFinderUtil.getBlockKey(state.getBlock())).findFirst().get().get(), pos, state);
+        this.groupData = new GroupData(slotCount);
+
         this.groupData.setCapabilityProvider(this);
         this.injectPortableData(groupData);
 
@@ -67,10 +71,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 //        FluidDrawersLegacyMod.logger("create tile");
     }
 
-
     private static int getCapacityStandard() {
         return General.volume.get();
     }
+
+
 
     //    @Override
     public IDrawerGroup getGroup() {
@@ -97,13 +102,13 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
     @Override
     public int getDrawerCount() {
-        return 1;
+        return groupData.getDrawerCount();
     }
 
     @NotNull
     @Override
     public IDrawer getDrawer(int i) {
-        return groupData.getDrawer(0);
+        return groupData.getDrawer(i);
     }
 
     @NotNull
@@ -116,9 +121,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
     @Nonnull
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
         IDrawerGroup group = this.getGroup();
-        if (capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
+        if ( capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
             return this.capabilityGroup.cast();
         } else {
+            if(getGroup()==null){return super.getCapability(capability, facing);}
             LazyOptional<T> cap = this.getGroup().getCapability(capability, facing);
             return cap.isPresent() ? cap : super.getCapability(capability, facing);
         }

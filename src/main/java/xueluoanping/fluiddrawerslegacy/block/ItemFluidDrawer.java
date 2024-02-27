@@ -34,7 +34,6 @@ public class ItemFluidDrawer extends BlockItem {
 
     public ItemFluidDrawer(Block block, Properties properties) {
         super(block, properties);
-
     }
 
     @Override

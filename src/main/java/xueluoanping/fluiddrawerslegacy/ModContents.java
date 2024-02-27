@@ -2,6 +2,7 @@ package xueluoanping.fluiddrawerslegacy;
 
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -49,22 +50,30 @@ public class ModContents {
     public static void creativeModeTabRegister(RegisterEvent event) {
         event.register(Registries.CREATIVE_MODE_TAB, helper -> {
             helper.register(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawers"),
-                    CreativeModeTab.builder().icon(() -> new ItemStack(itemBlock.get()))
-                    .title(Component.translatable("itemGroup.fluiddrawers"))
-                    .displayItems((params, output) -> {
-                        DREntityBlockItems.getEntries().forEach((reg) -> {
-                            output.accept(new ItemStack(reg.get()));
-                        });
-                    })
-                    .build());
+                    CreativeModeTab.builder().icon(() -> new ItemStack(BuiltInRegistries.BLOCK.get(FluidDrawersLegacyMod.rl("fluiddrawers"))))
+                            .title(Component.translatable("itemGroup.fluiddrawers"))
+                            .displayItems((params, output) -> {
+                                DREntityBlockItems.getEntries().forEach((reg) -> {
+                                    output.accept(new ItemStack(reg.get()));
+                                });
+                            })
+                            .build());
         });
     }
-    public static final RegistryObject<Block> fluiddrawer = DREntityBlocks.register("fluiddrawer", () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
-            .sound(SoundType.GLASS).strength(5.0F)
-            .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse)));
-    public static final RegistryObject<Item> itemBlock = DREntityBlockItems.register("fluiddrawer", () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
-    public static final RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register("fluiddrawer",
-            () -> BlockEntityType.Builder.of(BlockEntityFluidDrawer::new, fluiddrawer.get()).build(null));
+
+    @SubscribeEvent
+    public static void blockRegister(RegisterEvent event) {
+        event.register(Registries.BLOCK, blockRegisterHelper -> {
+            blockRegisterHelper.register("test", new Block(BlockBehaviour.Properties.of()));
+        });
+    }
+
+    // public static final RegistryObject<Block> fluiddrawer = DREntityBlocks.register("fluiddrawer", () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
+    //         .sound(SoundType.GLASS).strength(5.0F)
+    //         .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), 1));
+    // public static final RegistryObject<Item> itemBlock = DREntityBlockItems.register("fluiddrawer", () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
+    // public static final RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register("fluiddrawer",
+    //         () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(1, pos, state), fluiddrawer.get()).build(null));
 
     public static final RegistryObject<MenuType<ContainerFluiDrawer>> containerType = DRMenuType.register("fluid_drawer_container_1", () -> IForgeMenuType.create(ContainerFluiDrawer::new));
 
@@ -73,5 +82,20 @@ public class ModContents {
         return false;
     }
 
+
+    public static void init() {
+        String[] sizelist = {"", "_2", "_4"};
+        int[] sizeclist = {1, 2,4};
+        for (int i = 0; i < sizelist.length; i++) {
+            String path="fluiddrawer"+sizelist[i];
+            int count=sizeclist[i];
+            RegistryObject<Block> fluiddrawer = DREntityBlocks.register(path, () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
+                    .sound(SoundType.GLASS).strength(5.0F)
+                    .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), count));
+             RegistryObject<Item> itemBlock = DREntityBlockItems.register(path, () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
+             RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
+                    () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(count, pos, state), fluiddrawer.get()).build(null));
+        }
+    }
 }
 

@@ -81,7 +81,10 @@ public class FluidDrawersLegacyMod {
         ModContents.DREntityBlockItems.register(FMLJavaModLoadingContext.get().getModEventBus());
         ModContents.DRBlockEntities.register(FMLJavaModLoadingContext.get().getModEventBus());
         ModContents.DRMenuType.register(FMLJavaModLoadingContext.get().getModEventBus());
+
+        ModContents.init();
     }
+
 
     public static ResourceLocation rl(String id) {
         return new ResourceLocation(MOD_ID, id);

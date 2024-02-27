@@ -71,9 +71,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     //    public FluidDrawer(int drawerCount, boolean halfDepth, int storageUnits, Properties properties) {
     //        super(properties);
     //    }
-
-    public BlockFluidDrawer(Properties properties) {
+    private final int slotCount;
+    public BlockFluidDrawer(Properties properties, int slotCount) {
         super(properties);
+        this.slotCount = slotCount;
     }
 
     // Add all the properties here, or may cause a null point exception.
@@ -157,7 +158,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
-        ItemStack stack = ModContents.itemBlock.get().getDefaultInstance();
+        ItemStack stack = asItem().getDefaultInstance();
         BlockEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof BlockEntityFluidDrawer) {
             BlockEntityFluidDrawer tile = (BlockEntityFluidDrawer) tileEntity;
@@ -280,9 +281,12 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         return side == Direction.UP ? this.getSignal(state, worldIn, pos, side) : 0;
     }
 
-    @org.jetbrains.annotations.Nullable
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BlockEntityFluidDrawer(pos, state);
+        return new BlockEntityFluidDrawer(getSlotCount(),pos, state);
+    }
+
+    private int getSlotCount() {
+        return this.slotCount;
     }
 }

@@ -11,6 +11,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 // import net.minecraftforge.client.ClientRegistry;
@@ -22,6 +24,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.Screen;
 import xueluoanping.fluiddrawerslegacy.client.model.BakedModelFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.TESRFluidDrawer;
@@ -52,22 +55,28 @@ public class ClientSetup {
     @OnlyIn(Dist.CLIENT)
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // FluidDrawersLegacyMod.logger("Register Renderer");
-        event.registerBlockEntityRenderer(ModContents.tankTileEntityType.get(), TESRFluidDrawer::new);
+        ModContents.DRBlockEntities.getEntries().forEach((reg) -> {
+            event.registerBlockEntityRenderer((BlockEntityType<BlockEntityFluidDrawer>)reg.get(),
+                    TESRFluidDrawer::new);
+        });
     }
 
 
     @SubscribeEvent
     public static void onModelBaked(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> modelRegistry = event.getModels();
-        ModelResourceLocation location = new ModelResourceLocation(ModContents.itemBlock.getId(), "inventory");
-        BakedModel existingModel = modelRegistry.get(location);
-        if (existingModel == null) {
-            throw new RuntimeException("Did not find in registry");
-        } else if (existingModel instanceof BakedModelFluidDrawer) {
-            throw new RuntimeException("Tried to replace twice");
-        } else {
-            BakedModelFluidDrawer model = new BakedModelFluidDrawer(existingModel);
-            modelRegistry.put(location, model);
-        }
+
+        ModContents.DREntityBlockItems.getEntries().forEach((reg) -> {
+            ModelResourceLocation location = new ModelResourceLocation(reg.getId(), "inventory");
+            BakedModel existingModel = modelRegistry.get(location);
+            if (existingModel == null) {
+                throw new RuntimeException("Did not find in registry");
+            } else if (existingModel instanceof BakedModelFluidDrawer) {
+                throw new RuntimeException("Tried to replace twice");
+            } else {
+                BakedModelFluidDrawer model = new BakedModelFluidDrawer(existingModel);
+                modelRegistry.put(location, model);
+            }
+        });
     }
 }

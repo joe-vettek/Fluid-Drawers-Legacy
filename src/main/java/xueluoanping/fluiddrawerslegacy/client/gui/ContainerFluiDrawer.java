@@ -63,12 +63,12 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
         this.upgradeInventory = new InventoryUpgrade(tileEntity);
 
         int i;
-        this.upgradeSlots = new ArrayList();
+        this.upgradeSlots = new ArrayList<>();
         for (i = 0; i < 7; ++i) {
             this.upgradeSlots.add(this.addSlot(new SlotUpgrade(this.upgradeInventory, i, 26 + i * 18, 86)));
         }
 
-        this.playerSlots = new ArrayList();
+        this.playerSlots = new ArrayList<>();
 
         for (i = 0; i < 3; ++i) {
             for (int j = 0; j < 9; ++j) {
@@ -76,7 +76,7 @@ public class ContainerFluiDrawer extends AbstractContainerMenu {
             }
         }
 
-        this.hotbarSlots = new ArrayList();
+        this.hotbarSlots = new ArrayList<>();
 
         for (i = 0; i < 9; ++i) {
             this.hotbarSlots.add(this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 175)));
