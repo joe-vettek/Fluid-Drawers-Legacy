@@ -1,6 +1,5 @@
 package xueluoanping.fluiddrawerslegacy.block.blockentity;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
@@ -20,6 +19,8 @@ import com.jaquadro.minecraft.storagedrawers.network.MessageHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,14 +32,14 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.api.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
-import xueluoanping.fluiddrawerslegacy.block.drawer.IFluidDrawe.IFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.api.IFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
@@ -47,7 +48,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGroup {
+public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDrawerGroup {
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -106,9 +107,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
         return fluidGroupData.getDrawer(i);
     }
 
-    @NotNull
     @Override
-    public int[] getAccessibleDrawerSlots() {
+    public int @NotNull [] getAccessibleDrawerSlots() {
         return new int[0];
     }
 
@@ -331,8 +331,15 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 //            FluidDrawersLegacyMod.logger(tag.toString());
 //             tag.put("tank", tank.serializeNBT());
             upgradeData.write(tag);
-            for (FluidDrawerData data : this.slots) {
-                tag.put("tank", data.serializeNBT());
+            // if (getDrawerCount() == 1)
+            //     tag.put("tank", this.slots[0].serializeNBT());
+            // else
+            {
+                ListTag tanklist = new ListTag();
+                for (FluidDrawerData data : this.slots) {
+                    tanklist.add(data.serializeNBT());
+                }
+                tag.put("tanks", tanklist);
             }
 //            inventoryChanged();
             //            If want to camouflage, pay attention to setting the capacity first, but we don't need it.
@@ -348,8 +355,13 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
             upgrades().read(nbt);
 //            FluidDrawersLegacyMod.logger("read"+nbt.toString());
 
-            for (FluidDrawerData data : this.slots) {
-                data.deserializeNBT(nbt.getCompound("tank"));
+            if (nbt.contains("tank")) {
+                this.slots[0].deserializeNBT(nbt.getCompound("tank"));
+            } else if (nbt.contains("tanks")) {
+                var tanklist=nbt.getList("tanks",ListTag.TAG_COMPOUND);
+                for (int i = 0; i < tanklist.size(); i++) {
+                    this.slots[i].deserializeNBT(tanklist.getCompound(i));
+                }
             }
 //            inventoryChanged();
         }
@@ -386,36 +398,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
             return tank;
         }
 
-//        public int getCapacity() {
-//            return getCapacityStandard() * upgrades().getStorageMultiplier();
-//        }
-//
-//         @Override
-//         protected int getStackCapacity() {
-// //            return upgrades().getStorageMultiplier() * getEffectiveDrawerCapacity();
-//             return 0;
-//         }
-//
-//
-//         @Override
-//         protected void onItemChanged() {
-//             DrawerPopulatedEvent event = new DrawerPopulatedEvent(this);
-//             MinecraftForge.EVENT_BUS.post(event);
-//
-//             if (getLevel() != null && !getLevel().isClientSide()) {
-//                 setChanged();
-//                 markBlockForUpdate();
-//             }
-//         }
-//
-//         @Override
-//         protected void onAmountChanged() {
-//             if (getLevel() != null && !getLevel().isClientSide()) {
-//                 syncClientCount(slot, getStoredItemCount());
-//                 setChanged();
-//
-//             }
-//         }
 
         public boolean isLock() {
             return BlockEntityFluidDrawer.this.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
@@ -661,9 +643,9 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGr
 
                     for (int i = 0; i < getDrawerCount(); i++) {
                         int amount = getDrawer(i).getTank().getFluidAmount();
-                        int standardCapacity = getCapacityTank() ;
+                        int standardCapacity = getCapacityTank();
                         int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
-                        if (afterCapacity<amount)
+                        if (afterCapacity < amount)
                             return false;
                     }
                 }

@@ -7,6 +7,8 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
 import net.minecraft.world.item.BlockItem;
@@ -19,6 +21,7 @@ import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import org.checkerframework.checker.units.qual.C;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidDrawerItemStackTileEntityRenderer;
 import xueluoanping.fluiddrawerslegacy.util.SafeClientAccess;
 import xueluoanping.fluiddrawerslegacy.util.TooltipKey;
@@ -78,31 +81,42 @@ public class ItemFluidDrawer extends BlockItem {
             if (key == TooltipKey.SHIFT || key == TooltipKey.UNKNOWN) {
                 boolean hasFluid = false;
                 if (stack.getOrCreateTag().contains("tank")) {
-                    FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
-                    if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
-                        fluidStack.setAmount(Integer.MAX_VALUE);
-                    if (fluidStack.getAmount() > 0) {
-                        hasFluid = true;
-                        componentList.add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1")
-                                .append(String.valueOf(fluidStack.getAmount()))
+                    ListTag tanklist = new ListTag();
+                    tanklist.add(stack.getOrCreateTag().getCompound("tank"));
+                    stack.getOrCreateTag().put("tanks",tanklist);
+                }
+                if (stack.getOrCreateTag().contains("tanks")) {
+                    int slotCouont = 0;
+                    for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
+                        slotCouont++;
+                        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
+                        if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+                            fluidStack.setAmount(Integer.MAX_VALUE);
+                        if (fluidStack.getAmount() > 0) {
+                            hasFluid = true;
+                            componentList
+                                    .add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont)
+                                            .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1"))
+                                            .append(String.valueOf(fluidStack.getAmount()))
 //                                .append("/" + TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) + "mB")
-                                .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer2"))
-                                .append(Component.translatable(fluidStack.getTranslationKey())));
+                                            .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer2"))
+                                            .append(Component.translatable(fluidStack.getTranslationKey())));
+                        }
                     }
                 }
                 if (stack.getOrCreateTag().contains("Lock")) {
                     Byte b = stack.getOrCreateTag().getByte("Lock");
                     EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(b);
                     if (attrs.contains(LockAttribute.LOCK_EMPTY)) {
-                        String fluidNameShow="";
+                        String fluidNameShow = "";
                         if (!hasFluid) {
-                            if (stack.getOrCreateTag().contains("tank")&&stack.getOrCreateTag().getCompound("tank").contains("cache")) {
+                            if (stack.getOrCreateTag().contains("tank") && stack.getOrCreateTag().getCompound("tank").contains("cache")) {
                                 FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(stack.getOrCreateTag().getCompound("tank").getCompound("cache"));
-                                fluidNameShow=fluidStack.getDisplayName().getString()+" ";
+                                fluidNameShow = fluidStack.getDisplayName().getString() + " ";
                             }
                         }
 
-                        componentList.add(Component.translatable(" §7("+fluidNameShow + I18n.get("tooltip.storagedrawers.waila.locked") + ") "));
+                        componentList.add(Component.translatable(" §7(" + fluidNameShow + I18n.get("tooltip.storagedrawers.waila.locked") + ") "));
 
                     }
                 }

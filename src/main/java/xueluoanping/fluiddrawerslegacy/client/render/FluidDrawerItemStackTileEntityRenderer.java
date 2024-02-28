@@ -17,6 +17,9 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -109,13 +112,26 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
     }
 
     private void renderFluid(ItemStack stack, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
-        if (!stack.getOrCreateTag().contains("tank"))
+        if (!stack.getOrCreateTag().contains("tank")&&!stack.getOrCreateTag().contains("tanks"))
             return;
         FluidStack fluidStackDown = new FluidStack(Fluids.EMPTY, 0);
-        fluidStackDown = FluidStack.loadFluidStackFromNBT((CompoundTag) stack.getOrCreateTag().get("tank"));
+        if (stack.getOrCreateTag().contains("tank")) {
+            ListTag tanklist = new ListTag();
+            tanklist.add(stack.getOrCreateTag().getCompound("tank"));
+            stack.getOrCreateTag().put("tanks",tanklist);
+        }
+        if (stack.getOrCreateTag().contains("tanks")) {
+            for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
+                FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
+                if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+                    fluidStack.setAmount(Integer.MAX_VALUE);
+                if (fluidStack.getAmount() > 0) {
+                    fluidStackDown = fluidStack;
+                }
+            }
+        }
         if (fluidStackDown.getAmount() == 0)
             return;
-        if(stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))fluidStackDown.setAmount(Integer.MAX_VALUE);
 
         Minecraft mc = Minecraft.getInstance();
         TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));

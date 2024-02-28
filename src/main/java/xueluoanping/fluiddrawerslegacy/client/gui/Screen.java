@@ -1,5 +1,6 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
+import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 // import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
@@ -30,18 +31,16 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
+import xueluoanping.fluiddrawerslegacy.api.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 import java.util.*;
 
 
 public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
-    private static final ResourceLocation guiTextures1 = new ResourceLocation("storagedrawers", "textures/gui/drawers_1.png");
 
     private static final int smDisabledX = 176;
     private static final int smDisabledY = 0;
-    // private static StorageRenderItem storageItemRender;
-    // private static StorageGuiGraphics storageGuiGraphics;
     private final ResourceLocation background;
     private final Inventory inventory;
 
@@ -55,10 +54,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
     protected void init() {
         super.init();
-        // if (storageGuiGraphics == null && minecraft != null) {
-        //     storageGuiGraphics  = new StorageGuiGraphics(minecraft, minecraft.renderBuffers().bufferSource());
-        // }
-
     }
 
     public boolean hasFluidInfo() {
@@ -67,21 +62,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     }
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = storageGuiGraphics;
-        // super.render(storageGuiGraphics, mouseX, mouseY, partialTicks);
-        // ((ContainerFluiDrawer) this.menu).activeGuiGraphics = null;
-        // storageGuiGraphics.overrideStack = ItemStack.EMPTY;
-
-        // can not render empty
-
-
         super.render(graphics, mouseX, mouseY, partialTicks);
-
         renderTooltip(graphics, mouseX, mouseY);
-        //        this.font.draw(stack, mouseY + "|" + mouseX, mouseX, mouseY, 4210752);
-        //        this.font.draw(stack, "屏高" + imageHeight + ",屏宽" + imageWidth, mouseX, mouseY + 8, 4210752);
-        //        this.font.draw(stack, "屏高" + height + ",屏宽" + width, mouseX, mouseY + 16, 4210752);
-
     }
 
     @Override
@@ -220,7 +202,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int extraWidth = wFloors == 0 ? width : width % 16;
         int hFloors = height / 16;
         int extraHeight = hFloors == 0 ? height : height % 16;
-        extraHeight=Math.max(1,extraHeight);
+        extraHeight = Math.max(1, extraHeight);
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
@@ -280,7 +262,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
             amount = Integer.MAX_VALUE;
-        //        每个数量级3.0f
+        //  one *10 occur 3.0f pixel
         if (amount > 10000000) {
             amountLabel = "∞";
             textWidth = font.width(amountLabel);
@@ -353,8 +335,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     }
 
     protected boolean isHovering(int x, int y, int width, int height, double originX, double originY) {
-
-
         int innerX = x - getGuiLeft();
         int innerY = y - getGuiTop();
         int startX = 78;
@@ -366,21 +346,22 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 return true;
             }
         }
-
         return super.isHovering(x, y, width, height, originX, originY);
 
     }
 
-    // private ItemRenderer setItemRender(ItemRenderer renderItem) {
-    //     ItemRenderer prev = this.itemRenderer;
-    //     this.itemRenderer = renderItem;
-    //     return prev;
-    // }
 
+    public static ResourceLocation getBgByType(IFluidDrawerGroup group) {
+        int s=group.getDrawerCount();
+
+        if (s == 4) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_4.png");
+        else if (s == 2) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_2.png");
+        else return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_1.png");
+    }
 
     public static class Slot1 extends Screen {
         public Slot1(ContainerFluiDrawer container, Inventory playerInv, Component name) {
-            super(container, playerInv, name, Screen.guiTextures1);
+            super(container, playerInv, name, getBgByType(container.getTileEntityFluidDrawer()));
         }
     }
 

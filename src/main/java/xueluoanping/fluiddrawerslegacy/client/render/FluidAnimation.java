@@ -4,7 +4,7 @@ public class FluidAnimation {
     private int lastFluidAmount = 0;
     private int cacheFluidAmount = 0;
     private double lastAnimationTime = 0d;
-    private boolean cutStartAnimation = false;
+    private boolean cutStartAnimation = true;
 
     public void setCutStartAnimation(boolean cutStartAnimation) {
         this.cutStartAnimation = cutStartAnimation;
