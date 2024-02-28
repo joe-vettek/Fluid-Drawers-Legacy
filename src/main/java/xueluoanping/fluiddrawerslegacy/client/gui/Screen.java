@@ -71,26 +71,19 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         super.renderTooltip(graphics, mouseX, mouseY);
 
         if (hasFluidInfo() && isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
-            FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
-            int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
-            int amount = fluidStackDown.getAmount();
-            if (capacity < amount)
-                amount = capacity;
+            FluidStack fluidStackDown = FluidStack.EMPTY;
             List<Component> list = new ArrayList<>();
-
             if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = null;
-                // FluidStack fluidStackDown = FluidStack.EMPTY;
-                // int capacity = 0;
-                // boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
                 for (BlockEntityFluidDrawer.FluidDrawerData data : this.menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList()) {
-                    betterFluidHandler = data.getTank();
-                }
-                if (fluidStackDown.getAmount() <= 0 &&
-                        betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
-                    fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                    var betterFluidHandler = data.getTank();
+                    if (fluidStackDown.isEmpty()
+                            && !betterFluidHandler.getCacheFluid().isEmpty()) {
+                        fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                    }
                 }
             }
+
+            if (fluidStackDown.isEmpty()) return;
             list.add(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName());
             ModList modList = ModList.get();
             FluidStack finalFluidStackDown = fluidStackDown;
@@ -255,7 +248,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         graphics.drawString(this.font, this.title.getString(), 8.0F, 6.0F, 4210752, false);
         graphics.drawString(this.font, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752, false);
         graphics.drawString(this.font, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752, false);
-        FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
         int amount = fluidStackDown.getAmount();
         String amountLabel = String.valueOf(amount) + "mB";
         int textWidth = font.width(amountLabel);
@@ -281,55 +274,45 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int guiX = (this.width - this.imageWidth) / 2;
         int guiY = (this.height - this.imageHeight) / 2;
         graphics.blit(this.background, guiX, guiY, 0, 0, this.imageWidth, this.imageHeight);
-        //        List<Slot> storageSlots = ((ContainerFluiDrawer)this.menu).getStorageSlots();
-        //        Iterator var8 = storageSlots.iterator();
-        //
-        //        while(var8.hasNext()) {
-        //            Slot slot = (Slot)var8.next();
-        //            this.blit(stack, guiX + slot.x, guiY + slot.y, 176, 0, 16, 16);
-        //        }
 
-        List<Slot> upgradeSlots = ((ContainerFluiDrawer) this.menu).getUpgradeSlots();
-        Iterator var12 = upgradeSlots.iterator();
+        List<Slot> upgradeSlots = this.menu.getUpgradeSlots();
 
-        while (var12.hasNext()) {
-            Slot slot = (Slot) var12.next();
+        for (Slot slot : upgradeSlots) {
             if (slot instanceof SlotUpgrade && !((SlotUpgrade) slot).canTakeStack()) {
                 graphics.blit(this.background, guiX + slot.x, guiY + slot.y, 176, 0, 16, 16);
             }
         }
 
-
-        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
-
-
-        // FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        // TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-        // int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
-
-        int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
-        int amount = fluidStackDown.getAmount();
-        if (capacity < amount)
-            amount = capacity;
-        float h = 0.0f;
-        h = (float) amount / (float) capacity;
-        if (((float) amount / (float) capacity) <= 0.0625 && ((float) amount / (float) capacity) >= 0.01)
-            h = 0.01f;
-        if (((float) amount / (float) capacity) > 0.9375 && ((float) amount / (float) capacity) < 0.99)
-            h = 0.9375f;
-        int h0 = (int) (h * 16.0f);
-        if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
-            h0 = 16;
-        //        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
-
-
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
-        if (hasFluidInfo())
-            renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
-        if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
-            graphics.fill(guiX + upgradeSlots.get(3).x, guiY + 36, guiX + upgradeSlots.get(3).x + 16, guiY + 52, 0, 0x88FFFFFF);
+        int slot=0;
+        var dlis=menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList();
+        for (BlockEntityFluidDrawer.FluidDrawerData data : dlis) {
+            slot++;
+            BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
+            FluidStack cache = betterFluidHandler.getCacheFluid();
+            FluidStack fluidStackDown = betterFluidHandler.getFluid().copy();
+
+            int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
+            int amount = fluidStackDown.getAmount();
+            if (capacity < amount)
+                amount = capacity;
+            float h = 0.0f;
+            h = (float) amount / (float) capacity;
+            if (((float) amount / (float) capacity) <= 0.0625 && ((float) amount / (float) capacity) >= 0.01)
+                h = 0.01f;
+            if (((float) amount / (float) capacity) > 0.9375 && ((float) amount / (float) capacity) < 0.99)
+                h = 0.9375f;
+            int h0 = (int) (h * 16.0f);
+            if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
+                h0 = 16;
+            var geo=SlotGeometry.get(slot,dlis.size(),this);
+            renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, geo.left(), geo.h());
+            if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
+                graphics.fill(geo.left(), geo.top(), geo.left()+16,  geo.top()+16, 0, 0x88FFFFFF);
+
+        }
 
         poseStack.popPose();
     }
@@ -350,9 +333,20 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
     }
 
+    public record SlotGeometry(int left, int top, int w, int h) {
+
+        public static SlotGeometry get(int slot, int count, Screen screen) {
+            if (count == 4) {
+
+            } else if (count == 2) {
+
+            }
+            return new SlotGeometry(26 + 3 * 18, (screen.height - screen.imageHeight) / 2, 16, 16);
+        }
+    }
 
     public static ResourceLocation getBgByType(IFluidDrawerGroup group) {
-        int s=group.getDrawerCount();
+        int s = group.getDrawerCount();
 
         if (s == 4) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_4.png");
         else if (s == 2) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_2.png");
