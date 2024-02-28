@@ -326,19 +326,19 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                     amount = Integer.MAX_VALUE;
                 //  one *10 occur 3.0f pixel
                 if(amount>=10000){
-                    amountLabel = String.valueOf(Math.floor(amount/1000f)) + "B";
+                    amountLabel = ((int)Math.floor(amount/1000f)) + "B";
                 }
                 if(amount>=1000*1000){
-                    amountLabel = String.valueOf(Math.floor(amount/1000f/1000f)) + "K";
+                    amountLabel = String.valueOf((int)Math.floor(amount/1000f/1000f)) + "K";
                 }
                 if(amount>=1000*1000*1000){
-                    amountLabel = String.valueOf(Math.floor(amount/1000f/1000f/1000f)) + "M";
+                    amountLabel = String.valueOf((int)Math.floor(amount/1000f/1000f/1000f)) + "M";
                 }
                 if (amount >= 1000*1000*1000) {
                     amountLabel = "∞";
                 }
                 int   textWidth = font.width(amountLabel);
-                int innerX = (int) ((geo.left()+16 )/scale_x- textWidth);
+                int innerX = (int) ((geo.left()+16 )/scale_x- textWidth+1);
                 int innerY = (int) (geo.top()/scale_y - font.lineHeight +1);
                 // (geo.left()+16-textWidth-imageWidth)/2,(geo.top()+16-imageHeight)/2
 

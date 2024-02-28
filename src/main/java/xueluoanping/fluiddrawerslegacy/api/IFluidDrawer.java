@@ -61,7 +61,6 @@ public interface IFluidDrawer extends IDrawer {
     }
 
 
-
     @Override
     default int getStoredItemStackSize() {
         return 0;
@@ -85,7 +84,9 @@ public interface IFluidDrawer extends IDrawer {
         return false;
     }
 
-    boolean isEmpty();
+    default boolean isEmpty() {
+        return false;
+    }
 
     IFluidTank getTank();
 

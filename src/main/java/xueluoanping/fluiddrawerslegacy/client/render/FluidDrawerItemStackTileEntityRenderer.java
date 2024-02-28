@@ -123,7 +123,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         if (stack.getOrCreateTag().contains("tanks")) {
             for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
                 FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
-                if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+                if (!fluidStack.isEmpty()&& stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
                     fluidStack.setAmount(Integer.MAX_VALUE);
                 if (fluidStack.getAmount() > 0) {
                     fluidStackDown = fluidStack;

@@ -44,8 +44,8 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                         .ifPresent(handler -> {
                             int capacity = tile.getCapacityTank();
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            if (handler instanceof betterFluidManager ){
-                                var h=(betterFluidManager<BlockEntityFluidDrawer>)handler;
+                            if (handler instanceof betterFluidManager) {
+                                var h = (betterFluidManager<BlockEntityFluidDrawer>) handler;
                                 for (BlockEntityFluidDrawer.FluidDrawerData data : h.getFluidDrawerDataList()) {
                                     BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
                                     FluidStack fluidStack = betterFluidHandler.getFluid().copy();

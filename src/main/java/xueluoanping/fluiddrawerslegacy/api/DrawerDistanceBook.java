@@ -3,7 +3,7 @@ package xueluoanping.fluiddrawerslegacy.api;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
-public  class DrawerDistanceBook implements Comparable<DrawerDistanceBook> {
+public class DrawerDistanceBook implements Comparable<DrawerDistanceBook> {
 
 
     BlockEntityFluidDrawer.FluidDrawerData fluidDrawerData;

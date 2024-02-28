@@ -153,7 +153,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public RenderShape getRenderShape(BlockState p_149645_1_) {
-        return RenderShape.MODEL;
+        return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Override
@@ -209,6 +209,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public int getDirectSignal(BlockState state, BlockGetter worldIn, BlockPos pos, Direction side) {
         return side == Direction.UP ? this.getSignal(state, worldIn, pos, side) : 0;
     }
+
+
 
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

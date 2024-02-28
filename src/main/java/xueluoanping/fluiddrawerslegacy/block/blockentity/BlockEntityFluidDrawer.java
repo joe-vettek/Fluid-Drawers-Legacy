@@ -257,7 +257,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         return this.upgradeData;
     }
 
-    public class FluidGroupData extends BlockEntityDataShim implements IDrawerGroup {
+    public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup {
 
         private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
         public final betterFluidManager<BlockEntityFluidDrawer> tank;
@@ -408,11 +408,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         }
 
 
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
         // @Override
         public int getMaxTankCapacity() {
             return getCapacityTank();
@@ -454,7 +449,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
             if (upgrades().hasVendingUpgrade() && this.fluid.getFluid() != Fluids.EMPTY) {
 //                FluidStack stack = fluid.copy();
 //                stack.setAmount(Integer.MAX_VALUE);
-                return new FluidStack(super.getFluid().getFluid(), Integer.MAX_VALUE);
+                return new FluidStack(super.getFluid(), Integer.MAX_VALUE);
             }
             return super.getFluid();
         }
@@ -671,5 +666,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 ////            if(hasOneStackUpgrade())return super.getStorageMultiplier()/32;
 //            return super.getStorageMultiplier();
 //        }
+
     }
 }

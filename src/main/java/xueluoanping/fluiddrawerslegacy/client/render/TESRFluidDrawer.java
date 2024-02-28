@@ -35,6 +35,7 @@ import org.joml.Vector3d;
 import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.client.gui.Screen;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.util.MathUtil;
 
@@ -212,72 +213,178 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         FluidStack fluidStackDown = FluidStack.EMPTY;
         int capacity = 0;
         boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-        for (BlockEntityFluidDrawer.FluidDrawerData data : tile.getTank().getFluidDrawerDataList()) {
+        int count = tile.getDrawerCount();
+        int slot = 0;
+        for (int i = 0; i < tile.getDrawerCount(); i++) {
+            slot = i + 1;
+            var data = ((BlockEntityFluidDrawer.FluidDrawerData) tile.getDrawer(i));
             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
             fluidStackDown = betterFluidHandler.getFluid().copy();
             FluidStack cache = betterFluidHandler.getCacheFluid();
             if (isLocked && fluidStackDown.isEmpty() && !cache.isEmpty()) {
                 fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
             }
-            capacity=data.getTank().getCapacity();
+            capacity = betterFluidHandler.getCapacity();
+            if (fluidStackDown.isEmpty() && capacity > 0) continue;
+
+            Minecraft mc = Minecraft.getInstance();
+            TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
+
+            RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
+            int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
+
+            int amount = fluidStackDown.getAmount();
+//             int amount = tile.fluidAnimation.getAndUpdateLastFluidAmount(tile.getTankFLuid().getAmount(), animationTime);
+            // FluidDrawersLegacyMod.logger(""+animationTime);
+            if (capacity < amount) amount = capacity;
+
+            float r = (float) amount / (float) capacity;
+            if (tile.upgrades().hasVendingUpgrade()) r = 1f;
+
+            float maxHeight = 0.875f;
+            float height = r * maxHeight;
+            float width = 0.872f;
+            float didw = 0.0625f;
+            float didh = 0.0625f;
+            float x0 = 0.064f;
+            float y0 = 0.064f;
+            float z0 = 0.064f;
+            float x1 = 0.9360f;
+            float y1 = 0.064f;
+            float z1 = 0.9360f;
+
+            float u0=still.getU0();
+            float u1=still.getU1();
+            float du=u1-u0;
+            float v0=still.getV0();
+            float v1=still.getV1();
+            float dv=v1-v0;
+
+            float vHeight = (still.getU1() - still.getU0()) * (1f - r);
+
+
+            if (count == 4) {
+                int orderY = 0;
+                int orderX = 0;
+                switch (slot) {
+                    case 1 -> {
+                        orderX = 0;
+                        orderY = 1;
+                    }
+                    case 2 -> {
+                        orderX = 1;
+                        orderY = 1;
+                    }
+                    case 3 -> {
+                        orderX = 0;
+                        orderY = 0;
+                    }
+                    case 4 -> {
+                        orderX = 1;
+                        orderY = 0;
+                    }
+                }
+                // x0 += (1-orderX) * (didw + width/2);
+                // x1 += (1 - orderX) * (didw) + (orderX - 1) * width / 2;
+                x0 = orderX == 0 ? x0 + (width + didw) / 2 : x0;
+                x1 = orderX == 0 ? x1 : x1 - (width + didw) / 2;
+
+                y0 += orderY * (didh + maxHeight / 2);
+                y1 += y0 + height / 2 + (orderY - 1) * didh;
+
+                u0= orderY == 1 ? u0 : u0+du/2;
+                u1= orderY == 1 ? u1-du/2 : u1;
+
+                v0= orderX == 1 ? v0 : v0+dv/2;
+                v1= orderX == 1 ? v1-dv/2 : v1;
+                vHeight=vHeight/2;
+
+            } else if (count == 2) {
+                int orderY = slot == 1 ? 1 : 0;
+                y0 += orderY * (didh + maxHeight / 2);
+                y1 += y0 + height / 2 + (orderY - 1) * didh;
+                vHeight=vHeight/2;
+
+                u0= slot == 2 ? u0 : u0+du/2;
+                u1= slot == 2 ? u1-du/2 : u1;
+            } else {
+                y1 += y0 + height;
+            }
+
+
+            matrixStackIn.pushPose();
+            GlStateManager._disableCull();
+            VertexConsumer buffer = bufferIn.getBuffer(RenderType.translucent());
+
+            //
+            // 1,0 should convart
+
+            // Bottom
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u1, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u1, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z0, u0, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z0, u0, v1, colorRGB, 1.0f, combinedLight);
+
+            // Top
+            addVertex(buffer, matrixStackIn, x0, y1, z0, u0, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z1, u1, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z1, u1, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z0, u0, v1, colorRGB, 1.0f, combinedLight);
+
+            // Front
+            addVertex(buffer, matrixStackIn, x0, y0, z0, u0, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z0, u1-vHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z0, u1-vHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z0, u0, v1, colorRGB, 1.0f, combinedLight);
+
+            // Right(for block)
+            addVertex(buffer, matrixStackIn, x1, y0, z0, u0, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z0, u1-vHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z1, u1-vHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u0, v1, colorRGB, 1.0f, combinedLight);
+
+            // Behind
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u1, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u1, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z1, u0+vHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z1, u0+vHeight, v1, colorRGB, 1.0f, combinedLight);
+
+            // Left(for block)
+            addVertex(buffer, matrixStackIn, x0, y0, z0, u0, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u0, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z1, u1-vHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z0, u1-vHeight, v0, colorRGB, 1.0f, combinedLight);
+
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            //
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            //
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
+            //
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            //
+            //
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
+            // addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
+
+
+            GlStateManager._enableCull();
+            matrixStackIn.popPose();
         }
-        if (fluidStackDown.isEmpty()&&capacity>0) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        Player player = mc.player;
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
-
-        RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
-        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
-
-//        int amount = fluidStackDown.getAmount();
-        int amount = tile.fluidAnimation.getAndUpdateLastFluidAmount(tile.getTankFLuid().getAmount(), animationTime);
-        // FluidDrawersLegacyMod.logger(""+animationTime);
-        if (capacity < amount) amount = capacity;
-
-        float r = (float) amount / (float) capacity;
-        if (tile.upgrades().hasVendingUpgrade()) r = 1f;
-        float height = r * 0.875f;
-        float vHeight = (still.getV1() - still.getV0()) * (1f - r);
-        matrixStackIn.pushPose();
-        GlStateManager._disableCull();
-        VertexConsumer buffer = bufferIn.getBuffer(RenderType.translucent());
-
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-
-        GlStateManager._enableCull();
-        matrixStackIn.popPose();
 
 
     }
@@ -293,7 +400,12 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         //		renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880)/*.lightmap(0, 240)*/.normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
         int light1 = brightness & '\uffff';
         int light2 = brightness >> 16 & '\uffff';
-        renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).uv2(light1, light2).overlayCoords(OverlayTexture.NO_OVERLAY).normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
+        renderer.vertex(stack.last().pose(), x, y, z)
+                .color(red, green, blue, alpha)
+                .uv(u, v).uv2(light1, light2)
+                .overlayCoords(OverlayTexture.NO_OVERLAY)
+                .normal(stack.last().normal(), 0, 1.0F, 0)
+                .endVertex();
     }
 
 }
