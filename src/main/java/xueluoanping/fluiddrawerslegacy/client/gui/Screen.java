@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -22,6 +23,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
@@ -31,10 +33,13 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.api.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 
 public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
@@ -57,8 +62,12 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     }
 
     public boolean hasFluidInfo() {
-        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
-        return fluidStackDown.getFluid() != Fluids.EMPTY;
+        boolean result = false;
+        for (BlockEntityFluidDrawer.FluidDrawerData data : this.menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList()) {
+            if (!data.getTank().isEmpty())
+                result = true;
+        }
+        return result;
     }
 
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
@@ -69,44 +78,50 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
     @Override
     protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         super.renderTooltip(graphics, mouseX, mouseY);
+        if (hasFluidInfo()) {
+            var tile = menu.getTileEntityFluidDrawer();
+            int size = tile.getDrawerCount();
+            for (int i = 0; i < size; i++) {
+                var geo = SlotGeometry.get(i + 1, size, this.width, this.height, this.imageHeight, this.imageWidth);
+                // if (geo.left() < mouseX && mouseX < geo.left() + 17)
+                //     if (geo.top() - 17 < mouseY && mouseY < geo.top())
+                if (isInside(mouseX, mouseY, 17, 17, geo.left(), geo.top())) {
+                    var tank = (BlockEntityFluidDrawer.betterFluidHandler) tile.getDrawer(i).getTank();
+                    FluidStack fluidStackDown = tank.getFluid();
+                    if (fluidStackDown.isEmpty()) {
+                        var cache = tank.getCacheFluid();
+                        if (!cache.isEmpty())
+                            fluidStackDown = new FluidStack(cache, FluidType.BUCKET_VOLUME);
+                    }
+                    if (!fluidStackDown.isEmpty()) {
+                        List<Component> list = new ArrayList<>();
+                        // list.add();
+                        list.add(Component.translatable(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName().getString()+" §e"+tank.getFluidAmount() + "mB"));
+                        ModList modList = ModList.get();
+                        FluidStack finalFluidStackDown = fluidStackDown;
 
-        if (hasFluidInfo() && isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
-            FluidStack fluidStackDown = FluidStack.EMPTY;
-            List<Component> list = new ArrayList<>();
-            if (this.menu.getTileEntityFluidDrawer().getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                for (BlockEntityFluidDrawer.FluidDrawerData data : this.menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList()) {
-                    var betterFluidHandler = data.getTank();
-                    if (fluidStackDown.isEmpty()
-                            && !betterFluidHandler.getCacheFluid().isEmpty()) {
-                        fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1000);
+                        Optional<Map.Entry<ResourceKey<Fluid>, Fluid>> fluidInfo = ForgeRegistries.FLUIDS.getEntries().stream()
+                                .filter(resourceKeyFluidEntry -> resourceKeyFluidEntry.getValue() == finalFluidStackDown.getFluid())
+                                .findFirst();
+
+                        fluidInfo.ifPresent(resourceKeyFluidEntry -> {
+                            String modId = resourceKeyFluidEntry.getKey().location().getNamespace();
+                            // ForgeRegistries.FLUIDS.getKey(finalFluidStackDown.getFluid()).namespace
+                            // String modId = finalFluidStackDown.getTranslationKey().split("\\.")[1];
+                            Optional<String> modName = modList.getMods().stream().filter((modInfo) -> modInfo.getModId().equals(modId))
+                                    .map(IModInfo::getDisplayName)
+                                    .findFirst();
+                            modName.ifPresent(s -> list.add(Component.literal("§9§o" + s)));
+
+                        });
+
+                        // renderComponentTooltip(stack, list, mouseX, mouseY);
+                        graphics.renderComponentTooltip(this.getMinecraft().font, list, mouseX, mouseY);
                     }
                 }
             }
-
-            if (fluidStackDown.isEmpty()) return;
-            list.add(new FluidStack(fluidStackDown, fluidStackDown.getAmount()).getDisplayName());
-            ModList modList = ModList.get();
-            FluidStack finalFluidStackDown = fluidStackDown;
-
-            Optional<Map.Entry<ResourceKey<Fluid>, Fluid>> fluidInfo = ForgeRegistries.FLUIDS.getEntries().stream()
-                    .filter(resourceKeyFluidEntry -> resourceKeyFluidEntry.getValue() == finalFluidStackDown.getFluid())
-                    .findFirst();
-
-            fluidInfo.ifPresent(resourceKeyFluidEntry -> {
-                String modId = resourceKeyFluidEntry.getKey().location().getNamespace();
-                // ForgeRegistries.FLUIDS.getKey(finalFluidStackDown.getFluid()).namespace
-                // String modId = finalFluidStackDown.getTranslationKey().split("\\.")[1];
-                Optional<String> modName = modList.getMods().stream().filter((modInfo) -> modInfo.getModId().equals(modId))
-                        .map(IModInfo::getDisplayName)
-                        .findFirst();
-                modName.ifPresent(s -> list.add(Component.literal("§9§o" + s)));
-
-            });
-
-            // renderComponentTooltip(stack, list, mouseX, mouseY);
-            graphics.renderComponentTooltip(this.getMinecraft().font, list, mouseX, mouseY);
-
         }
+
 
     }
 
@@ -196,6 +211,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int hFloors = height / 16;
         int extraHeight = hFloors == 0 ? height : height % 16;
         extraHeight = Math.max(1, extraHeight);
+        // add it to avoid too much
+        if (height==16)extraHeight=0;
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
@@ -248,20 +265,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         graphics.drawString(this.font, this.title.getString(), 8.0F, 6.0F, 4210752, false);
         graphics.drawString(this.font, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752, false);
         graphics.drawString(this.font, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752, false);
-        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
-        int amount = fluidStackDown.getAmount();
-        String amountLabel = String.valueOf(amount) + "mB";
-        int textWidth = font.width(amountLabel);
-
-        if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
-            amount = Integer.MAX_VALUE;
-        //  one *10 occur 3.0f pixel
-        if (amount > 10000000) {
-            amountLabel = "∞";
-            textWidth = font.width(amountLabel);
-        }
-        graphics.drawString(this.font, amountLabel, (float) ((this.imageWidth - textWidth) / 2.0), (float) (this.imageHeight - 144.5 + 2), 2237562, false);
-
 
     }
 
@@ -286,8 +289,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         PoseStack poseStack = graphics.pose();
         poseStack.pushPose();
         // poseStack.translate(guiX + upgradeSlots.get(3).x, guiY + 52, 0);
-        int slot=0;
-        var dlis=menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList();
+        int slot = 0;
+        var dlis = menu.getTileEntityFluidDrawer().getTank().getFluidDrawerDataList();
         for (BlockEntityFluidDrawer.FluidDrawerData data : dlis) {
             slot++;
             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
@@ -307,50 +310,126 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             int h0 = (int) (h * 16.0f);
             if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
                 h0 = 16;
-            var geo=SlotGeometry.get(slot,dlis.size(),this);
-            renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, geo.left(), geo.h());
-            if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY))
-                graphics.fill(geo.left(), geo.top(), geo.left()+16,  geo.top()+16, 0, 0x88FFFFFF);
+            var geo = SlotGeometry.get(slot, dlis.size(), this.width, this.height, this.imageHeight, this.imageWidth);
+            if (!fluidStackDown.isEmpty())
+                renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, geo.left(), geo.top());
+
+            if (!fluidStackDown.isEmpty()) {
+                // int amount = fluidStackDown.getAmount();
+                graphics.pose().pushPose();
+                float scale_x=0.6f;
+                float scale_y=0.6f;
+                graphics.pose().scale(scale_x, scale_y, 1.0F);
+                double roundedAmount = Math.floor(amount * 10/1000f) / 10; // Round down to one decimal place
+                String amountLabel = String.format("%.1f",roundedAmount) + "B";
+                if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
+                    amount = Integer.MAX_VALUE;
+                //  one *10 occur 3.0f pixel
+                if(amount>=10000){
+                    amountLabel = String.valueOf(Math.floor(amount/1000f)) + "B";
+                }
+                if(amount>=1000*1000){
+                    amountLabel = String.valueOf(Math.floor(amount/1000f/1000f)) + "K";
+                }
+                if(amount>=1000*1000*1000){
+                    amountLabel = String.valueOf(Math.floor(amount/1000f/1000f/1000f)) + "M";
+                }
+                if (amount >= 1000*1000*1000) {
+                    amountLabel = "∞";
+                }
+                int   textWidth = font.width(amountLabel);
+                int innerX = (int) ((geo.left()+16 )/scale_x- textWidth);
+                int innerY = (int) (geo.top()/scale_y - font.lineHeight +1);
+                // (geo.left()+16-textWidth-imageWidth)/2,(geo.top()+16-imageHeight)/2
+
+                // 16777215
+                // 2237562
+                // Color.DARK_GRAY.hashCode()
+                TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
+
+                int color=Color.YELLOW.hashCode();
+                // for (int i = 0; i < FLUID.contents().width(); i++) {
+                //     for (int j = 0; j <FLUID.contents().height(); j++) {
+                //         color=FLUID.getPixelRGBA(0,i,j);
+                //     }
+                // }
+                // color=color/(FLUID.contents().width()*FLUID.contents().height());
+
+
+                graphics.drawString(font, amountLabel, innerX+0.8f*scale_x, innerY+0.8f*scale_y,  Color.DARK_GRAY.hashCode(), false);
+                graphics.drawString(font, amountLabel, innerX, innerY,  color, false);
+
+                graphics.pose().popPose();
+            }
+            // FluidDrawersLegacyMod.logger(mouseX,geo.left());
+            if (isInside(mouseX, mouseY, 17, 17, geo.left(), geo.top()))
+                // if (geo.left() < mouseX && mouseX < geo.left() + 17)
+                //     if (geo.top() - 17 < mouseY && mouseY < geo.top())
+                graphics.fill(geo.left(), geo.top() - 16, geo.left() + 16, geo.top(), 0, 0x88FFFFFF);
 
         }
 
         poseStack.popPose();
     }
 
+    protected boolean isInside(int x, int y, int w, int h, double originX, double originY) {
+        if (x - w < originX && originX < x)
+            return y < originY && originY < y + h;
+        return false;
+
+    }
+
+    @Override
     protected boolean isHovering(int x, int y, int width, int height, double originX, double originY) {
-        int innerX = x - getGuiLeft();
-        int innerY = y - getGuiTop();
-        int startX = 78;
-        int startY = 35;
-        int bound = 17;
-
-        if (innerX > startX - 1 && innerX - bound - 1 < startX) {
-            if (innerY > startY - 1 && innerY - bound - 1 < startY) {
-                return true;
-            }
-        }
         return super.isHovering(x, y, width, height, originX, originY);
-
     }
 
     public record SlotGeometry(int left, int top, int w, int h) {
 
-        public static SlotGeometry get(int slot, int count, Screen screen) {
+        public static SlotGeometry get(int slot, int count, int width, int height, int imageHeight, int imageWidth) {
+            int guiX = (width - imageWidth) / 2;
+            int guiY = (height - imageHeight) / 2;
             if (count == 4) {
-
+                int orderY = 0;
+                int orderX = 0;
+                switch (slot) {
+                    case 1 -> {
+                        orderX = 1;
+                        orderY = 1;
+                    }
+                    case 2 -> {
+                        orderX = 2;
+                        orderY = 1;
+                    }
+                    case 3 -> {
+                        orderX = 1;
+                        orderY = 2;
+                    }
+                    case 4 -> {
+                        orderX = 2;
+                        orderY = 2;
+                    }
+                }
+                int left = guiX + 93 + (orderX - 2) * 26;
+                int top = guiY + 39 + (orderY - 1) * 26;
+                return new SlotGeometry(left, top, 16, 16);
             } else if (count == 2) {
-
+                int orderY = slot == 1 ? 1 : 2;
+                return new SlotGeometry(guiX + 80, guiY + 39 + (orderY - 1) * 26, 16, 16);
             }
-            return new SlotGeometry(26 + 3 * 18, (screen.height - screen.imageHeight) / 2, 16, 16);
+            return new SlotGeometry(guiX + 80, guiY + 52, 16, 16);
         }
     }
 
     public static ResourceLocation getBgByType(IFluidDrawerGroup group) {
         int s = group.getDrawerCount();
 
-        if (s == 4) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_4.png");
-        else if (s == 2) return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_2.png");
-        else return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_1.png");
+        if (s == 4)
+            return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_4.png");
+        else if (s == 2)
+            return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_2.png");
+        else
+            return new ResourceLocation(StorageDrawers.MOD_ID, "textures/gui/drawers_1.png");
     }
 
     public static class Slot1 extends Screen {
