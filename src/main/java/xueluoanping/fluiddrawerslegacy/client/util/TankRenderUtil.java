@@ -30,13 +30,14 @@ public class TankRenderUtil {
 
     public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
 
-        int count=fluidStacks.size();
-        int slot=0;
+        int count = fluidStacks.size();
+        int slot = 0;
         for (TankHolder holder : fluidStacks) {
-            var fluidStackDown=holder.fluidStackDown();
-            int capacity= holder.capacity();
+            var fluidStackDown = holder.fluidStackDown();
+            int capacity = holder.capacity();
             slot++;
-            if (fluidStackDown.isEmpty() && capacity > 0) continue;
+            if (fluidStackDown.isEmpty() && capacity > 0)
+                continue;
 
             Minecraft mc = Minecraft.getInstance();
             TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
@@ -45,9 +46,10 @@ public class TankRenderUtil {
             int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
 
             int amount = fluidStackDown.getAmount();
-//             int amount = tile.fluidAnimation.getAndUpdateLastFluidAmount(tile.getTankFLuid().getAmount(), animationTime);
+            //             int amount = tile.fluidAnimation.getAndUpdateLastFluidAmount(tile.getTankFLuid().getAmount(), animationTime);
             // FluidDrawersLegacyMod.logger(""+animationTime);
-            if (capacity < amount) amount = capacity;
+            if (capacity < amount)
+                amount = capacity;
 
             float r = (float) amount / (float) capacity;
 
@@ -63,12 +65,12 @@ public class TankRenderUtil {
             float y1 = 0.064f;
             float z1 = 0.9360f;
 
-            float u0=still.getU0();
-            float u1=still.getU1();
-            float du=u1-u0;
-            float v0=still.getV0();
-            float v1=still.getV1();
-            float dv=v1-v0;
+            float u0 = still.getU0();
+            float u1 = still.getU1();
+            float du = u1 - u0;
+            float v0 = still.getV0();
+            float v1 = still.getV1();
+            float dv = v1 - v0;
 
             float uHeight = (still.getU1() - still.getU0()) * (1f - r);
             float vHeight = (still.getV1() - still.getV0()) * (1f - r);
@@ -101,7 +103,7 @@ public class TankRenderUtil {
                 x1 = orderX == 0 ? x1 : x1 - (width + didw) / 2;
 
                 y0 += orderY * (didh + maxHeight / 2);
-                y1 +=  height / 2 + (orderY - 1) * didh;
+                y1 =y0+ height / 2 + (orderY - 1) * didh;
 
                 // u0= orderY == 0 ? u0 : u0+du/2;
                 // u1= orderY == 0 ? u1-du/2 : u1;
@@ -112,14 +114,14 @@ public class TankRenderUtil {
 
             } else if (count == 2) {
                 int orderY = slot == 1 ? 1 : 0;
-                y0 += orderY * (didh + maxHeight / 2);
-                y1 +=  height / 2 + (orderY - 1) * didh;
+                y0 += orderY * (didh + maxHeight )/ 2;
+                y1 =y0+ height / 2 + (orderY - 1) * didh;
                 // uHeight=uHeight/2;
                 //
                 // u0= slot == 2 ? u0 : u0+du/2;
                 // u1= slot == 2 ? u1-du/2 : u1;
             } else {
-                y1 +=  height;
+                y1 =y0+ height;
             }
 
 
@@ -145,26 +147,26 @@ public class TankRenderUtil {
             addVertex(buffer, matrixStackIn, x1, y1, z0, u0, v1, colorRGB, 1.0f, combinedLight);
 
             // Front
-            addVertex(buffer, matrixStackIn, x1, y1, z0, u1, v1-vHeight, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z0, u1, v1 - vHeight, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x1, y0, z0, u1, v0, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x0, y0, z0, u0, v0, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x0, y1, z0, u0, v1-vHeight, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z0, u0, v1 - vHeight, colorRGB, 1.0f, combinedLight);
 
             // Right(for block)
-            addVertex(buffer, matrixStackIn, x1, y0, z0, u0+uHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z0, u0 + uHeight, v0, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x1, y1, z0, u1, v0, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x1, y1, z1, u1, v1, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x1, y0, z1, u0+uHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u0 + uHeight, v1, colorRGB, 1.0f, combinedLight);
 
             // Behind
-            addVertex(buffer, matrixStackIn, x0, y0, z1, u1-uHeight, v1, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x1, y0, z1, u1-uHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u1 - uHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u1 - uHeight, v0, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x1, y1, z1, u0, v0, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x0, y1, z1, u0, v1, colorRGB, 1.0f, combinedLight);
 
             // Left(for block)
-            addVertex(buffer, matrixStackIn, x0, y0, z0, u0+uHeight, v0, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x0, y0, z1, u0+uHeight, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z0, u0 + uHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u0 + uHeight, v1, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x0, y1, z1, u1, v1, colorRGB, 1.0f, combinedLight);
             addVertex(buffer, matrixStackIn, x0, y1, z0, u1, v0, colorRGB, 1.0f, combinedLight);
 
