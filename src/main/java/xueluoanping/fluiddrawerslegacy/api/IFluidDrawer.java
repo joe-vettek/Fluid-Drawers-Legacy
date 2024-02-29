@@ -2,14 +2,17 @@ package xueluoanping.fluiddrawerslegacy.api;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.NotNull;
+import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 
 import java.util.function.Predicate;
 
 // we need to override the idrawer but not need the function storage item
-public interface IFluidDrawer extends IDrawer {
+public interface IFluidDrawer <T extends IFluidTank &IFluidHandler>extends IDrawer {
+    @Deprecated
     default @NotNull ItemStack getStoredItemPrototype() {
         return ItemStack.EMPTY;
     }
@@ -88,7 +91,10 @@ public interface IFluidDrawer extends IDrawer {
         return false;
     }
 
-    IFluidTank getTank();
+    T getTank();
 
+    FluidStack getCacheFluid();
+
+    FluidAnimation getFluidAnimation();
 
 }

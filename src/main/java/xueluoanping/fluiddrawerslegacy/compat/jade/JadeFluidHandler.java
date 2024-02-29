@@ -4,6 +4,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.capability.IFluidHandler;
@@ -20,12 +21,14 @@ import java.util.List;
 import java.util.Optional;
 
 public class JadeFluidHandler {
+
+
     public static void appendServerDataIfWithNotEmpty(CompoundTag compoundTag, BlockAccessor accessor) {
         if (compoundTag.contains("JadeFluidStorage")) {
             ListTag list =
                     ((CompoundTag) compoundTag.getList("JadeFluidStorage", CompoundTag.TAG_COMPOUND).get(0))
                             .getList("Views", CompoundTag.TAG_COMPOUND);
-            if(list.size()<=1)return;
+            if(list.size()<=1 &&list.toString().contains(new ResourceLocation("empty").toString()))return;
 
             Optional<IFluidHandler> a = accessor.getBlockEntity().getCapability(ForgeCapabilities.FLUID_HANDLER).resolve();
             if (a.isPresent()) {

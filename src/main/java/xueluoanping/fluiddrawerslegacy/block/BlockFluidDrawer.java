@@ -138,11 +138,13 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             // need an empty left hand
-            else if (offhandStack == ItemStack.EMPTY) {
+            else if (offhandStack == ItemStack.EMPTY && !player.isShiftKeyDown()) {
                 if (ModHandlerManager.tryHandleByMod(tile, player, hand))
                     return InteractionResult.SUCCESS;
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
                     return InteractionResult.SUCCESS;
+                } else if (ModHandlerManager.mayConsume(tile,player,hand)) {
+                    return InteractionResult.CONSUME;
                 }
             }
         }

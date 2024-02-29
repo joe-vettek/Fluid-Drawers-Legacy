@@ -30,7 +30,11 @@ import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.client.util.TankHolder;
+import xueluoanping.fluiddrawerslegacy.client.util.TankRenderUtil;
 
+
+import java.util.ArrayList;
 
 import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
@@ -120,71 +124,17 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
             tanklist.add(stack.getOrCreateTag().getCompound("tank"));
             stack.getOrCreateTag().put("tanks",tanklist);
         }
+        var flist = new ArrayList<TankHolder>();
         if (stack.getOrCreateTag().contains("tanks")) {
             for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
                 FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
+                int capacity = BlockEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
                 if (!fluidStack.isEmpty()&& stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
-                    fluidStack.setAmount(Integer.MAX_VALUE);
-                if (fluidStack.getAmount() > 0) {
-                    fluidStackDown = fluidStack;
-                }
+                    fluidStack.setAmount(capacity);
+                flist.add(TankRenderUtil.of(fluidStack,capacity));
             }
         }
-        if (fluidStackDown.getAmount() == 0)
-            return;
-
-        Minecraft mc = Minecraft.getInstance();
-        TextureAtlasSprite still = mc.getTextureAtlas(BLOCK_ATLAS).apply(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
-        RenderSystem.setShaderTexture(0, BLOCK_ATLAS);
-        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor(fluidStackDown);
-
-        int capacity = BlockEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
-        int amount = fluidStackDown.getAmount();
-        if (capacity < amount) amount = capacity;
-        float height = (float) amount / (float) capacity * 0.875f;
-        float vHeight = (still.getV1() - still.getV0()) * (1f - (float) amount / (float) capacity);
-//        float height = (float) fluidStackDown.getAmount() / (float) TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) * 0.75f;
-//        float vHeight = (still.getV1() - still.getV0()) * (1f - (float) fluidStackDown.getAmount() / (float) TileEntityFluidDrawer.calcultaeCapacitybyStack(stack));
-//        matrixStackIn.pushPose();
-        GlStateManager._disableCull();
-        VertexConsumer buffer = bufferIn.getBuffer(RenderType.translucent());
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU1(), still.getV0(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU1(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV1() - vHeight, colorRGB, 1.0f, combinedLight);
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.064f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.064f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.064f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.064f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f, 0.9360f, still.getU0(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f, 0.9360f, still.getU1(), still.getV0() + vHeight, colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.9360f, 0.064f + height, 0.9360f, still.getU1(), still.getV1(), colorRGB, 1.0f, combinedLight);
-        addVertex(buffer, matrixStackIn, 0.064f, 0.064f + height, 0.9360f, still.getU0(), still.getV1(), colorRGB, 1.0f, combinedLight);
-
-
-        GlStateManager._enableCull();
-//        matrixStackIn.popPose();
-
-
+        TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime);
     }
 
 

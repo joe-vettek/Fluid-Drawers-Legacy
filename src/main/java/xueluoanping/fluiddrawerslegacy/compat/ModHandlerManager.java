@@ -4,6 +4,7 @@ import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
@@ -75,6 +76,28 @@ public class ModHandlerManager {
         return false;
     }
 
+    public static boolean mayConsume(BlockEntity tile, Player player, InteractionHand hand) {
+        ItemStack heldStack = player.getItemInHand(hand);
+        try {
+            for (FluidItemHolder handler : FluidManager.handlers) {
+                FluidStack fluidStack = handler.getFluidByItem.apply(heldStack);
+                if (!fluidStack.isEmpty())
+                    return true;
+            }
+            for (FluidContainerHolder handler : FluidManager.outHandlers) {
+                if (handler.applyItem.test(heldStack))
+                    return true;
+            }
+
+            if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent())
+                return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public static ArrayList<FluidStack> getFluidInItemContainer(ItemStack heldStack) {
         ArrayList<FluidStack> fluidStacksList = new ArrayList<>();
 
@@ -135,28 +158,13 @@ public class ModHandlerManager {
         }
     }
 
-    public static class FluidItemHolder {
-        Function<ItemStack, FluidStack> getFluidByItem;
-        Function<FluidStack, ItemStack> getItemByFluid;
-
-        public FluidItemHolder(Function<ItemStack, FluidStack> getFluidByItem, Function<FluidStack, ItemStack> getItemByFluid) {
-            this.getFluidByItem = getFluidByItem;
-            this.getItemByFluid = getItemByFluid;
-        }
-
+    public static record FluidItemHolder(Function<ItemStack, FluidStack> getFluidByItem,
+                                         Function<FluidStack, ItemStack> getItemByFluid) {
     }
 
-    public static class FluidContainerHolder {
-        Predicate<ItemStack> applyItem;
-        Function<FluidStack, Integer> checkFluidAmount;
-        Function<FluidStack, ItemStack> getItemByFluid;
-
-
-        public FluidContainerHolder(Predicate<ItemStack> applyItem, Function<FluidStack, Integer> checkFluidAmount, Function<FluidStack, ItemStack> getItemByFluid) {
-            this.applyItem = applyItem;
-            this.checkFluidAmount = checkFluidAmount;
-            this.getItemByFluid = getItemByFluid;
-        }
+    public static record FluidContainerHolder(Predicate<ItemStack> applyItem,
+                                              Function<FluidStack, Integer> checkFluidAmount,
+                                              Function<FluidStack, ItemStack> getItemByFluid) {
     }
 
 

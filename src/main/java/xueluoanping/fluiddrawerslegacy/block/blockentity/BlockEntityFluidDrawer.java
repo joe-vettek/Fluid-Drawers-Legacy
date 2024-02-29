@@ -32,6 +32,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
@@ -373,11 +374,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
     }
 
     // IDrawer,
-    public class FluidDrawerData implements IFluidDrawer, INBTSerializable<CompoundTag> {
+    public class FluidDrawerData implements IFluidDrawer<betterFluidHandler>, INBTSerializable<CompoundTag> {
         private int slot;
         //        private FluidStack fluid = new FluidStack(Fluids.EMPTY, 0);
         private final FluidGroupData group;
-        public final betterFluidHandler tank;
+        private final betterFluidHandler tank;
+        public FluidAnimation fluidAnimation=new FluidAnimation();
 
         public FluidDrawerData(FluidGroupData group, int slot, int ca) {
             super();
@@ -396,6 +398,17 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         public betterFluidHandler getTank() {
             return tank;
+        }
+
+
+        @Override
+        public FluidStack getCacheFluid() {
+            return getTank().getCacheFluid();
+        }
+
+        @Override
+        public FluidAnimation getFluidAnimation() {
+            return this.fluidAnimation;
         }
 
 
