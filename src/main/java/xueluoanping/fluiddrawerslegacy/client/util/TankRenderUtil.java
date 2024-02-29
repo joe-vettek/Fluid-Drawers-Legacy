@@ -103,21 +103,21 @@ public class TankRenderUtil {
                 y0 += orderY * (didh + maxHeight / 2);
                 y1 += y0 + height / 2 + (orderY - 1) * didh;
 
-                u0= orderY == 1 ? u0 : u0+du/2;
-                u1= orderY == 1 ? u1-du/2 : u1;
-
-                v0= orderX == 1 ? v0 : v0+dv/2;
-                v1= orderX == 1 ? v1-dv/2 : v1;
-                uHeight=uHeight/2;
+                // u0= orderY == 0 ? u0 : u0+du/2;
+                // u1= orderY == 0 ? u1-du/2 : u1;
+                //
+                // v0= orderX == 1 ? v0 : v0+dv/2;
+                // v1= orderX == 1 ? v1-dv/2 : v1;
+                // uHeight=uHeight/2;
 
             } else if (count == 2) {
                 int orderY = slot == 1 ? 1 : 0;
                 y0 += orderY * (didh + maxHeight / 2);
                 y1 += y0 + height / 2 + (orderY - 1) * didh;
-                uHeight=uHeight/2;
-
-                u0= slot == 2 ? u0 : u0+du/2;
-                u1= slot == 2 ? u1-du/2 : u1;
+                // uHeight=uHeight/2;
+                //
+                // u0= slot == 2 ? u0 : u0+du/2;
+                // u1= slot == 2 ? u1-du/2 : u1;
             } else {
                 y1 += y0 + height;
             }
