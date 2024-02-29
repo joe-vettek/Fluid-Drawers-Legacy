@@ -1,33 +1,22 @@
 package xueluoanping.fluiddrawerslegacy.client.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 // import com.mojang.math.Quaternion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.util.TankHolder;
@@ -35,8 +24,6 @@ import xueluoanping.fluiddrawerslegacy.client.util.TankRenderUtil;
 
 
 import java.util.ArrayList;
-
-import static net.minecraft.world.inventory.InventoryMenu.BLOCK_ATLAS;
 
 
 public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLevelRenderer {
@@ -128,21 +115,13 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         if (stack.getOrCreateTag().contains("tanks")) {
             for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
                 FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
-                int capacity = BlockEntityFluidDrawer.calcultaeTankCapacitybyStack(stack);
+                int capacity = BlockEntityFluidDrawer.calculateTankCapacityFromStack(stack);
                 if (!fluidStack.isEmpty()&& stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
                     fluidStack.setAmount(capacity);
                 flist.add(TankRenderUtil.of(fluidStack,capacity));
             }
         }
         TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime);
-    }
-
-
-    private void addVertex(VertexConsumer renderer, PoseStack stack, float x, float y, float z, float u, float v, int RGBA, float alpha, int brightness) {
-        float red = ((RGBA >> 16) & 0xFF) / 255f;
-        float green = ((RGBA >> 8) & 0xFF) / 255f;
-        float blue = ((RGBA >> 0) & 0xFF) / 255f;
-        renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880)/*.lightmap(0, 240)*/.normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
     }
 
 }
