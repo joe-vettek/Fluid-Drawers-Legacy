@@ -9,9 +9,11 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.client.render.XYZ;
+import xueluoanping.fluiddrawerslegacy.util.MathUtils;
 
 import java.util.ArrayList;
 
@@ -29,6 +31,10 @@ public class TankRenderUtil {
     }
 
     public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
+        renderFluid(fluidStacks, matrixStackIn, bufferIn, combinedLight, animationTime, Direction.NORTH);
+    }
+
+    public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime, Direction direction) {
 
         int count = fluidStacks.size();
         int slot = 0;
@@ -103,7 +109,7 @@ public class TankRenderUtil {
                 x1 = orderX == 0 ? x1 : x1 - (width + didw) / 2;
 
                 y0 += orderY * (didh + maxHeight / 2);
-                y1 =y0+ height / 2 + (orderY - 1) * didh;
+                y1 = y0 + height / 2 ;
 
                 // u0= orderY == 0 ? u0 : u0+du/2;
                 // u1= orderY == 0 ? u1-du/2 : u1;
@@ -114,16 +120,25 @@ public class TankRenderUtil {
 
             } else if (count == 2) {
                 int orderY = slot == 1 ? 1 : 0;
-                y0 += orderY * (didh + maxHeight )/ 2;
-                y1 =y0+ height / 2 + (orderY - 1) * didh;
+                y0 += orderY * (didh + maxHeight) / 2;
+                y1 = y0 + height / 2 ;
                 // uHeight=uHeight/2;
                 //
                 // u0= slot == 2 ? u0 : u0+du/2;
                 // u1= slot == 2 ? u1-du/2 : u1;
             } else {
-                y1 =y0+ height;
+                y1 = y0 + height;
             }
 
+            // var box = MathUtils.getShapefromDirection(x0*16, y0*16, z0*16, x1*16, y1*16, z1*16, direction, true);
+            var box = MathUtils.getShapefromDirection(x0*16, y0*16, z0*16, x1*16, y1*16, z1*16, direction,false);
+
+            x0 = (float) box.min(Direction.Axis.X);
+            y0 = (float) box.min(Direction.Axis.Y);
+            z0 = (float) box.min(Direction.Axis.Z);
+            x1 = (float) box.max(Direction.Axis.X);
+            y1 = (float) box.max(Direction.Axis.Y);
+            z1 = (float) box.max(Direction.Axis.Z);
 
             matrixStackIn.pushPose();
             GlStateManager._disableCull();

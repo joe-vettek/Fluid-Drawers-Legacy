@@ -167,7 +167,7 @@ dependencies {
 
 //    implementation fg.deobf("curse.maven:minemenu-222378:3544634")
 //    implementation fg.deobf("curse.maven:configured-457570:3721946")
-    //implementation fg.deobf("curse.maven:journeymap-32274:3696405")
+    implementation fg.deobf("curse.maven:journeymap-32274:4873863")
 
     // Real mod deobf dependency examples - these get remapped to your current mappings
     // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
@@ -205,7 +205,7 @@ tasks.named('processResources', ProcessResources).configure {
             forge_version: forge_version, forge_version_range: forge_version_range,
             loader_version_range: loader_version_range,storagedrawers_version_range:storagedrawers_version_range,
             mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors: mod_authors, mod_description: mod_description,
+            mod_authors: mod_authors, mod_description: mod_description,mod_update_json: mod_update_json,mod_url: mod_url,
     ]
     inputs.properties replaceProperties
 

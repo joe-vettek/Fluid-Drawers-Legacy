@@ -237,7 +237,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
                 fluidStackDown.setAmount(capacity);
             flist.add(TankRenderUtil.of(fluidStackDown, capacity));
         }
-        TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime);
+        TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime,tile.getBlockState().getValue(BlockFluidDrawer.FACING));
     }
 
 }
