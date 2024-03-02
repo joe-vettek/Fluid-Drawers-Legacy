@@ -11,19 +11,21 @@ import net.minecraftforge.common.util.LazyOptional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CapabilityProvider_FluidControllerProxy implements  ICapabilityProvider {
+public class CapabilityProvider_FluidControllerProxy implements ICapabilityProvider {
 
     private final BlockEntitySlave tile;
+
     public CapabilityProvider_FluidControllerProxy(BlockEntitySlave tile) {
-        this.tile=tile;
+        this.tile = tile;
     }
 
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        boolean isvalid = tile.getController() != null && tile.getController().isValidSlave(tile.getBlockPos());
         return cap == ForgeCapabilities.FLUID_HANDLER
-                ? (tile.getController()!=null?tile.getController().getCapability(cap, side):LazyOptional.empty())
-                :LazyOptional.empty();
+                ? (isvalid ? tile.getController().getCapability(cap, side) : LazyOptional.empty())
+                : LazyOptional.empty();
     }
 
 }
