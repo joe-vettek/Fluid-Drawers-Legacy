@@ -65,7 +65,7 @@ public class SlaveCompoentProvider implements IComponentProvider, IServerDataPro
             final ListNBT list = new ListNBT();
             TileEntityController tile = ((TileEntitySlave) tileEntity).getController();
 
-            if(tile==null)
+            if(tile==null || !tile.isValidSlave(tileEntity.getBlockPos()))
                 return;
             tile.getCapability(ModConstants.DRAWER_GROUP_CAPABILITY, null)
                     .ifPresent(handler -> {
