@@ -60,25 +60,17 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
     public void render(PoseStack stack, int mouseX, int mouseY, float partialTicks) {
         ItemRenderer ri = this.setItemRender(storageItemRender);
-        ((ContainerFluiDrawer) this.menu).activeRenderItem = storageItemRender;
+        this.menu.activeRenderItem = storageItemRender;
         this.renderBackground(stack);
         super.render(stack, mouseX, mouseY, partialTicks);
         this.renderTooltip(stack, mouseX, mouseY);
-        ((ContainerFluiDrawer) this.menu).activeRenderItem = null;
+        this.menu.activeRenderItem = null;
         storageItemRender.overrideStack = ItemStack.EMPTY;
         this.setItemRender(ri);
 
 
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
-
-            FluidType attributes = fluidStackDown.getFluid().getFluidType();
-            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-
-
-
-
-            int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
             int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
@@ -95,9 +87,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             renderComponentTooltip(stack, list, mouseX, mouseY);
 
         }
-//        this.font.draw(stack, mouseY + "|" + mouseX, mouseX, mouseY, 4210752);
-//        this.font.draw(stack, "屏高" + imageHeight + ",屏宽" + imageWidth, mouseX, mouseY + 8, 4210752);
-//        this.font.draw(stack, "屏高" + height + ",屏宽" + width, mouseX, mouseY + 16, 4210752);
 
     }
 
@@ -277,13 +266,10 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         }
 
 
-        FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
 
-        FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
 
-        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
+        int capacity = this.menu.getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float h = 0.0f;
@@ -295,8 +281,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int h0 = (int) (h * 16.0f);
         if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
             h0 = 16;
-//        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
 
+        if(!fluidStackDown.isEmpty())
         renderFluidStackInGUI(stack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
 
 

@@ -25,18 +25,7 @@ import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(FluidDrawersLegacyMod.MOD_ID)
 public class FluidDrawersLegacyMod {
-//     public static final CreativeModeTab CREATIVE_TAB = new CreativeModeTab("fluiddrawers") {
-//         @Override
-//         public ItemStack makeIcon() {
-//             return ModContents.itemBlock.get().getDefaultInstance();
-//         }
-//
-// //         @Override
-// //         public void fillItemList(NonNullList<ItemStack> itemStackNonNullList) {
-// // //            itemStackNonNullList.add(0, RegistryEvents.fluiddrawer.asItem().getDefaultInstance());
-// //             super.fillItemList(itemStackNonNullList);
-// //         }
-//     };
+
     public static final String MOD_ID = "fluiddrawerslegacy";
 
 

@@ -55,7 +55,7 @@ public class ModContents {
     public static void creativeModeTabRegister(CreativeModeTabEvent.Register event) {
         MAIN = event.registerCreativeModeTab(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawers"), builder -> builder
                 .icon(() -> ModContents.itemBlock.get().getDefaultInstance())
-                .title(Component.translatable("fluiddrawers"))
+                .title(Component.translatable("itemGroup.fluiddrawers"))
                 .displayItems((features, output, hasPermissions) -> {
                     DREntityBlockItems.getEntries().forEach((reg) -> {
                         output.accept(new ItemStack(reg.get()));
