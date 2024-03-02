@@ -276,13 +276,10 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
         }
 
 
-        FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
 
-        FluidAttributes attributes = fluidStackDown.getFluid().getAttributes();
-        TextureAtlasSprite still = getBlockSprite(attributes.getStillTexture());
-        int colorRGB = fluidStackDown.getFluid().getAttributes().getColor();
 
-        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getEffectiveCapacity();
+        int capacity = this.menu.getTileEntityFluidDrawer().getEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float h = 0.0f;
@@ -294,11 +291,9 @@ public class Screen extends ContainerScreen<ContainerFluiDrawer> {
         int h0 = (int) (h * 16.0f);
         if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
             h0 = 16;
-//        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
 
         renderFluidStackInGUI(stack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
-
-
+        
     }
 
     protected boolean isHovering(int x, int y, int width, int height, double originX, double originY) {
