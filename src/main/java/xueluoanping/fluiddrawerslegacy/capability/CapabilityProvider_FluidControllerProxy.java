@@ -21,8 +21,9 @@ public class CapabilityProvider_FluidControllerProxy implements  ICapabilityProv
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        boolean isvalid=tile.getController() != null && tile.getController().isValidSlave(tile.getBlockPos());
         return cap == ForgeCapabilities.FLUID_HANDLER
-                ? (tile.getController()!=null?tile.getController().getCapability(cap, side):LazyOptional.empty())
+                ? (isvalid?tile.getController().getCapability(cap, side):LazyOptional.empty())
                 :LazyOptional.empty();
     }
 

@@ -72,16 +72,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 
         if (isHovering(mouseX, mouseY, 17, 17, mouseX, mouseY)) {
             FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
-
-            FluidType attributes = fluidStackDown.getFluid().getFluidType();
-            TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-
-
-
-
-            int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
-
-            int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
+            int capacity = this.menu.getTileEntityFluidDrawer().getTankEffectiveCapacity();
             int amount = fluidStackDown.getAmount();
             if (capacity < amount) amount = capacity;
             List<Component> list = new ArrayList<>();
@@ -283,13 +274,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         }
 
 
-        FluidStack fluidStackDown = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankFLuid();
+        FluidStack fluidStackDown = this.menu.getTileEntityFluidDrawer().getTankFLuid();
 
-        FluidType attributes = fluidStackDown.getFluid().getFluidType();
-        TextureAtlasSprite still = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture());
-        int colorRGB = IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getTintColor();
-
-        int capacity = ((ContainerFluiDrawer) this.menu).getTileEntityFluidDrawer().getTankEffectiveCapacity();
+        int capacity = this.menu.getTileEntityFluidDrawer().getTankEffectiveCapacity();
         int amount = fluidStackDown.getAmount();
         if (capacity < amount) amount = capacity;
         float h = 0.0f;
@@ -304,8 +291,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
 //        FluidDrawersLegacyMod.LOGGER.info(""+h+amount+"/]]"+capacity);
 
         stack.pushPose();
+        if(!fluidStackDown.isEmpty())
         renderFluidStackInGUI(stack.last().pose(), fluidStackDown, 16, h0, guiX + upgradeSlots.get(3).x, guiY + 52);
-stack.popPose();
+        stack.popPose();
 
     }
 
