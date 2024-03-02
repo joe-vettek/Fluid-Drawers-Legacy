@@ -294,7 +294,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         for (BlockEntityFluidDrawer.FluidDrawerData data : dlis) {
             slot++;
             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
-            FluidStack cache = betterFluidHandler.getCacheFluid();
             FluidStack fluidStackDown = betterFluidHandler.getFluid().copy();
 
             int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
@@ -345,7 +344,6 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 // 16777215
                 // 2237562
                 // Color.DARK_GRAY.hashCode()
-                TextureAtlasSprite FLUID = getBlockSprite(IClientFluidTypeExtensions.of(fluidStackDown.getFluid()).getStillTexture(fluidStackDown));
 
                 int color=Color.YELLOW.hashCode();
                 // for (int i = 0; i < FLUID.contents().width(); i++) {
