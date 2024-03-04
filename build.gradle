@@ -79,6 +79,9 @@ minecraft {
 
             property 'forge.enabledGameTestNamespaces', mod_id
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -98,6 +101,9 @@ minecraft {
 
             property 'forge.enabledGameTestNamespaces', mod_id
 
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
+
             mods {
                 "${mod_id}" {
                     source sourceSets.main
@@ -114,6 +120,9 @@ minecraft {
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
             args '--mod', mod_id, '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${buildDir}/createSrgToMcp/output.srg"
 
             mods {
                 "${mod_id}" {
@@ -156,18 +165,18 @@ dependencies {
     implementation fg.deobf("curse.maven:storage-drawers-223852:4668552-deobf-sources-api")
     implementation fg.deobf("curse.maven:jei-238222:4644453")
 //    implementation fg.deobf("curse.maven:jade-324717:4654448")
-    onlyMainRuntimeOnly fg.deobf("curse.maven:jade-324717:5072729-deobf-sources-api")
+    implementation fg.deobf("curse.maven:jade-324717:5072729-deobf-sources-api")
 
     onlyMainRuntimeOnly fg.deobf("curse.maven:cyclic-239286:4661938")
     onlyMainRuntimeOnly fg.deobf("curse.maven:flib-661261:4661080")
 
-    onlyMainRuntimeOnly fg.deobf("curse.maven:create-328085:4835191-deobf-sources-api")
+    implementation fg.deobf("curse.maven:create-328085:4835191-deobf-sources-api")
 
     onlyMainRuntimeOnly fg.deobf("curse.maven:embeddium-908741:4949986")
     onlyMainRuntimeOnly fg.deobf("curse.maven:oculus-581495:4952626")
 //    implementation fg.deobf("curse.maven:create-enchantment-industry-688768:4962850")
-    onlyMainRuntimeOnly fg.deobf("curse.maven:caupona-656147:5001135")
-    onlyMainRuntimeOnly fg.deobf("curse.maven:convivium-905776:4743580")
+    implementation fg.deobf("curse.maven:caupona-656147:5001135")
+    implementation fg.deobf("curse.maven:convivium-905776:4743580")
 
 //    implementation fg.deobf("curse.maven:crafttweaker-239197:4675705")
 

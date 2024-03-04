@@ -12,22 +12,11 @@ import net.minecraftforge.client.model.generators.BlockStateProvider;
 import net.minecraftforge.client.model.generators.ConfiguredModel;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.RegistryObject;
-import xueluoanping.cuisine.Cuisine;
-import xueluoanping.cuisine.block.BlockBasin;
-import xueluoanping.cuisine.block.BlockFirePit;
-import xueluoanping.cuisine.block.baseblock.SimpleHorizontalEntityBlock;
-import xueluoanping.cuisine.block.nature.BlockCuisineCrops;
-import xueluoanping.cuisine.register.BlockEntityRegister;
-import xueluoanping.cuisine.register.BlockRegister;
-import xueluoanping.cuisine.register.CropRegister;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class BlockStatesDataProvider extends BlockStateProvider {
@@ -41,13 +30,16 @@ public class BlockStatesDataProvider extends BlockStateProvider {
 	@Override
 	protected void registerStatesAndModels() {
 		// simpleBlock(BlockRegister.bamboo_root.get());
-		ModContents.
-		getVariantBuilder(BlockEntityRegister.wok_on_fire_pit.get()).forAllStatesExcept(state -> {
-			return ConfiguredModel.builder()
-					.modelFile(models().withExistingParent(blockName(BlockEntityRegister.wok_on_fire_pit.get()), resourceBlock("fire_pit_with_wok_obj"))).rotationY(getRotateYByFacing(state))
-					.build();
-		});
+		for (RegistryObject<Block> entry : ModContents.DREntityBlocks.getEntries()) {
+			getVariantBuilder(entry.get()).forAllStatesExcept(state -> ConfiguredModel.builder()
+					.modelFile(models().getExistingFile(resourceBlock(entry.getId().getPath())))
+					// .modelFile(models().withExistingParent(blockName(entry.get()), resourceBlock(entry.getId().getPath())))
+					.rotationY(getRotateYByFacing(state))
+					.build());
+		}
+
 	}
+
 
 
 	// Thanks vectorwing，great work

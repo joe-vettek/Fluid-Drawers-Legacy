@@ -14,6 +14,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
@@ -34,7 +35,7 @@ public class FluidDrawersLegacyMod {
     public static final Logger LOGGER = LogManager.getLogger(FluidDrawersLegacyMod.MOD_ID);
 
     public static void logger(String x) {
-        if (General.bool.get()) {
+        if (!FMLEnvironment.production||General.bool.get()) {
 //            LOGGER.debug(x);
             LOGGER.info(x);
         }
@@ -42,7 +43,7 @@ public class FluidDrawersLegacyMod {
 
     public static void logger(Object... x) {
 
-        if (General.bool.get()) {
+        if (!FMLEnvironment.production||General.bool.get()) {
             StringBuilder output = new StringBuilder();
 
             for (Object i : x) {

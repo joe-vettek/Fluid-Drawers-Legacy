@@ -6,6 +6,8 @@ import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.data.event.GatherDataEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.data.blockstate.BlockStatesDataProvider;
+import xueluoanping.fluiddrawerslegacy.data.blockstate.ItemModelProvider;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -38,8 +40,8 @@ public class start {
 
         }
         if (event.includeClient()) {
-            // generator.addProvider(new BlockStatesDataProvider(generator, helper));
-            // generator.addProvider(new ItemModelProvider(generator, helper));
+            generator.addProvider(event.includeClient(),new BlockStatesDataProvider(packOutput,helper));
+            generator.addProvider(event.includeClient(),new ItemModelProvider(packOutput,helper));
         }
 
 
