@@ -187,8 +187,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         return this.fluidGroupData.tank;
     }
 
-    private static int getCapacityStandard() {
+    private static int getVolume() {
         return General.volume.get();
+    }
+
+    private int getCapacityStandard() {
+        return (int) (General.volume.get() * (isHalf() ? 0.5 : 1));
     }
 
 
@@ -214,7 +218,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
 
     public static int calculateTankCapacityFromStack(ItemStack stack) {
-        int tankCapacity = getCapacityStandard();
+        int tankCapacity = getVolume();
         var tag = stack.getTag();
         if (tag != null) {
             if (tag.contains("tanks")) {
@@ -228,6 +232,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
             up.read(tag);
             int mul = up.getStorageMultiplier();
             tankCapacity *= mul;
+            if (stack.getItem().getDescriptionId().contains("half"))
+                tankCapacity /= 2;
             if (up.hasVendingUpgrade() || up.hasUnlimitedUpgrade())
                 tankCapacity = Integer.MAX_VALUE;
             if (up.hasOneStackUpgrade())
@@ -251,6 +257,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
     //    @Override
     public UpgradeData upgrades() {
         return this.upgradeData;
+    }
+
+    public boolean isHalf() {
+        return getBlockState().getBlock().getDescriptionId().contains("half");
     }
 
     public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup {

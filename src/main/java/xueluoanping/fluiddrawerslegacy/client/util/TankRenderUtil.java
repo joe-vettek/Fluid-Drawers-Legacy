@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.client.render.XYZ;
 import xueluoanping.fluiddrawerslegacy.util.MathUtils;
 
@@ -30,11 +31,11 @@ public class TankRenderUtil {
         renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).uv2(light1, light2).overlayCoords(OverlayTexture.NO_OVERLAY).normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
     }
 
-    public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
-        renderFluid(fluidStacks, matrixStackIn, bufferIn, combinedLight, animationTime, Direction.NORTH);
+    public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime, boolean isHalf) {
+        renderFluid(fluidStacks, matrixStackIn, bufferIn, combinedLight, animationTime, isHalf, Direction.NORTH);
     }
 
-    public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime, Direction direction) {
+    public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime, boolean isHalf, Direction direction) {
 
         int count = fluidStacks.size();
         int slot = 0;
@@ -109,7 +110,7 @@ public class TankRenderUtil {
                 x1 = orderX == 0 ? x1 : x1 - (width + didw) / 2;
 
                 y0 += orderY * (didh + maxHeight / 2);
-                y1 = y0 + height / 2 ;
+                y1 = y0 + height / 2;
 
                 // u0= orderY == 0 ? u0 : u0+du/2;
                 // u1= orderY == 0 ? u1-du/2 : u1;
@@ -121,7 +122,7 @@ public class TankRenderUtil {
             } else if (count == 2) {
                 int orderY = slot == 1 ? 1 : 0;
                 y0 += orderY * (didh + maxHeight) / 2;
-                y1 = y0 + height / 2 ;
+                y1 = y0 + height / 2;
                 // uHeight=uHeight/2;
                 //
                 // u0= slot == 2 ? u0 : u0+du/2;
@@ -130,8 +131,11 @@ public class TankRenderUtil {
                 y1 = y0 + height;
             }
 
+            if (isHalf) {
+                z0+=0.5f;
+            }
             // var box = MathUtils.getShapefromDirection(x0*16, y0*16, z0*16, x1*16, y1*16, z1*16, direction, true);
-            var box = MathUtils.getShapefromDirection(x0*16, y0*16, z0*16, x1*16, y1*16, z1*16, direction,false);
+            var box = MathUtils.getShapefromDirection(x0 * 16, y0 * 16, z0 * 16, x1 * 16, y1 * 16, z1 * 16, direction, true);
 
             x0 = (float) box.min(Direction.Axis.X);
             y0 = (float) box.min(Direction.Axis.Y);
@@ -139,6 +143,7 @@ public class TankRenderUtil {
             x1 = (float) box.max(Direction.Axis.X);
             y1 = (float) box.max(Direction.Axis.Y);
             z1 = (float) box.max(Direction.Axis.Z);
+
 
             matrixStackIn.pushPose();
             GlStateManager._disableCull();

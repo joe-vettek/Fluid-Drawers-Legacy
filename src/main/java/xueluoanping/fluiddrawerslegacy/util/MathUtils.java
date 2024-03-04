@@ -86,7 +86,7 @@ public class MathUtils {
 		double zmax = Math.abs(Math.max(z1, z2));
 		return switch (direction) {
 			case EAST -> Block.box(-zmin + 8.0D, ymin, x0 + 8.0D, zmax + 8.0D, ymax, x0 + xd + 8.0D);
-			case SOUTH -> Block.box(-x0 - xd + 8.0D, ymin, -zmin + 8.0D, -x0 + 8.0D, ymax, zmax + 8.0D);
+			case NORTH -> Block.box(-x0 - xd + 8.0D, ymin, -zmin + 8.0D, -x0 + 8.0D, ymax, zmax + 8.0D);
 			case WEST -> Block.box(-zmax + 8.0D, ymin, -x0 - xd + 8.0D, zmin + 8.0D, ymax, -x0 + 8.0D);
 			default -> Block.box(x0 + 8.0D, ymin, -zmin + 8.0D, x0 + xd + 8.0D, ymax, zmax + 8.0D);
 		};
@@ -157,9 +157,9 @@ public class MathUtils {
 			}
 		}
 	}
-    public static VoxelShape getShapefromAngle(VoxelShape v1, VoxelShape v2, int angle) {
+    public static VoxelShape getShapefromAngle(VoxelShape v1, int angle) {
         return getShapefromAngle(v1.min(Direction.Axis.X)*16, v1.min(Direction.Axis.Y)*16, v1.min(Direction.Axis.Z)*16
-                , v2.min(Direction.Axis.X)*16, v2.min(Direction.Axis.Y)*16, v2.min(Direction.Axis.Z)*16
+                , v1.max(Direction.Axis.X)*16, v1.max(Direction.Axis.Y)*16, v1.max(Direction.Axis.Z)*16
                 , angle);
     }
 

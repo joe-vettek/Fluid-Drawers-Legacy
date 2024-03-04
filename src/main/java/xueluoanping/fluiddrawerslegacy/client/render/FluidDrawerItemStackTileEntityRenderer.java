@@ -121,7 +121,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
                 flist.add(TankRenderUtil.of(fluidStack,capacity));
             }
         }
-        TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime);
+        TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime,stack.getItem().getDescriptionId().contains("half"));
     }
 
 }

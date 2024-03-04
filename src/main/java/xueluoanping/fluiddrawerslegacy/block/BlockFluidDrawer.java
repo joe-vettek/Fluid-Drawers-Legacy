@@ -50,9 +50,11 @@ import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 import xueluoanping.fluiddrawerslegacy.compat.ModHandlerManager;
+import xueluoanping.fluiddrawerslegacy.util.MathUtils;
 
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.EnumSet;
 
 
@@ -72,6 +74,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     //        super(properties);
     //    }
     private final int slotCount;
+
     public BlockFluidDrawer(Properties properties, int slotCount) {
         super(properties);
         this.slotCount = slotCount;
@@ -86,7 +89,36 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        return Shapes.or(center, base, column1, column2, column3, column4, top);
+        if (!getDescriptionId().contains("half"))
+            return Shapes.or(center, base, column1, column2, column3, column4, top);
+        else {
+            VoxelShape center = Block.box(1, 1, 9, 15, 15, 15);
+            VoxelShape base = Block.box(0, 0, 8, 16, 1, 16);
+
+            switch (state.getValue(FACING)) {
+                case EAST -> {
+                    center = MathUtils.getShapefromAngle(center, 270);
+                    base = MathUtils.getShapefromAngle(base, 270);
+                }
+                case SOUTH -> {
+                    center = MathUtils.getShapefromAngle(center, 180);
+                    base = MathUtils.getShapefromAngle(base, 180);
+                }
+                case WEST -> {
+                    center = MathUtils.getShapefromAngle(center, 90);
+                    base = MathUtils.getShapefromAngle(base, 90);
+                }
+                default -> {
+                }
+            }
+            // final VoxelShape column1 = Block.box(0, 1, 0, 1, 15, 1);
+            // final VoxelShape column2 = Block.box(15, 1, 0, 16, 15, 1);
+            // final VoxelShape column3 = Block.box(0, 1, 15, 1, 15, 16);
+            // final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
+            // final VoxelShape top = Block.box(0, 15, 8, 16, 16, 16);
+            // return Shapes.or(center, base, column1, column2, column3, column4, top);
+            return Shapes.or(center, base);
+        }
     }
 
     @Override
@@ -110,6 +142,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         public Component getDisplayName() {
                             return Component.translatable("gui.fluiddrawerslegacy.tittle");
                         }
+
                         @Nullable
                         @Override
                         public AbstractContainerMenu createMenu(int windowId, Inventory playerInv, Player playerEntity) {
@@ -143,7 +176,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                     return InteractionResult.SUCCESS;
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
                     return InteractionResult.SUCCESS;
-                } else if (ModHandlerManager.mayConsume(tile,player,hand)) {
+                } else if (ModHandlerManager.mayConsume(tile, player, hand)) {
                     return InteractionResult.CONSUME;
                 }
             }
@@ -213,10 +246,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     }
 
 
-
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
-        return new BlockEntityFluidDrawer(getSlotCount(),pos, state);
+        return new BlockEntityFluidDrawer(getSlotCount(), pos, state);
     }
 
     private int getSlotCount() {
