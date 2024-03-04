@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "fluiddrawerslegacy:block/fluiddrawer_4_half",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "fluiddrawerslegacy:block/fluiddrawer_4_half"
+    },
+    "facing=south": {
+      "model": "fluiddrawerslegacy:block/fluiddrawer_4_half",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "fluiddrawerslegacy:block/fluiddrawer_4_half",
+      "y": 270
+    }
+  }
+}
