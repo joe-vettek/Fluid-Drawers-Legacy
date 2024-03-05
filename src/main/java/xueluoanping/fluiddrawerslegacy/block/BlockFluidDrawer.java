@@ -1,18 +1,12 @@
 package xueluoanping.fluiddrawerslegacy.block;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.EmptyDrawerAttributes;
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
-import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
-import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.*;
@@ -42,42 +36,67 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.SoundActions;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 import xueluoanping.fluiddrawerslegacy.compat.ModHandlerManager;
+import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.MathUtils;
 
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INetworked, EntityBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    public static final VoxelShape center = Block.box(1, 1, 1, 15, 15, 15);
-    public static final VoxelShape base = Block.box(0, 0, 0, 16, 1, 16);
-    public static final VoxelShape column1 = Block.box(0, 1, 0, 1, 15, 1);
-    public static final VoxelShape column2 = Block.box(15, 1, 0, 16, 15, 1);
-    public static final VoxelShape column3 = Block.box(0, 1, 15, 1, 15, 16);
-    public static final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
-    public static final VoxelShape top = Block.box(0, 15, 0, 16, 16, 16);
+
+    private static final VoxelShape shape;
+    private static final VoxelShape shapef;
+    public final Map<Direction, VoxelShape> getShape;
+
+
+    static {
+        var base = Block.box(0, 0, 1, 16, 16, 16);
+        var column1 = Block.box(0, 0, 0, 1, 16, 1);
+        var column2 = column1.move(15/16f, 0, 0);
+        var column3 = Block.box(1, 0, 0, 15, 1, 1);
+        var column4 = column3.move(0, 15/16f, 0);
+        var column = Shapes.or(column1, column2, column3, column4);
+        shape = Shapes.or(base, column);
+
+        var basef = Block.box(0, 0, 9, 16, 16, 16);
+        shapef = Shapes.or(basef, column.move(0, 0, 8/16f));
+    }
 
 
     //    public FluidDrawer(int drawerCount, boolean halfDepth, int storageUnits, Properties properties) {
     //        super(properties);
     //    }
     private final int slotCount;
+    private final boolean half;
 
-    public BlockFluidDrawer(Properties properties, int slotCount) {
+    public BlockFluidDrawer(Properties properties, int slotCount, boolean half) {
         super(properties);
         this.slotCount = slotCount;
+        this.half = half;
+        getShape = new HashMap<>() {{
+            var s = isHalf() ? shapef : shape;
+            put(Direction.EAST, MathUtils.getShapefromAngle(s, 270));
+            put(Direction.SOUTH, MathUtils.getShapefromAngle(s, 180));
+            put(Direction.WEST, MathUtils.getShapefromAngle(s, 90));
+            put(Direction.NORTH, s);
+        }};
+    }
+
+    private boolean isHalf() {
+        return this.half;
     }
 
     // Add all the properties here, or may cause a null point exception.
@@ -89,37 +108,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-        if (!getDescriptionId().contains("half"))
-            return Shapes.or(center, base, column1, column2, column3, column4, top);
-        else {
-            VoxelShape center = Block.box(1, 1, 9, 15, 15, 15);
-            VoxelShape base = Block.box(0, 0, 8, 16, 1, 16);
-
-            switch (state.getValue(FACING)) {
-                case EAST -> {
-                    center = MathUtils.getShapefromAngle(center, 270);
-                    base = MathUtils.getShapefromAngle(base, 270);
-                }
-                case SOUTH -> {
-                    center = MathUtils.getShapefromAngle(center, 180);
-                    base = MathUtils.getShapefromAngle(base, 180);
-                }
-                case WEST -> {
-                    center = MathUtils.getShapefromAngle(center, 90);
-                    base = MathUtils.getShapefromAngle(base, 90);
-                }
-                default -> {
-                }
-            }
-            // final VoxelShape column1 = Block.box(0, 1, 0, 1, 15, 1);
-            // final VoxelShape column2 = Block.box(15, 1, 0, 16, 15, 1);
-            // final VoxelShape column3 = Block.box(0, 1, 15, 1, 15, 16);
-            // final VoxelShape column4 = Block.box(15, 1, 15, 16, 15, 16);
-            // final VoxelShape top = Block.box(0, 15, 8, 16, 16, 16);
-            // return Shapes.or(center, base, column1, column2, column3, column4, top);
-            return Shapes.or(center, base);
-        }
+       return getShape.get(state.getValue(FACING));
     }
+
 
     @Override
     public @NotNull InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
@@ -214,7 +205,19 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         }
         super.setPlacedBy(level, pos, state, entity, stack);
     }
-
+    @Override
+    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player playerEntity) {
+        super.playerWillDestroy(level, pos, state, playerEntity);
+        if (level instanceof ServerLevel) {
+            if (!General.retainFluid.get() && level.getBlockEntity(pos) instanceof BlockEntityFluidDrawer blockEntityFluidDrawer) {
+                blockEntityFluidDrawer.getCapability(ForgeCapabilities.FLUID_HANDLER).ifPresent(iFluidHandler -> {
+                    for (int i = 0; i < iFluidHandler.getTanks(); i++) {
+                        iFluidHandler.drain(iFluidHandler.getFluidInTank(i), IFluidHandler.FluidAction.EXECUTE);
+                    }
+                });
+            }
+        }
+    }
 
     @Override
     public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {

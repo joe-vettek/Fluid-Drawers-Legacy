@@ -1,6 +1,5 @@
 package xueluoanping.fluiddrawerslegacy.util;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -47,9 +46,9 @@ public class MathUtils {
 
         //	Rotate point
         public static Point rotatePoint(Point p, float angle) {
-            angle = (float) CMath.toRadians(angle);
-            double x0 = p.x * CMath.cos(angle) + p.z * CMath.sin(angle);
-            double z0 = -p.x * CMath.sin(angle) + p.z * CMath.cos(angle);
+           var  radians_angle = (float) CMath.toRadians(angle);
+            double x0 = p.x * CMath.cos(radians_angle,angle) + p.z * CMath.sin(radians_angle,angle);
+            double z0 = -p.x * CMath.sin(radians_angle,angle) + p.z * CMath.cos(radians_angle,angle);
             return new Point(x0, p.y, z0);
         }
 
@@ -72,20 +71,19 @@ public class MathUtils {
     }
 
 
-    //	//请输入x正轴方向的碰撞箱点位，即EAST,需要为16D
-    ////	这个输入要求为MC方块坐标系
-
+    //	// input: North to annother
+    //  point input coord must be mc with 16 as px count
     public static VoxelShape getShapefromAngle(double x1, double y1, double z1, double x2, double y2, double z2, float angle) {
-        //		偏移到数学坐标系
+        //		To Math Coord
         Point p1 = Point.fromMCBlockBoxtoMathCenter(new Point(x1, y1, z1));
         Point p2 = Point.fromMCBlockBoxtoMathCenter(new Point(x2, y2, z2));
-        //		旋转
+        //		Rotate
         p1 = Point.rotatePoint(p1, angle);
         p2 = Point.rotatePoint(p2, angle);
-        //		还原
+        //		Revert to MC Coord
         p1 = Point.fromMathCentertoMCBlock(p1);
         p2 = Point.fromMathCentertoMCBlock(p2);
-        //				重排列
+        //		Rearrange
         double xmin = Math.min(p1.x, p2.x);
         double xmax = Math.max(p1.x, p2.x);
         double ymin = Math.min(p1.y, p2.y);
@@ -143,18 +141,18 @@ public class MathUtils {
             return Math.toRadians(angle);
         }
 
-        public static double cos(float angle) {
-            var temp = (int) angle;
+        public static double cos(float angle_r, float angle0) {
+            var temp = (int) angle0;
             if (COS_ANGLE_MAP.containsKey(temp))
                 return COS_ANGLE_MAP.get(temp);
-            return Math.cos(angle);
+            return Math.cos(angle_r);
         }
 
-        public static double sin(float angle) {
-            var temp = (int) angle - 90;
+        public static double sin(float angle_r, float angle0) {
+            var temp = (int) angle0 - 90;
             if (COS_ANGLE_MAP.containsKey(temp))
                 return COS_ANGLE_MAP.get(temp);
-            return Math.sin(angle);
+            return Math.sin(angle_r);
         }
     }
 }

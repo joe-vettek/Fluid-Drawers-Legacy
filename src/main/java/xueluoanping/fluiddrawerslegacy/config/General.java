@@ -6,6 +6,7 @@ public class General {
     public static ForgeConfigSpec COMMON_CONFIG;
     public static ForgeConfigSpec.BooleanValue bool;
     public static ForgeConfigSpec.IntValue volume;
+    public static ForgeConfigSpec.BooleanValue retainFluid;
     public static ForgeConfigSpec.BooleanValue createPotion;
     public static ForgeConfigSpec.BooleanValue cauponaSoupBowl;
     static {
@@ -16,6 +17,7 @@ public class General {
 
         COMMON_BUILDER.comment("General settings").push("general");
         volume=COMMON_BUILDER.comment("Set it to change volume.").defineInRange("volume",32000,4000,96000);
+        retainFluid=COMMON_BUILDER.comment("Whether the drawer retains fluid when destroyed.").define("retainFluid",true);
         COMMON_BUILDER.pop();
         // COMMON_CONFIG = COMMON_BUILDER.build();
 

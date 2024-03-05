@@ -14,8 +14,8 @@
 	"elements": [
 		{
 			"name": "front_glass",
-			"from": [0.5, 1, 8.02],
-			"to": [7.5, 7, 8.02],
+			"from": [0.5, 1, 9.02],
+			"to": [7.5, 7, 9.02],
 			"faces": {
 				"north": {"uv": [1, 1, 15, 15], "texture": "#front"},
 				"east": {"uv": [0, 0, 0, 14], "texture": "#front"},
@@ -27,8 +27,8 @@
 		},
 		{
 			"name": "front_glass",
-			"from": [8.5, 8, 8.02],
-			"to": [15.5, 15, 8.02],
+			"from": [8.5, 8, 9.02],
+			"to": [15.5, 15, 9.02],
 			"faces": {
 				"north": {"uv": [1, 1, 15, 15], "texture": "#front"},
 				"east": {"uv": [0, 0, 0, 14], "texture": "#front"},
@@ -40,8 +40,8 @@
 		},
 		{
 			"name": "front_glass",
-			"from": [0.5, 8, 8.02],
-			"to": [7.5, 15, 8.02],
+			"from": [0.5, 8, 9.02],
+			"to": [7.5, 15, 9.02],
 			"faces": {
 				"north": {"uv": [1, 1, 15, 15], "texture": "#front"},
 				"east": {"uv": [0, 0, 0, 14], "texture": "#front"},
@@ -53,8 +53,8 @@
 		},
 		{
 			"name": "front_glass",
-			"from": [8.5, 1, 8.02],
-			"to": [15.5, 7, 8.02],
+			"from": [8.5, 1, 9.02],
+			"to": [15.5, 7, 9.02],
 			"faces": {
 				"north": {"uv": [1, 1, 15, 15], "texture": "#front"},
 				"east": {"uv": [0, 0, 0, 14], "texture": "#front"},
