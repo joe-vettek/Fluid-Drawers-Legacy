@@ -69,7 +69,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                     }
                 }
                 Collections.sort(listW);
-                listNew = listW.stream().map(drawerDistanceBook -> drawerDistanceBook.fluidDrawerData).toList();
+                listNew = listW.stream().map(DrawerDistanceBook::fluidDrawerData).toList();
 
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
