@@ -1,0 +1,54 @@
+{
+  "type": "minecraft:block",
+  "functions": [
+    {
+      "function": "minecraft:copy_nbt",
+      "ops": [
+        {
+          "op": "replace",
+          "source": "tanks",
+          "target": "tanks"
+        },
+        {
+          "op": "replace",
+          "source": "Upgrades",
+          "target": "Upgrades"
+        },
+        {
+          "op": "replace",
+          "source": "Lock",
+          "target": "Lock"
+        },
+        {
+          "op": "replace",
+          "source": "Shr",
+          "target": "Shr"
+        },
+        {
+          "op": "replace",
+          "source": "Qua",
+          "target": "Qua"
+        }
+      ],
+      "source": "block_entity"
+    }
+  ],
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "fluiddrawerslegacy:fluiddrawer_2"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "fluiddrawerslegacy:blocks/fluiddrawer_2"
+}

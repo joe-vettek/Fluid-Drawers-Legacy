@@ -95,12 +95,13 @@ public class ItemFluidDrawer extends BlockItem {
                         if (fluidStack.getAmount() > 0) {
                             hasFluid = true;
                             componentList
-                                    .add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont)
-                                            .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1"))
-                                            .append(String.valueOf(fluidStack.getAmount()))
-//                                .append("/" + TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) + "mB")
-                                            .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer2"))
-                                            .append(Component.translatable(fluidStack.getTranslationKey())));
+                                    .add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont,fluidStack.getAmount(),Component.translatable(fluidStack.getTranslationKey())));
+//                                             .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1"))
+//                                             .append(String.valueOf(fluidStack.getAmount()))
+// //                                .append("/" + TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) + "mB")
+//                                             .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer2"))
+//                                             .append(Component.translatable(fluidStack.getTranslationKey())))
+                            ;
                         }
                     }
                 }

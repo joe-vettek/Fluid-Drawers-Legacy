@@ -128,26 +128,27 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         if (tile.isHalf()) {
             z += 0.55f;
         }
-        if (count > 1) {
+        if (count > 1)
+        {
             scale_x /= 2;
             scale_y /= 2;
             scale_z /= 2;
             if (count == 4) {
                 if (slot == 1) {
                     x += -0.25;
-                    y += -0.39;
+                    y += -0.4;
                 }
                 if (slot == 2) {
                     x += 0.25;
-                    y += -0.39;
+                    y += -0.4;
                 }
                 if (slot == 3) {
                     x += -0.25;
-                    y += 0.1;
+                    y += 0.08;
                 }
                 if (slot == 4) {
                     x += 0.25;
-                    y += 0.1;
+                    y += 0.08;
                 }
                 if (textWidth > 80) {
                     var r = textWidth / 80d;
@@ -159,14 +160,17 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
             }
             if (count == 2) {
                 if (slot == 1) {
-                    y += -0.39;
+                    y += -0.4;
                 }
                 if (slot == 2) {
                     y += 0.08;
                 }
             }
 
+
         }
+        if(count==1)
+            y += 0.05;
         matrixStackIn.translate(x, y, z);
         matrixStackIn.scale(scale_x, scale_y, scale_z);
         fontRenderer.drawInBatch(label

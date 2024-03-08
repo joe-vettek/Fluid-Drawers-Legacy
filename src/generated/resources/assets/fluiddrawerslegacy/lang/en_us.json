@@ -1,0 +1,15 @@
+{
+  "block.fluiddrawerslegacy.fluiddrawer": "Fluid Drawer",
+  "block.fluiddrawerslegacy.fluiddrawer_2": "Fluid Drawer 1x2",
+  "block.fluiddrawerslegacy.fluiddrawer_2_half": "Fluid Half Drawer 1x2",
+  "block.fluiddrawerslegacy.fluiddrawer_4": "Fluid Drawer 2x2",
+  "block.fluiddrawerslegacy.fluiddrawer_4_half": "Fluid Half Drawer 2x2",
+  "block.fluiddrawerslegacy.fluiddrawer_half": "Fluid Half Drawer",
+  "config.jade.plugin_fluiddrawerslegacy.controller": "Controller Fix",
+  "config.jade.plugin_fluiddrawerslegacy.controller_slave": "Controller Slave Fix",
+  "config.jade.plugin_fluiddrawerslegacy.fluiddrawer": "Fluid Drawer",
+  "config.jade.plugin_fluiddrawerslegacy.trim": "Trim Fix",
+  "fluiddrawerslegacy": "Fluid Drawers Legacy",
+  "statement.fluiddrawerslegacy.fluiddrawer.slot": "Slot %s: Contains %s of %s",
+  "waila.fluiddrawerslegacy.conceal": "§o<..Hold shift to see more..>"
+}

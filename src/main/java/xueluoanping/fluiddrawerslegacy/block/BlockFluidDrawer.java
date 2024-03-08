@@ -131,7 +131,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                     NetworkHooks.openScreen((ServerPlayer) player, new MenuProvider() {
                         @Override
                         public Component getDisplayName() {
-                            return Component.translatable("gui.fluiddrawerslegacy.tittle");
+                            // return Component.translatable("gui.fluiddrawerslegacy.tittle");
+                            return BlockFluidDrawer.this.getName();
                         }
 
                         @Nullable

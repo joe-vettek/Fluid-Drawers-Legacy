@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "/": {
+      "tag": "forge:glass"
+    },
+    "X": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "pattern": [
+    "X/X",
+    "///",
+    "X/X"
+  ],
+  "result": {
+    "count": 4,
+    "item": "fluiddrawerslegacy:fluiddrawer_4"
+  },
+  "show_notification": true
+}

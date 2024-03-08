@@ -8,6 +8,12 @@ import net.minecraftforge.data.event.GatherDataEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.data.blockstate.BlockStatesDataProvider;
 import xueluoanping.fluiddrawerslegacy.data.blockstate.ItemModelProvider;
+import xueluoanping.fluiddrawerslegacy.data.lang.Lang_EN;
+import xueluoanping.fluiddrawerslegacy.data.lang.Lang_ZH;
+import xueluoanping.fluiddrawerslegacy.data.loot.LFTLootTableProvider;
+import xueluoanping.fluiddrawerslegacy.data.recipe.RecipeDataProvider;
+import xueluoanping.fluiddrawerslegacy.data.tag.FDLItemTagsProvider;
+import xueluoanping.fluiddrawerslegacy.data.tag.TagsDataProvider;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -24,13 +30,13 @@ public class start {
             FluidDrawersLegacyMod.logger("Generate recipe");
 
             // work it until 1.21
-            // generator.addProvider(event.includeServer(),new RecipeDataProvider(packOutput));
+            generator.addProvider(event.includeServer(),new RecipeDataProvider(packOutput));
 
-            // DTBlockTagsProvider blockTags = new DTBlockTagsProvider(packOutput,lookupProvider, MODID, helper);
-            // generator.addProvider(event.includeServer(),blockTags);
-            // generator.addProvider(event.includeServer(),new DTItemTagsProvider(packOutput, MODID, lookupProvider, blockTags.contentsGetter(), helper));
+            TagsDataProvider blockTags = new TagsDataProvider(packOutput,lookupProvider, MODID, helper);
+            generator.addProvider(event.includeServer(),blockTags);
+            generator.addProvider(event.includeServer(),new FDLItemTagsProvider(packOutput, lookupProvider, blockTags.contentsGetter()));
 
-            // generator.addProvider(event.includeServer(),new DTFTLootTableProvider(packOutput,MODID,helper));
+            generator.addProvider(event.includeServer(),new LFTLootTableProvider(packOutput));
             // generator.addProvider(new GLMProvider(generator, MODID));
 
             // generator.addProvider(event.includeServer(),new Lang_EN(packOutput, helper));
@@ -42,6 +48,8 @@ public class start {
         if (event.includeClient()) {
             generator.addProvider(event.includeClient(),new BlockStatesDataProvider(packOutput,helper));
             generator.addProvider(event.includeClient(),new ItemModelProvider(packOutput,helper));
+            generator.addProvider(event.includeClient(),new Lang_EN(packOutput,helper));
+            generator.addProvider(event.includeClient(),new Lang_ZH(packOutput,helper));
         }
 
 

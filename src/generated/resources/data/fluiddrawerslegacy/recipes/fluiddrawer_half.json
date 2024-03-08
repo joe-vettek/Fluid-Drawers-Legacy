@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "/": {
+      "tag": "forge:glass_panes"
+    },
+    "X": {
+      "item": "minecraft:bucket"
+    }
+  },
+  "pattern": [
+    "///",
+    " X ",
+    "///"
+  ],
+  "result": {
+    "item": "fluiddrawerslegacy:fluiddrawer_half"
+  },
+  "show_notification": true
+}

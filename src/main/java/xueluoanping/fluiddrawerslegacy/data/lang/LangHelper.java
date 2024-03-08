@@ -3,6 +3,8 @@ package xueluoanping.fluiddrawerslegacy.data.lang;
 import net.minecraft.data.PackOutput;
 import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.common.data.LanguageProvider;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
+import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 public abstract class LangHelper extends LanguageProvider {
 	private final ExistingFileHelper helper;
@@ -21,8 +23,14 @@ public abstract class LangHelper extends LanguageProvider {
 		// add(ModConstant.DebugKey.getRealKey(key), value);
 	}
 
-	public void addSpecie(String specieName, String hint) {
-		add("species." + modid + '.'+specieName, hint);
+	public void addSlot(String hint) {
+		add("statement.fluiddrawerslegacy.fluiddrawer.slot",hint);
+	}
+	public void addWailaHint(String hint) {
+		add("waila.fluiddrawerslegacy.conceal", hint);
+	}
+	public void addDrawer(String countString, String hint) {
+		add(RegisterFinderUtil.getBlock(FluidDrawersLegacyMod.rl("fluiddrawer"+countString)), hint);
 	}
 
 	// There is a lot of code here that is redundant, but indispensable. In order to make corrections
