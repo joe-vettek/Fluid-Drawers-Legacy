@@ -1,7 +1,6 @@
 package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
-import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 // import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -9,7 +8,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -23,9 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
@@ -33,7 +29,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.api.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -296,7 +291,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
             FluidStack fluidStackDown = betterFluidHandler.getFluid().copy();
 
-            int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTank();
+            int capacity = this.menu.getTileEntityFluidDrawer().getCapacityTankEffective();
             int amount = fluidStackDown.getAmount();
             if (capacity < amount)
                 amount = capacity;

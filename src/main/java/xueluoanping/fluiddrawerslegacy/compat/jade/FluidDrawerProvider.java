@@ -1,7 +1,6 @@
 package xueluoanping.fluiddrawerslegacy.compat.jade;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -26,8 +25,6 @@ import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
-import java.util.List;
-
 
 public class FluidDrawerProvider implements IBlockComponentProvider {
     public static FluidDrawerProvider INSTANCE = new FluidDrawerProvider();
@@ -42,7 +39,7 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
             if (tileEntity instanceof BlockEntityFluidDrawer tile) {
                 tile.getCapability(ForgeCapabilities.FLUID_HANDLER, null)
                         .ifPresent(handler -> {
-                            int capacity = tile.getCapacityTank();
+                            int capacity = tile.getCapacityTankEffective();
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
                             if (handler instanceof betterFluidManager) {
                                 var h = (betterFluidManager<BlockEntityFluidDrawer>) handler;

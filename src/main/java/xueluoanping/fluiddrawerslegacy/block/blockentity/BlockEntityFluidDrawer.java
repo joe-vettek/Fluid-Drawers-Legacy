@@ -204,8 +204,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         return getCapacityStandard() * upgrades().getStorageMultiplier();
     }
 
-    public int getCapacityTank() {
+    public int getCapacityTankEffective() {
         return getCapacityEffective() / getDrawerCount();
+    }
+    public int getCapacityTankStandard() {
+        return getCapacityStandard() / getDrawerCount();
     }
 
     public int getCapacityUsed() {
@@ -422,7 +425,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         // @Override
         public int getMaxTankCapacity() {
-            return getCapacityTank();
+            return getCapacityTankEffective();
         }
 
         @Override
@@ -468,8 +471,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         public CompoundTag serializeNBT() {
             // resize capacity when sending message
-            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTank())
-                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTank());
+            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTankEffective())
+                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTankEffective());
             CompoundTag nbt = new CompoundTag();
             if (getCacheFluid().getRawFluid() != Fluids.EMPTY &&
                     fluid.getFluid() != Fluids.EMPTY &&
@@ -488,8 +491,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         }
 
         public void deserializeNBT(CompoundTag tank) {
-            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTank())
-                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTank());
+            if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTankEffective())
+                this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTankEffective());
             if (tank.contains("cache")) {
                 FluidStack cacheTempStack = FluidStack.loadFluidStackFromNBT(tank.getCompound("cache"));
                 setCacheFluid(cacheTempStack);
@@ -620,15 +623,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
                         return false;
 
                     for (int i = 0; i < getDrawerCount(); i++) {
-                        if (getDrawer(i).getTank().getFluidAmount() >= getCapacityTank() / 32)
+                        var tank=getDrawer(i).getTank();
+                        if (tank.getFluidAmount() >= tank.getCapacity() / 32)
                             return false;
                     }
-
-                    //                    int lostStackCapacity = getCapacityStandard() * upgrades().getStorageMultiplier();
-                    //
-                    //                    if (!this.stackCapacityCheck(lostStackCapacity)) {
-                    //                        return false;
-                    //                    }
                 }
 
                 return true;
@@ -652,7 +650,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
                     for (int i = 0; i < getDrawerCount(); i++) {
                         int amount = getDrawer(i).getTank().getFluidAmount();
-                        int standardCapacity = getCapacityTank();
+                        int standardCapacity = getCapacityTankStandard();
                         int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
                         if (afterCapacity < amount)
                             return false;
