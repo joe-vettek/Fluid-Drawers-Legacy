@@ -27,11 +27,9 @@ public class start {
         PackOutput packOutput = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
         if (event.includeServer()) {
-            FluidDrawersLegacyMod.logger("Generate recipe");
+            FluidDrawersLegacyMod.logger("Generate We Data!!!");
 
-            // work it until 1.21
             generator.addProvider(event.includeServer(),new RecipeDataProvider(packOutput));
-
             TagsDataProvider blockTags = new TagsDataProvider(packOutput,lookupProvider, MODID, helper);
             generator.addProvider(event.includeServer(),blockTags);
             generator.addProvider(event.includeServer(),new FDLItemTagsProvider(packOutput, lookupProvider, blockTags.contentsGetter()));
