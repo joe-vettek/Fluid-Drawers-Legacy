@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -54,7 +55,7 @@ public class ModHandlerManager {
         }
     }
 
-    public static boolean tryHandleByMod(BlockEntityFluidDrawer tile, Player player, InteractionHand hand) {
+    public static boolean tryHandleByMod(IFluidHandler tile, Player player, InteractionHand hand) {
         ItemStack heldStack = player.getItemInHand(hand);
         try {
             for (FluidItemHolder handler : FluidManager.handlers) {
@@ -76,7 +77,7 @@ public class ModHandlerManager {
         return false;
     }
 
-    public static boolean mayConsume(BlockEntity tile, Player player, InteractionHand hand) {
+    public static boolean mayConsume(Player player, InteractionHand hand) {
         ItemStack heldStack = player.getItemInHand(hand);
         try {
             for (FluidItemHolder handler : FluidManager.handlers) {
@@ -127,18 +128,20 @@ public class ModHandlerManager {
 
     public static boolean tryHandleClickInputByMod(BlockEntityController tile, Player player, InteractionHand hand) {
         ItemStack heldStack = player.getItemInHand(hand);
-        try {
-            for (FluidItemHolder handler : FluidManager.handlers) {
-                FluidStack fluidStack = handler.getFluidByItem.apply(heldStack);
-                if (fluidStack.isEmpty()) continue;
-                ItemStack itemStack = handler.getItemByFluid.apply(fluidStack);
-                if (itemStack.isEmpty()) continue;
-                if (FluidDrawerHandler.rightClickInPut(tile, player, fluidStack, itemStack, hand))
-                    return true;
+        if (tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().isPresent())
+            try {
+                var fluidM = tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
+                for (FluidItemHolder handler : FluidManager.handlers) {
+                    FluidStack fluidStack = handler.getFluidByItem.apply(heldStack);
+                    if (fluidStack.isEmpty()) continue;
+                    ItemStack itemStack = handler.getItemByFluid.apply(fluidStack);
+                    if (itemStack.isEmpty()) continue;
+                    if (FluidDrawerHandler.rightClickInPut(fluidM, player, fluidStack, itemStack, hand))
+                        return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return false;
     }
 

@@ -183,10 +183,10 @@ public class TankRenderUtil {
             addVertex(buffer, matrixStackIn, x1, y0, z1, u0 , v1, colorRGB, 1.0f, combinedLight);
 
             // Behind
-            addVertex(buffer, matrixStackIn, x0, y0, z1, u1-uHeight, v1, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x1, y0, z1, u1-uHeight , v0, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x1, y1, z1, u0, v0, colorRGB, 1.0f, combinedLight);
-            addVertex(buffer, matrixStackIn, x0, y1, z1, u0, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y0, z1, u1, v1, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y0, z1, u1 , v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x1, y1, z1, u0+uHeight, v0, colorRGB, 1.0f, combinedLight);
+            addVertex(buffer, matrixStackIn, x0, y1, z1, u0+uHeight, v1, colorRGB, 1.0f, combinedLight);
 
             // Left(for block)
             addVertex(buffer, matrixStackIn, x0, y0, z0, u0 , v0, colorRGB, 1.0f, combinedLight);

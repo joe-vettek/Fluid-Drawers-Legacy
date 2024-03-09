@@ -8,6 +8,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
 public class MathUtils {
 
@@ -46,24 +47,24 @@ public class MathUtils {
 
         //	Rotate point
         public static Point rotatePoint(Point p, float angle) {
-           var  radians_angle = (float) CMath.toRadians(angle);
-            double x0 = p.x * CMath.cos(radians_angle,angle) + p.z * CMath.sin(radians_angle,angle);
-            double z0 = -p.x * CMath.sin(radians_angle,angle) + p.z * CMath.cos(radians_angle,angle);
-            return new Point(x0, p.y, z0);
+            var radians_angle = (float) CMath.toRadians(angle);
+            double x0 = p.x * CMath.cos(radians_angle, angle) + p.z * CMath.sin(radians_angle, angle);
+            double z0 = -p.x * CMath.sin(radians_angle, angle) + p.z * CMath.cos(radians_angle, angle);
+           return new Point(x0, p.y, z0);
         }
 
-        //	适用于VoxelShape中得到的点
+        //	for value from VoxelShape
         public static double fromMCVoxelShapetoMathCenter(double value) {
             value = value * 16 - 8.0;
             return value;
         }
 
-        // 适用于Block.box，不需要/16
+        // Block.box，no need to /16
         public static Point fromMathCentertoMCBlock(Point p) {
             return new Point(p.x + 8.0D, p.y, p.z + 8.0D);
         }
 
-        // 适用于Block.box，不需要/16
+        // Block.box，no need to /16
         public static Point fromMCBlockBoxtoMathCenter(Point p) {
             return new Point(p.x - 8.0D, p.y, p.z - 8.0D);
         }
@@ -135,7 +136,7 @@ public class MathUtils {
 
     private static class CMath {
 
-        public static final Map<Integer, Integer> COS_ANGLE_MAP = Map.of(0, 1, 90, 0, 180, -1, 270, 0, -90, 1);
+        public static final Map<Integer, Integer> COS_ANGLE_MAP = Map.of(0, 1, 90, 0, 180, -1, 270, 0, -90, 0);
 
         public static double toRadians(float angle) {
             return Math.toRadians(angle);

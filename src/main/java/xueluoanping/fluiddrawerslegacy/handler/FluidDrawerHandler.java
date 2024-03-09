@@ -17,51 +17,48 @@ import java.util.function.Function;
 
 public class FluidDrawerHandler {
 
-    public static boolean rightClickInPut(BlockEntity tile, Player player, FluidStack extractFluid, ItemStack resultStack, InteractionHand mainHand) {
+    public static boolean rightClickInPut(IFluidHandler fluidHandler, Player player, FluidStack extractFluid, ItemStack resultStack, InteractionHand mainHand) {
         AtomicBoolean result = new AtomicBoolean(false);
-        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
-                .ifPresent(fluidHandler -> {
-                    FluidStack fluidStack = extractFluid.copy();
-                    if (!fluidStack.isEmpty() && fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.SIMULATE) == extractFluid.getAmount()) {
-                        int amount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (amount == fluidStack.getAmount()) {
-                            result.set(true);
-                            playSound(player,fluidStack,true);
-                            if (!player.isCreative())
-                                player.setItemInHand(mainHand, resultStack);
-                        }
-                    }
-                });
+        {
+            FluidStack fluidStack = extractFluid.copy();
+            if (!fluidStack.isEmpty() && fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.SIMULATE) == extractFluid.getAmount()) {
+                int amount = fluidHandler.fill(fluidStack, IFluidHandler.FluidAction.EXECUTE);
+                if (amount == fluidStack.getAmount()) {
+                    result.set(true);
+                    playSound(player,fluidStack,true);
+                    if (!player.isCreative())
+                        player.setItemInHand(mainHand, resultStack);
+                }
+            }
+        }
         return result.get();
     }
 
-    public static boolean rightClickOuput(BlockEntity tile, Player player, Function<FluidStack, Integer> testIfValidAndSet, Function<FluidStack, ItemStack> getItemByFluid, ItemStack heldStack, InteractionHand mainHand) {
+    public static boolean rightClickOuput(IFluidHandler fluidHandler, Player player, Function<FluidStack, Integer> testIfValidAndSet, Function<FluidStack, ItemStack> getItemByFluid, ItemStack heldStack, InteractionHand mainHand) {
         AtomicBoolean result = new AtomicBoolean(false);
-        tile.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN)
+        {
+            FluidStack fluidStack = fluidHandler.getFluidInTank(0).copy();
+            if (fluidStack.isEmpty()) return false;
+            // fluidStack.setAmount(250);
+            int amount = testIfValidAndSet.apply(fluidStack);
+            fluidStack.setAmount(amount);
+            if (!fluidStack.isEmpty() && fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.SIMULATE).getAmount() == amount) {
 
-                .ifPresent(fluidHandler -> {
-                    FluidStack fluidStack = fluidHandler.getFluidInTank(0).copy();
-                    if (fluidStack.isEmpty()) return;
-                    // fluidStack.setAmount(250);
-                    int amount = testIfValidAndSet.apply(fluidStack);
-                    fluidStack.setAmount(amount);
-                    if (!fluidStack.isEmpty() && fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.SIMULATE).getAmount() == amount) {
-
-                        FluidStack outStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
-                        if (outStack.getAmount() == amount) {
-                            result.set(true);
-                            playSound(player,outStack,false);
-                            if (!player.isCreative()) {
-                                ItemStack itemStack = getItemByFluid.apply(outStack);
-                                heldStack.shrink(1);
-                                player.setItemInHand(InteractionHand.MAIN_HAND, heldStack);
-                                if (!heldStack.isEmpty())
-                                    player.addItem(itemStack);
-                                else player.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
-                            }
-                        }
+                FluidStack outStack = fluidHandler.drain(fluidStack, IFluidHandler.FluidAction.EXECUTE);
+                if (outStack.getAmount() == amount) {
+                    result.set(true);
+                    playSound(player,outStack,false);
+                    if (!player.isCreative()) {
+                        ItemStack itemStack = getItemByFluid.apply(outStack);
+                        heldStack.shrink(1);
+                        player.setItemInHand(InteractionHand.MAIN_HAND, heldStack);
+                        if (!heldStack.isEmpty())
+                            player.addItem(itemStack);
+                        else player.setItemInHand(InteractionHand.MAIN_HAND, itemStack);
                     }
-                });
+                }
+            }
+        }
         return result.get();
     }
 

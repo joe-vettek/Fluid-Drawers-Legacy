@@ -31,6 +31,7 @@ import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -40,6 +41,7 @@ import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
@@ -65,14 +67,14 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     static {
         var base = Block.box(0, 0, 1, 16, 16, 16);
         var column1 = Block.box(0, 0, 0, 1, 16, 1);
-        var column2 = column1.move(15/16f, 0, 0);
+        var column2 = column1.move(15 / 16f, 0, 0);
         var column3 = Block.box(1, 0, 0, 15, 1, 1);
-        var column4 = column3.move(0, 15/16f, 0);
+        var column4 = column3.move(0, 15 / 16f, 0);
         var column = Shapes.or(column1, column2, column3, column4);
         shape = Shapes.or(base, column);
 
         var basef = Block.box(0, 0, 9, 16, 16, 16);
-        shapef = Shapes.or(basef, column.move(0, 0, 8/16f));
+        shapef = Shapes.or(basef, column.move(0, 0, 8 / 16f));
     }
 
 
@@ -108,15 +110,18 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context) {
-       return getShape.get(state.getValue(FACING));
+        return getShape.get(state.getValue(FACING));
     }
 
 
     @Override
     public @NotNull InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        var facing = state.getValue(FACING);
+        var playerFrom = hit.getDirection();
 
-        if (hit.getDirection() == Direction.UP || hit.getDirection() == Direction.DOWN)
-            return InteractionResult.PASS;
+        if (playerFrom == Direction.UP || playerFrom == Direction.DOWN) return InteractionResult.PASS;
+        if (isHalf() && playerFrom != facing) return InteractionResult.PASS;
+
 
         BlockEntity tileEntity = world.getBlockEntity(pos);
         // Must be a FluidDrawer
@@ -125,7 +130,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             ItemStack heldStack = player.getItemInHand(hand);
             ItemStack offhandStack = player.getOffhandItem();
             // open GUI when squat
-            if (heldStack.isEmpty() && player.isShiftKeyDown()) {
+
+            if (facing == playerFrom && heldStack.isEmpty() && player.isShiftKeyDown()) {
                 if (CommonConfig.GENERAL.enableUI.get() && !world.isClientSide()) {
                     //                    FluidDrawersLegacyMod.logger("hello，screen");
                     NetworkHooks.openScreen((ServerPlayer) player, new MenuProvider() {
@@ -148,11 +154,10 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
             // insert upgrade
-            else if (heldStack.getItem() instanceof ItemUpgrade) {
+            else if (facing == playerFrom && heldStack.getItem() instanceof ItemUpgrade) {
                 if (tile.upgrades().canAddUpgrade(heldStack)) {
                     if (tile.upgrades().addUpgrade(heldStack)) {
-                        if (!player.isCreative())
-                            heldStack.shrink(1);
+                        if (!player.isCreative()) heldStack.shrink(1);
                         return InteractionResult.SUCCESS;
                     } else if (!world.isClientSide()) {
                         player.displayClientMessage(Component.translatable("message.storagedrawers.max_upgrades"), true);
@@ -164,17 +169,56 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             }
             // need an empty left hand
             else if (offhandStack == ItemStack.EMPTY && !player.isShiftKeyDown()) {
-                if (ModHandlerManager.tryHandleByMod(tile, player, hand))
+                // Case 1: From equal Facing and  then all can get
+                // Case 2: From can be nearst last from Facing then get 2,4 or 1,2 or 1
+                // Case default: get 1,3 or 1,2 or 1
+
+                // use it we can get a facing always without z
+                var loc = hit.getLocation().add(-pos.getX(), -pos.getY(), -pos.getZ());
+
+                int tankSlot = getSlotByVec(loc, facing, playerFrom, getSlotCount());
+                IFluidHandler tank = tankSlot == -1 ?
+                        tile.getTank() :
+                        (IFluidHandler) tile.getDrawer(tankSlot).getTank();
+
+                if (ModHandlerManager.tryHandleByMod(tank, player, hand))
                     return InteractionResult.SUCCESS;
-                else if (FluidUtil.interactWithFluidHandler(player, hand, tile.getTank())) {
+                else if (FluidUtil.interactWithFluidHandler(player, hand, tank)) {
                     return InteractionResult.SUCCESS;
-                } else if (ModHandlerManager.mayConsume(tile, player, hand)) {
+                } else if (ModHandlerManager.mayConsume(player, hand)) {
                     return InteractionResult.CONSUME;
                 }
             }
         }
 
         return InteractionResult.PASS;
+    }
+
+    public static int getSlotByVec(Vec3 loc, Direction facing, Direction playerFrom, int slotCount) {
+        int tankSlot = 0;
+        if (slotCount == 2) {
+            tankSlot = loc.y() > 0.5 ? 0 : 1;
+        } else if (slotCount == 4) {
+            int angle = (int) (facing.toYRot() - playerFrom.toYRot());
+            FluidDrawersLegacyMod.logger(angle, facing.toYRot());
+            if (angle == 0) {
+                var p = new MathUtils.Point(loc);
+                p = MathUtils.Point.rotatePoint(p, facing.toYRot());
+                int xo = (int) (Math.floor(p.x / 0.5f) + 1);
+                int yo = (int) (1 - Math.floor(p.y / 0.5f));
+                yo = yo == 0 ? 0 : 2;
+                tankSlot = xo + yo - 1;
+            } else if (angle == 90 || angle == -270) {
+                tankSlot = loc.y() > 0.5 ? 1 : 3;
+            } else {
+                tankSlot = loc.y() > 0.5 ? 0 : 2;
+            }
+        }
+
+        //  to avoid error
+        tankSlot = tankSlot < 0 || tankSlot >= slotCount ? -1 : tankSlot;
+
+        return tankSlot;
     }
 
 
@@ -206,6 +250,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         }
         super.setPlacedBy(level, pos, state, entity, stack);
     }
+
     @Override
     public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player playerEntity) {
         super.playerWillDestroy(level, pos, state, playerEntity);
