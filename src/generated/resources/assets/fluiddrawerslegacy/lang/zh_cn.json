@@ -6,6 +6,6 @@
   "block.fluiddrawerslegacy.fluiddrawer_4_half": "2x2 小型流体抽屉",
   "block.fluiddrawerslegacy.fluiddrawer_half": "小型流体抽屉",
   "fluiddrawerslegacy": "储液抽屉：遗产",
-  "statement.fluiddrawerslegacy.fluiddrawer.slot": "§7o%s号抽屉: 装有%s的%s",
+  "statement.fluiddrawerslegacy.fluiddrawer.slot": "§7%s号格子: 装有%s的%s",
   "waila.fluiddrawerslegacy.conceal": "§o<..按住shift以查看更多..>"
 }

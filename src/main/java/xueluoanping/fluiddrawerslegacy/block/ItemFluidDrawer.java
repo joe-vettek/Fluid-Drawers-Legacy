@@ -11,6 +11,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -94,8 +95,11 @@ public class ItemFluidDrawer extends BlockItem {
                             fluidStack.setAmount(Integer.MAX_VALUE);
                         if (fluidStack.getAmount() > 0) {
                             hasFluid = true;
+
+                            String str=I18n.get("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont,fluidStack.getAmount(), fluidStack.getDisplayName().getString());
+
                             componentList
-                                    .add(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont,fluidStack.getAmount(),Component.translatable(fluidStack.getTranslationKey())));
+                                    .add(Component.translatable(str));
 //                                             .append(Component.translatable("statement.fluiddrawerslegacy.fluiddrawer1"))
 //                                             .append(String.valueOf(fluidStack.getAmount()))
 // //                                .append("/" + TileEntityFluidDrawer.calcultaeCapacitybyStack(stack) + "mB")
