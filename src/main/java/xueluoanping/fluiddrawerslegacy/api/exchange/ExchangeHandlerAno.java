@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.compat;
+package xueluoanping.fluiddrawerslegacy.api.exchange;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -14,7 +14,7 @@ import snownee.jade.api.Identifiers;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElement;
 import xueluoanping.fluiddrawerslegacy.ModTranslateKey;
-import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 
 import java.util.List;

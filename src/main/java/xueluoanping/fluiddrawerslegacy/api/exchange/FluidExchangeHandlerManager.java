@@ -1,10 +1,9 @@
-package xueluoanping.fluiddrawerslegacy.compat;
+package xueluoanping.fluiddrawerslegacy.api.exchange;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
@@ -15,7 +14,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.ModFileScanData;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.handler.FluidDrawerHandler;
 
 import java.util.*;
@@ -23,7 +21,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
-public class ModHandlerManager {
+public class FluidExchangeHandlerManager {
     // public static List<ModExchangeHandler> handlers = new ArrayList<>();
     public static FluidItem FluidManager = new FluidItem();
 

@@ -12,7 +12,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fml.common.Mod;
-import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

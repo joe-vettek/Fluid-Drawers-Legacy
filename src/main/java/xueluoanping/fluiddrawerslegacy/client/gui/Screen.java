@@ -29,7 +29,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.joml.Matrix4f;
-import xueluoanping.fluiddrawerslegacy.api.IFluidDrawerGroup;
+import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
 import java.awt.*;

@@ -21,7 +21,7 @@ import net.minecraftforge.fluids.FluidStack;
 // import snownee.jade.VanillaPlugin;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.api.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 

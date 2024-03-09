@@ -25,7 +25,7 @@ import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidControllerProxy;
 import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
-import xueluoanping.fluiddrawerslegacy.compat.ModHandlerManager;
+import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
 
 import java.util.ArrayList;
 
@@ -72,7 +72,7 @@ public class ControllerFluidCapabilityHandler {
         }
 
         if (world.getBlockEntity(pos) instanceof BlockEntityController tile && tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().isPresent()) {
-            ArrayList<FluidStack> fluidStacksList = ModHandlerManager.getFluidInItemContainer(stack);
+            ArrayList<FluidStack> fluidStacksList = FluidExchangeHandlerManager.getFluidInItemContainer(stack);
             if (fluidStacksList.size() == 0) {
                 return;
             }
@@ -89,7 +89,7 @@ public class ControllerFluidCapabilityHandler {
             }
 
             if (isExist && (
-                    ModHandlerManager.tryHandleClickInputByMod(tile,event.getEntity(),event.getHand())
+                    FluidExchangeHandlerManager.tryHandleClickInputByMod(tile,event.getEntity(),event.getHand())
                     ||FluidUtilPatch.interactWithFluidHandlerAndEmpty(event.getEntity(), event.getHand(), fluidHandler, fluidStack))) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);

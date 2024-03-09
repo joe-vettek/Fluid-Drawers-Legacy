@@ -43,9 +43,9 @@ import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
-import xueluoanping.fluiddrawerslegacy.compat.ModHandlerManager;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.MathUtils;
 
@@ -181,11 +181,11 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                         tile.getTank() :
                         (IFluidHandler) tile.getDrawer(tankSlot).getTank();
 
-                if (ModHandlerManager.tryHandleByMod(tank, player, hand))
+                if (FluidExchangeHandlerManager.tryHandleByMod(tank, player, hand))
                     return InteractionResult.SUCCESS;
                 else if (FluidUtil.interactWithFluidHandler(player, hand, tank)) {
                     return InteractionResult.SUCCESS;
-                } else if (ModHandlerManager.mayConsume(player, hand)) {
+                } else if (FluidExchangeHandlerManager.mayConsume(player, hand)) {
                     return InteractionResult.CONSUME;
                 }
             }

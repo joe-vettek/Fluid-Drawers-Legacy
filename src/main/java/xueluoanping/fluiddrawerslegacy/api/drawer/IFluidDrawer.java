@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api;
+package xueluoanping.fluiddrawerslegacy.api.drawer;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import net.minecraft.world.item.ItemStack;

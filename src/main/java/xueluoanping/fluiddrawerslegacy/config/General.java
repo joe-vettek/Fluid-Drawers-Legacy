@@ -9,6 +9,7 @@ public class General {
     public static ForgeConfigSpec.BooleanValue retainFluid;
     public static ForgeConfigSpec.BooleanValue createPotion;
     public static ForgeConfigSpec.BooleanValue cauponaSoupBowl;
+
     static {
         ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
         COMMON_BUILDER.comment("Debug settings").push("debugMode");

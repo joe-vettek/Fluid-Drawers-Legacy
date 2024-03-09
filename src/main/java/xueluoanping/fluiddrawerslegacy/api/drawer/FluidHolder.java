@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api;
+package xueluoanping.fluiddrawerslegacy.api.drawer;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.fluids.FluidStack;

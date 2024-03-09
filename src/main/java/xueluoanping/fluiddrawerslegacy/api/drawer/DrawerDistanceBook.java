@@ -1,4 +1,4 @@
-package xueluoanping.fluiddrawerslegacy.api;
+package xueluoanping.fluiddrawerslegacy.api.drawer;
 
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
