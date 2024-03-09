@@ -10,6 +10,6 @@
   "config.jade.plugin_fluiddrawerslegacy.fluiddrawer": "Fluid Drawer",
   "config.jade.plugin_fluiddrawerslegacy.trim": "Trim Fix",
   "fluiddrawerslegacy": "Fluid Drawers Legacy",
-  "statement.fluiddrawerslegacy.fluiddrawer.slot": "Slot %s: Contains %s of %s",
+  "statement.fluiddrawerslegacy.fluiddrawer.slot": "§7Slot %s: Contains %s of %s",
   "waila.fluiddrawerslegacy.conceal": "§o<..Hold shift to see more..>"
 }

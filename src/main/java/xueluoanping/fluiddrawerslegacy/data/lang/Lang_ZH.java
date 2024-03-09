@@ -25,7 +25,7 @@ public class Lang_ZH extends LangHelper {
         addDrawer2("_4", "2x2");
 		
 		addWailaHint( "§o<..按住shift以查看更多..>");
-        addSlot("%s号格子: 装有%s的%s");
+        addSlot("§7o%s号抽屉: 装有%s的%s");
     }
 
 

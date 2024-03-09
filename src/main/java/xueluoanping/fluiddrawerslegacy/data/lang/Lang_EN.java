@@ -23,7 +23,7 @@ public class Lang_EN extends LangHelper {
         addDrawer2("_4", "2x2");
 
         addWailaHint( "§o<..Hold shift to see more..>");
-        addSlot("Slot %s: Contains %s of %s");
+        addSlot("§7Slot %s: Contains %s of %s");
 
         addJadeConfig();
     }
