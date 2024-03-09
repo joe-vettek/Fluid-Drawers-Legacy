@@ -200,14 +200,24 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             tankSlot = loc.y() > 0.5 ? 0 : 1;
         } else if (slotCount == 4) {
             int angle = (int) (facing.toYRot() - playerFrom.toYRot());
-            FluidDrawersLegacyMod.logger(angle, facing.toYRot());
             if (angle == 0) {
                 var p = new MathUtils.Point(loc);
-                p = MathUtils.Point.rotatePoint(p, facing.toYRot());
-                int xo = (int) (Math.floor(p.x / 0.5f) + 1);
-                int yo = (int) (1 - Math.floor(p.y / 0.5f));
-                yo = yo == 0 ? 0 : 2;
-                tankSlot = xo + yo - 1;
+                FluidDrawersLegacyMod.logger(facing, p.x, p.y, p.z);
+                switch (facing) {
+                    case EAST -> {
+                        p = new MathUtils.Point(p.z, p.y, 0);
+                    }
+                    case SOUTH -> {
+                        p = new MathUtils.Point(1 - p.x, p.y, 0);
+                    }
+                    case WEST -> {
+                        p = new MathUtils.Point(1 - p.z, p.y, 0);
+                    }
+                }
+
+                int xo = p.x < 0.5f ? 1 : 0;
+                int yo = p.y < 0.5f ? 2 : 0;
+                tankSlot = xo + yo;
             } else if (angle == 90 || angle == -270) {
                 tankSlot = loc.y() > 0.5 ? 1 : 3;
             } else {
