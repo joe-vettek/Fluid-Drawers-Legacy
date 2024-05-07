@@ -26,6 +26,8 @@ public class Lang_EN extends LangHelper {
         addSlot("§7Slot %s: Contains %s of %s");
 
         addJadeConfig();
+
+        add("itemGroup.fluiddrawers", "Fluid Drawers Legacy");
     }
     
     private void addJadeConfig() {

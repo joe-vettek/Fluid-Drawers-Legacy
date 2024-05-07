@@ -168,6 +168,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
             // when locked, need to check cache, or not necessary
             FluidStack tankCacheFluid = drawerDataList.get(i).getTank().getCacheFluid();
+
             if (drawerDataList.get(i).isLock()) {
                 if (!tankCacheFluid.isEmpty() && !tankCacheFluid.isFluidEqual(resource)) {
                     continue;
@@ -177,7 +178,8 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
             FluidStack tankFluid = drawerDataList.get(i).getTank().getFluid();
             if (tankFluid.isFluidEqual(resource) || tankFluid.isEmpty()) {
                 if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
-                        <= drawerDataList.get(i).getTank().getCapacity()) {
+                        <= drawerDataList.get(i).getTank().getCapacity()||
+                        drawerDataList.get(i).isVoid()) {
                     if (action.execute())
                         drawerDataList.get(i).getTank().fill(resource, IFluidHandler.FluidAction.EXECUTE);
                     return resource.getAmount();
@@ -199,7 +201,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
     private int getFluidDrawerPriority(BlockEntityFluidDrawer.FluidDrawerData data) {
         if (data.getTank().isFull())
-            return ModConstants.PRI_DISABLED;
+            return data.isVoid()?ModConstants.PRI_VOID:ModConstants.PRI_DISABLED;
         if (data.getTank().isEmpty()) {
             if (data.isLock())
                 return ModConstants.PRI_LOCKED_EMPTY;

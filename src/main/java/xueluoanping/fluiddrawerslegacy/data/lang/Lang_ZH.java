@@ -16,6 +16,7 @@ public class Lang_ZH extends LangHelper {
     @Override
     protected void addTranslations() {
         add(FluidDrawersLegacyMod.MOD_ID, "储液抽屉：遗产");
+        add("itemGroup.fluiddrawers", "储液抽屉：遗产");
 
         addDrawer("", "");
         addDrawer("_2", "1x2");
