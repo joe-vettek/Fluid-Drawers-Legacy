@@ -267,7 +267,8 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
                 FluidStack tankFluid = drawerDataList.get(i).getTank().getFluid();
                 if (tankFluid.isFluidEqual(resource) || tankFluid.isEmpty()) {
                     if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
-                            <= drawerDataList.get(i).getTank().getCapacity()) {
+                            <= drawerDataList.get(i).getTank().getCapacity()||
+                            drawerDataList.get(i).isVoid()) {
                         if (action.execute())
                             drawerDataList.get(i).getTank().fill(resource, FluidAction.EXECUTE);
                         return resource.getAmount();
@@ -289,7 +290,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
         private int getFluidDrawerPriority(TileEntityFluidDrawer.StandardDrawerData data) {
             if (data.getTank().isFull())
-                return ModConstants.PRI_DISABLED;
+                return data.isVoid()?ModConstants.PRI_VOID:ModConstants.PRI_DISABLED;
             if (data.getTank().isEmpty()) {
                 if (data.isLock())
                     return ModConstants.PRI_LOCKED_EMPTY;
