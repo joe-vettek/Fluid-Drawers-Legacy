@@ -21,8 +21,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Vector3d;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
@@ -31,13 +31,12 @@ import xueluoanping.fluiddrawerslegacy.client.util.TankRenderUtil;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.util.MathUtil;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 // Thanks to WaterSource
 public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDrawer> {
 
-    public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
+    public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS,  ResourceLocation.withDefaultNamespace("entity/bell/bell_body"));
     private static final String BELL_BODY = "bell_body";
     private final ModelPart bellBody;
     private final Font font;
@@ -75,26 +74,26 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         for (BlockEntityFluidDrawer.FluidDrawerData data : dlist) {
             slot++;
             var betterFluidHandler = data.getTank();
-            if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY &&
+            if (betterFluidHandler.getCacheFluid().getFluid() != Fluids.EMPTY &&
                     tile.getDrawerAttributes().isConcealed()) {
-                FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid(), 1);
-                var label = fluidStackDown.getDisplayName().getString();
-                drawText(0, label, slot, count, tile, matrixStackIn, combinedLightIn);
+                FluidStack fluidStackDown = new FluidStack(betterFluidHandler.getCacheFluid().getFluidHolder(), 1);
+                var label = fluidStackDown.getHoverName().getString();
+                drawText(0, label, slot, count, tile, matrixStackIn,bufferIn, combinedLightIn);
             }
 
             if (tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
+                if (betterFluidHandler.getCacheFluid().getFluid() != Fluids.EMPTY) {
                     String label = "(" + I18n.get("tooltip.storagedrawers.waila.locked") + ")";
-                    drawText(1, label, slot, count, tile, matrixStackIn, combinedLightIn);
+                    drawText(1, label, slot, count, tile, matrixStackIn, bufferIn, combinedLightIn);
                 }
             }
 
             if (tile.getDrawerAttributes().isShowingQuantity()) {
-                if (betterFluidHandler.getCacheFluid().getRawFluid() != Fluids.EMPTY) {
+                if (betterFluidHandler.getCacheFluid().getFluid() != Fluids.EMPTY) {
                     FluidStack fluidStackDown = betterFluidHandler.getFluid();
                     int amount = fluidStackDown.getAmount();
                     String label = amount + "mB";
-                    drawText(2, label, slot, count, tile, matrixStackIn, combinedLightIn);
+                    drawText(2, label, slot, count, tile, matrixStackIn, bufferIn, combinedLightIn);
                 }
 
             }
@@ -104,11 +103,11 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay);
     }
 
-    private void drawText(int line, String label, int slot, int count, BlockEntityFluidDrawer tile, PoseStack matrixStackIn, int combinedLightIn) {
+    private void drawText(int line, String label, int slot, int count, BlockEntityFluidDrawer tile, PoseStack matrixStackIn, MultiBufferSource txtBuffer, int combinedLightIn) {
         matrixStackIn.pushPose();
 
         Font fontRenderer = this.font;
-        MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        // MultiBufferSource.BufferSource txtBuffer = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
         int textWidth = fontRenderer.width(label);
         var lh = font.lineHeight;
 
@@ -175,7 +174,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         matrixStackIn.scale(scale_x, scale_y, scale_z);
         fontRenderer.drawInBatch(label
                 , (float) (-textWidth) / 2.0F, -18F - lh * 1.2f * line - 1.2f*extraHeight, 0xFFFFFF, false, matrixStackIn.last().pose(), txtBuffer, Font.DisplayMode.NORMAL, 0, combinedLightIn);
-        txtBuffer.endBatch();
+        // txtBuffer.endBatch();
 
         matrixStackIn.popPose();
     }
@@ -248,7 +247,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
                 fluidStackDown.setAmount(data.getFluidAnimation().getAndUpdateLastFluidAmount(fluidStackDown.getAmount(), animationTime));
 
             if (isLocked && fluidStackDown.isEmpty() && !cache.isEmpty()) {
-                fluidStackDown = new FluidStack(cache, 1000);
+                fluidStackDown = new FluidStack(cache.getFluidHolder(), 1000);
             }
 
             if (tile.upgrades().hasVendingUpgrade() && !fluidStackDown.isEmpty())

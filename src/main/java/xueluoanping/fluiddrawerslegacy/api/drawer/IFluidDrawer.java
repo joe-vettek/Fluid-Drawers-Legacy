@@ -2,9 +2,9 @@ package xueluoanping.fluiddrawerslegacy.api.drawer;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;

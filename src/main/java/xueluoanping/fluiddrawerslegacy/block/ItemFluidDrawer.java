@@ -18,11 +18,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 // import net.minecraftforge.client.IItemRenderProperties;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.fluids.FluidStack;
-import org.checkerframework.checker.units.qual.C;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidDrawerItemStackTileEntityRenderer;
 import xueluoanping.fluiddrawerslegacy.util.SafeClientAccess;
 import xueluoanping.fluiddrawerslegacy.util.TooltipKey;
@@ -40,17 +36,17 @@ public class ItemFluidDrawer extends BlockItem {
         super(block, properties);
     }
 
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        super.initializeClient(consumer);
-        consumer.accept(new IClientItemExtensions() {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-                return new FluidDrawerItemStackTileEntityRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
-
-            }
-        });
-    }
+    // @Override
+    // public void initializeClient(Consumer<IClientItemExtensions> consumer) {
+    //     super.initializeClient(consumer);
+    //     consumer.accept(new IClientItemExtensions() {
+    //         @Override
+    //         public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+    //             return new FluidDrawerItemStackTileEntityRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), Minecraft.getInstance().getEntityModels());
+    //
+    //         }
+    //     });
+    // }
 
     // @Override
     // public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.IItemRenderProperties> consumer)

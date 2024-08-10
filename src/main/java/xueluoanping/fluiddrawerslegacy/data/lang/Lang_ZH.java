@@ -2,7 +2,7 @@ package xueluoanping.fluiddrawerslegacy.data.lang;
 
 
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
 import static xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil.*;

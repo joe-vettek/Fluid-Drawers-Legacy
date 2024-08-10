@@ -23,16 +23,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.Capability;
 
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.network.PacketDistributor;
+
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
@@ -542,7 +538,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
                     return resource.getAmount();
                 }
                 if (fluid.isEmpty()) {
-                    fluid = new FluidStack(resource, Math.min(capacity, resource.getAmount()));
+                    fluid = new FluidStack(resource.getFluidHolder(), Math.min(capacity, resource.getAmount()));
                     onContentsChanged();
                     return fluid.getAmount();
                 }
@@ -568,7 +564,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         @Nonnull
         @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
+        public FluidStack drain(int maxDrain, IFluidHandler.FluidAction action) {
             if (upgrades().hasVendingUpgrade())
                 return new FluidStack(fluid.getFluid(), maxDrain);
             return super.drain(maxDrain, action);

@@ -3,7 +3,7 @@ package xueluoanping.fluiddrawerslegacy.handler;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
+import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -13,14 +13,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-// import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.FluidStack;
-// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
+
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidControllerProxy;
@@ -28,6 +27,7 @@ import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawer
 import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
@@ -41,7 +41,7 @@ public class ControllerFluidCapabilityHandler {
     // If want to subscribe in class ,need static
     //    or not
     @SubscribeEvent
-    public void onTileCapabilities(AttachCapabilitiesEvent<BlockEntity> event) {
+    public void onTileCapabilities(RegisterCapabilitiesEvent event) {
         // FluidDrawersLegacyMod.logger(event.getObject().getLevel());
         BlockEntity tile = event.getObject();
         if (tile instanceof BlockEntityController) {
@@ -57,6 +57,7 @@ public class ControllerFluidCapabilityHandler {
             event.addCapability(CAP_FLUID_PROXY, new CapabilityProvider_FluidControllerProxy((BlockEntitySlave) tile));
         }
 
+        event.registerBlockEntity();
     }
 
 
@@ -71,12 +72,12 @@ public class ControllerFluidCapabilityHandler {
             return;
         }
 
-        if (world.getBlockEntity(pos) instanceof BlockEntityController tile && tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().isPresent()) {
+        if (world.getBlockEntity(pos) instanceof BlockEntityController tile && event.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,pos,null)!=null) {
             ArrayList<FluidStack> fluidStacksList = FluidExchangeHandlerManager.getFluidInItemContainer(stack);
-            if (fluidStacksList.size() == 0) {
+            if (fluidStacksList.isEmpty()) {
                 return;
             }
-            IFluidHandler fluidHandler=tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
+            IFluidHandler fluidHandler=event.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,pos,null);
             FluidStack fluidStack =FluidStack.EMPTY;
             // 必须还要确保存在
             boolean isExist = false;
@@ -96,7 +97,7 @@ public class ControllerFluidCapabilityHandler {
                 return;
             }
 
-            tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
+            Optional.of(tile.getCapability(CapabilityDrawerGroup.DRAWER_GROUP_CAPABILITY))
                     .ifPresent((handler -> {
                         if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
                             for (int i = 0; i < handler.getDrawerCount(); i++) {

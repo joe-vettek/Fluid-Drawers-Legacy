@@ -3,8 +3,8 @@ package xueluoanping.fluiddrawerslegacy.compat.vanlia;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidType;
 import xueluoanping.fluiddrawerslegacy.api.exchange.ExchangeHandlerAno;
 import xueluoanping.fluiddrawerslegacy.api.exchange.ModExchangeHandler;
 import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
@@ -21,7 +21,7 @@ public class BucketExchanger implements ModExchangeHandler {
                     (item) -> item.getItem() instanceof BucketItem bucketItem &&bucketItem.getFluid()!= Fluids.EMPTY ? new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME) : FluidStack.EMPTY,
                     (fluidStack) -> Items.BUCKET.getDefaultInstance());
             manager.registerFluidContainer((item) -> item.getItem() == Items.BUCKET,
-                    (fluid) -> fluid.getFluid().getBucket()==Items.AIR?0:FluidType.BUCKET_VOLUME,
+                    (fluid) -> fluid.getFluid().getBucket()==Items.AIR?0: FluidType.BUCKET_VOLUME,
                     (outStack) -> outStack.getFluid().getBucket().getDefaultInstance());
         }
     }

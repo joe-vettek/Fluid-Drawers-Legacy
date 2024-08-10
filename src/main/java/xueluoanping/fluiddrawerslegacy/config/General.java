@@ -1,17 +1,18 @@
 package xueluoanping.fluiddrawerslegacy.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
+
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 public class General {
-    public static ForgeConfigSpec COMMON_CONFIG;
-    public static ForgeConfigSpec.BooleanValue bool;
-    public static ForgeConfigSpec.IntValue volume;
-    public static ForgeConfigSpec.BooleanValue retainFluid;
-    public static ForgeConfigSpec.BooleanValue createPotion;
-    public static ForgeConfigSpec.BooleanValue cauponaSoupBowl;
+    public static ModConfigSpec COMMON_CONFIG;
+    public static ModConfigSpec.BooleanValue bool;
+    public static ModConfigSpec.IntValue volume;
+    public static ModConfigSpec.BooleanValue retainFluid;
+    public static ModConfigSpec.BooleanValue createPotion;
+    public static ModConfigSpec.BooleanValue cauponaSoupBowl;
 
     static {
-        ForgeConfigSpec.Builder COMMON_BUILDER = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder COMMON_BUILDER = new ModConfigSpec.Builder();
         COMMON_BUILDER.comment("Debug settings").push("debugMode");
         bool = COMMON_BUILDER.comment("Set false to stop output log.").define("debugMode",false);
         COMMON_BUILDER.pop();

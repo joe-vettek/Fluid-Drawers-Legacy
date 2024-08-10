@@ -4,7 +4,7 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
 import snownee.jade.addon.universal.FluidStorageProvider;
 import snownee.jade.api.*;
 
@@ -12,11 +12,9 @@ import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.fluid.JadeFluidObject;
 import snownee.jade.api.ui.BoxStyle;
 import snownee.jade.api.ui.IElementHelper;
-import snownee.jade.api.ui.IProgressStyle;
 import net.minecraft.client.resources.language.I18n;
 
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.fluids.FluidStack;
 
 // import snownee.jade.VanillaPlugin;
 import snownee.jade.overlay.DisplayHelper;

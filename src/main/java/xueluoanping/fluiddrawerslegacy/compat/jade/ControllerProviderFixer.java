@@ -4,7 +4,7 @@ package xueluoanping.fluiddrawerslegacy.compat.jade;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityControllerIO;
 import net.minecraft.resources.ResourceLocation;
 import snownee.jade.addon.universal.FluidStorageProvider;
 import snownee.jade.api.*;
@@ -22,7 +22,7 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
     // TODO: reduce the code and it not need more (just keep hide)
     @Override
     public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-        JadeFluidHandler.resortTooltip(tooltip,accessor,config);
+        JadeFluidHandler.resortTooltip(tooltip, accessor, config);
     }
 
 
@@ -33,15 +33,15 @@ public class ControllerProviderFixer implements IBlockComponentProvider, IServer
 
     @Override
     public int getDefaultPriority() {
-        return FluidStorageProvider.INSTANCE.getDefaultPriority() + 1000;
+        return 1000 + 1000;
     }
 
     @Override
     public void appendServerData(CompoundTag compoundTag, BlockAccessor accessor) {
         // FluidDrawersLegacyMod.logger(compoundTag);
         if (!(accessor.getBlockEntity() instanceof BlockEntityController)
-                &&!(accessor.getBlockEntity() instanceof BlockEntitySlave))
+                && !(accessor.getBlockEntity() instanceof BlockEntityControllerIO))
             return;
-        JadeFluidHandler.appendServerDataIfWithNotEmpty(compoundTag,accessor);
+        JadeFluidHandler.appendServerDataIfWithNotEmpty(compoundTag, accessor);
     }
 }

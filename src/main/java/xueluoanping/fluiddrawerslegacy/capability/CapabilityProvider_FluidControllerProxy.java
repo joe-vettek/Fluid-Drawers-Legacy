@@ -1,20 +1,18 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityControllerIO;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class CapabilityProvider_FluidControllerProxy implements  ICapabilityProvider {
+public class CapabilityProvider_FluidControllerProxy implements ICapabilityProvider {
 
-    private final BlockEntitySlave tile;
-    public CapabilityProvider_FluidControllerProxy(BlockEntitySlave tile) {
+    private final BlockEntityControllerIO tile;
+    public CapabilityProvider_FluidControllerProxy(BlockEntityControllerIO tile) {
         this.tile=tile;
     }
 
@@ -28,4 +26,8 @@ public class CapabilityProvider_FluidControllerProxy implements  ICapabilityProv
                 :LazyOptional.empty();
     }
 
+    @Override
+    public @org.jetbrains.annotations.Nullable Object getCapability(Object object, Object context) {
+        return null;
+    }
 }

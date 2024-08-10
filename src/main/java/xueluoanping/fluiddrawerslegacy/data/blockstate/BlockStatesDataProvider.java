@@ -8,10 +8,10 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.RegistryObject;
+
+import net.neoforged.neoforge.client.model.generators.BlockStateProvider;
+import net.neoforged.neoforge.client.model.generators.ConfiguredModel;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
@@ -30,7 +30,7 @@ public class BlockStatesDataProvider extends BlockStateProvider {
 	@Override
 	protected void registerStatesAndModels() {
 		// simpleBlock(BlockRegister.bamboo_root.get());
-		for (RegistryObject<Block> entry : ModContents.DREntityBlocks.getEntries()) {
+		for (var entry : ModContents.DREntityBlocks.getEntries()) {
 			getVariantBuilder(entry.get()).forAllStatesExcept(state -> ConfiguredModel.builder()
 					.modelFile(models().getExistingFile(resourceBlock(entry.getId().getPath())))
 					// .modelFile(models().withExistingParent(blockName(entry.get()), resourceBlock(entry.getId().getPath())))
@@ -65,11 +65,11 @@ public class BlockStatesDataProvider extends BlockStateProvider {
 	}
 
 	public static ResourceLocation resourceBlock(String path) {
-		return new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "block/" + path);
+		return FluidDrawersLegacyMod.rl("block/" + path);
 	}
 
 	public ResourceLocation resourceVanillaBlock(String path) {
-		return new ResourceLocation("block/" + path);
+		return  ResourceLocation.withDefaultNamespace("block/" + path);
 	}
 
 	public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;

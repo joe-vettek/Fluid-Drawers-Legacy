@@ -10,8 +10,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
-import net.minecraftforge.fluids.FluidStack;
+
+import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.client.render.XYZ;
 import xueluoanping.fluiddrawerslegacy.util.MathUtils;
@@ -28,7 +29,7 @@ public class TankRenderUtil {
         //		renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).overlayCoords(OverlayTexture.NO_OVERLAY).uv2(15728880)/*.lightmap(0, 240)*/.normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
         int light1 = brightness & '\uffff';
         int light2 = brightness >> 16 & '\uffff';
-        renderer.vertex(stack.last().pose(), x, y, z).color(red, green, blue, alpha).uv(u, v).uv2(light1, light2).overlayCoords(OverlayTexture.NO_OVERLAY).normal(stack.last().normal(), 0, 1.0F, 0).endVertex();
+        renderer.addVertex(stack.last().pose(), x, y, z).setColor(red, green, blue, alpha).setUv(u, v).setUv2(light1, light2).setOverlay(OverlayTexture.NO_OVERLAY).setNormal(stack.last(), 0, 1.0F, 0);
     }
 
     public static void renderFluid(ArrayList<TankHolder> fluidStacks, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime, boolean isHalf) {

@@ -3,19 +3,12 @@ package xueluoanping.fluiddrawerslegacy.data.tag;
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.BlockTagsProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.data.BlockTagsProvider;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import org.jetbrains.annotations.Nullable;
 import xueluoanping.fluiddrawerslegacy.ModContents;
-
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class TagsDataProvider extends BlockTagsProvider {
 

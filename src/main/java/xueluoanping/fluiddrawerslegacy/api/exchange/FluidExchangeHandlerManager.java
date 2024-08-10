@@ -4,15 +4,15 @@ import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.language.ModFileScanData;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforgespi.language.IModInfo;
+import net.neoforged.neoforgespi.language.ModFileScanData;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.handler.FluidDrawerHandler;
 
@@ -20,7 +20,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class FluidExchangeHandlerManager {
     // public static List<ModExchangeHandler> handlers = new ArrayList<>();
     public static FluidItem FluidManager = new FluidItem();
@@ -88,7 +88,7 @@ public class FluidExchangeHandlerManager {
                     return true;
             }
 
-            if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent())
+            if (heldStack.getCapability(Capabilities.FluidHandler.ITEM)!=null)
                 return true;
 
         } catch (Exception e) {
@@ -111,8 +111,8 @@ public class FluidExchangeHandlerManager {
             e.printStackTrace();
         }
 
-        if (heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent()) {
-            heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
+        if (heldStack.getCapability(Capabilities.FluidHandler.ITEM)!=null) {
+          Optional.ofNullable(  heldStack.getCapability(Capabilities.FluidHandler.ITEM))
                     .ifPresent((itemFluidHandler) -> {
                         int size = itemFluidHandler.getTanks();
                         for (int i = 0; i < size; i++) {
@@ -126,9 +126,9 @@ public class FluidExchangeHandlerManager {
 
     public static boolean tryHandleClickInputByMod(BlockEntityController tile, Player player, InteractionHand hand) {
         ItemStack heldStack = player.getItemInHand(hand);
-        if (tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().isPresent())
+        if (tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,tile.getBlockPos(),null)!=null)
             try {
-                var fluidM = tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
+                var fluidM = tile.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,tile.getBlockPos(),null);
                 for (FluidItemHolder handler : FluidManager.handlers) {
                     FluidStack fluidStack = handler.getFluidByItem.apply(heldStack);
                     if (fluidStack.isEmpty()) continue;

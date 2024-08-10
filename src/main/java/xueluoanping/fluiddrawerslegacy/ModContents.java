@@ -17,14 +17,11 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegisterEvent;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.ItemFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
@@ -35,20 +32,20 @@ import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
 
 // You can use EventBusSubscriber to automatically subscribe events on the contained class (this is subscribing to the MOD
 // Event bus for receiving Registry Events)
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class ModContents {
-    public static final DeferredRegister<Item> DREntityBlockItems = DeferredRegister.create(ForgeRegistries.ITEMS, FluidDrawersLegacyMod.MOD_ID);
-    public static final DeferredRegister<Block> DREntityBlocks = DeferredRegister.create(ForgeRegistries.BLOCKS, FluidDrawersLegacyMod.MOD_ID);
-    public static final DeferredRegister<BlockEntityType<?>> DRBlockEntities = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, FluidDrawersLegacyMod.MOD_ID);
+    public static final DeferredRegister<Item> DREntityBlockItems = DeferredRegister.create(Registries.ITEM, FluidDrawersLegacyMod.MOD_ID);
+    public static final DeferredRegister<Block> DREntityBlocks = DeferredRegister.create(Registries.BLOCK, FluidDrawersLegacyMod.MOD_ID);
+    public static final DeferredRegister<BlockEntityType<?>> DRBlockEntities = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, FluidDrawersLegacyMod.MOD_ID);
 
-    public static final DeferredRegister<MenuType<?>> DRMenuType = DeferredRegister.create(ForgeRegistries.MENU_TYPES, FluidDrawersLegacyMod.MOD_ID);
+    public static final DeferredRegister<MenuType<?>> DRMenuType = DeferredRegister.create(Registries.MENU, FluidDrawersLegacyMod.MOD_ID);
 
     private static CreativeModeTab MAIN;
 
     @SubscribeEvent
     public static void creativeModeTabRegister(RegisterEvent event) {
         event.register(Registries.CREATIVE_MODE_TAB, helper -> {
-            helper.register(new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluiddrawers"),
+            helper.register(FluidDrawersLegacyMod.rl( "fluiddrawers"),
                     CreativeModeTab.builder().icon(() -> new ItemStack(DREntityBlockItems.getEntries().stream().findFirst().get().get()))
                             .title(Component.translatable("itemGroup.fluiddrawers"))
                             .displayItems((params, output) -> {
@@ -63,7 +60,7 @@ public class ModContents {
     @SubscribeEvent
     public static void blockRegister(RegisterEvent event) {
         event.register(Registries.BLOCK, blockRegisterHelper -> {
-            blockRegisterHelper.register("test", new Block(BlockBehaviour.Properties.of()));
+            blockRegisterHelper.register(ResourceLocation.parse("test"), new Block(BlockBehaviour.Properties.of()));
         });
     }
 
@@ -90,11 +87,11 @@ public class ModContents {
             for (int i = 0; i < 2; i++) {
                 var isHalf=i==1;
                 if(isHalf)path+=withhalf;
-                RegistryObject<Block> fluiddrawer = DREntityBlocks.register(path, () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
+                DeferredHolder<Block, BlockFluidDrawer> fluiddrawer = DREntityBlocks.register(path, () -> new BlockFluidDrawer(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
                         .sound(SoundType.GLASS).strength(5.0F)
                         .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), count, isHalf));
-                RegistryObject<Item> itemBlock = DREntityBlockItems.register(path, () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
-                RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
+                DeferredHolder<Item,ItemFluidDrawer> itemBlock = DREntityBlockItems.register(path, () -> new ItemFluidDrawer(fluiddrawer.get(), new Item.Properties()));
+                DeferredHolder<BlockEntityType<?>, BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
                         () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(count, pos, state), fluiddrawer.get()).build(null));
 
             }

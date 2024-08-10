@@ -3,11 +3,11 @@ package xueluoanping.fluiddrawerslegacy.data;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.data.blockstate.BlockStatesDataProvider;
-import xueluoanping.fluiddrawerslegacy.data.blockstate.ItemModelProvider;
+import xueluoanping.fluiddrawerslegacy.data.blockstate.FItemModelProvider;
 import xueluoanping.fluiddrawerslegacy.data.lang.Lang_EN;
 import xueluoanping.fluiddrawerslegacy.data.lang.Lang_ZH;
 import xueluoanping.fluiddrawerslegacy.data.loot.LFTLootTableProvider;
@@ -29,7 +29,7 @@ public class start {
         if (event.includeServer()) {
             FluidDrawersLegacyMod.logger("Generate We Data!!!");
 
-            generator.addProvider(event.includeServer(),new RecipeDataProvider(packOutput));
+            generator.addProvider(event.includeServer(),new RecipeDataProvider(packOutput,lookupProvider));
             TagsDataProvider blockTags = new TagsDataProvider(packOutput,lookupProvider, MODID, helper);
             generator.addProvider(event.includeServer(),blockTags);
             generator.addProvider(event.includeServer(),new FDLItemTagsProvider(packOutput, lookupProvider, blockTags.contentsGetter()));
@@ -45,7 +45,7 @@ public class start {
         }
         if (event.includeClient()) {
             generator.addProvider(event.includeClient(),new BlockStatesDataProvider(packOutput,helper));
-            generator.addProvider(event.includeClient(),new ItemModelProvider(packOutput,helper));
+            generator.addProvider(event.includeClient(),new FItemModelProvider(packOutput,helper));
             generator.addProvider(event.includeClient(),new Lang_EN(packOutput,helper));
             generator.addProvider(event.includeClient(),new Lang_ZH(packOutput,helper));
         }

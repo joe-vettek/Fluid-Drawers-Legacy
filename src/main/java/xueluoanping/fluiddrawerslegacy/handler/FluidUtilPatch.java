@@ -1,21 +1,21 @@
 package xueluoanping.fluiddrawerslegacy.handler;
 
 import com.google.common.base.Preconditions;
+import cpw.mods.util.Lazy;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidActionResult;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidActionResult;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +29,7 @@ public class FluidUtilPatch {
 
         ItemStack heldItem = player.getItemInHand(hand);
         if (!heldItem.isEmpty()) {
-            return player.getCapability(ForgeCapabilities.ITEM_HANDLER)
+            return Lazy.of( player.getCapability(Capabilities.ItemHandler.ENTITY))
                     .map(playerInventory -> {
                         // FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(heldItem, handler, playerInventory, Integer.MAX_VALUE, player, true);
                         // if (!fluidActionResult.isSuccess())
@@ -138,9 +138,9 @@ public class FluidUtilPatch {
                 .orElse(FluidActionResult.FAILURE);
     }
 
-    public static LazyOptional<IFluidHandlerItem> getFluidHandler(@NotNull ItemStack itemStack)
+    public static @Nullable Lazy<IFluidHandlerItem> getFluidHandler(@NotNull ItemStack itemStack)
     {
-        return itemStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM);
+        return Lazy.of(itemStack.getCapability(Capabilities.FluidHandler.ITEM));
     }
 
 }
