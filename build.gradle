@@ -132,7 +132,7 @@ dependencies {
 //    onlyMainRuntimeOnly ("curse.maven:embeddium-908741:5556146")
 //    onlyMainRuntimeOnly ("curse.maven:oculus-581495:4952626")
 
-    onlyMainRuntimeOnly ("curse.maven:journeymap-32274:5541925")
+//    onlyMainRuntimeOnly ("curse.maven:journeymap-32274:5541925")
 
 //    runtimeOnly ("curse.maven:spark-361579:5434153")
     

@@ -6,6 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -15,10 +16,12 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 // import net.minecraftforge.client.IItemRenderProperties;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidDrawerItemStackTileEntityRenderer;
 import xueluoanping.fluiddrawerslegacy.util.SafeClientAccess;
 import xueluoanping.fluiddrawerslegacy.util.TooltipKey;
@@ -71,28 +74,29 @@ public class ItemFluidDrawer extends BlockItem {
 
 
     @Override
-    public void appendHoverText(ItemStack stack, @org.jetbrains.annotations.Nullable Level level, List<Component> componentList, TooltipFlag flag) {
-        super.appendHoverText(stack, level, componentList, flag);
-        if (level instanceof ClientLevel) {
+    public void appendHoverText(ItemStack stack, TooltipContext pContext, List<Component> componentList, TooltipFlag flag) {
+        super.appendHoverText(stack, pContext, componentList, flag);
+        if (pContext.level() instanceof ClientLevel) {
             TooltipKey key = SafeClientAccess.getTooltipKey();
             if (key == TooltipKey.SHIFT || key == TooltipKey.UNKNOWN) {
                 boolean hasFluid = false;
-                if (stack.getOrCreateTag().contains("tank")) {
+                var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+                if (tag.contains("tank")) {
                     ListTag tanklist = new ListTag();
-                    tanklist.add(stack.getOrCreateTag().getCompound("tank"));
-                    stack.getOrCreateTag().put("tanks",tanklist);
+                    tanklist.add(tag.getCompound("tank"));
+                    tag.put("tanks", tanklist);
                 }
-                if (stack.getOrCreateTag().contains("tanks")) {
+                if (tag.contains("tanks")) {
                     int slotCouont = 0;
-                    for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
+                    for (Tag tank : tag.getList("tanks", ListTag.TAG_COMPOUND)) {
                         slotCouont++;
-                        FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
-                        if (stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+                        FluidStack fluidStack = FluidStack.parseOptional(pContext.registries(), (CompoundTag) tank);
+                        if (tag.toString().contains("storagedrawers:creative_vending_upgrade"))
                             fluidStack.setAmount(Integer.MAX_VALUE);
                         if (fluidStack.getAmount() > 0) {
                             hasFluid = true;
 
-                            String str=I18n.get("statement.fluiddrawerslegacy.fluiddrawer.slot",slotCouont,fluidStack.getAmount(), fluidStack.getDisplayName().getString());
+                            String str = I18n.get("statement.fluiddrawerslegacy.fluiddrawer.slot", slotCouont, fluidStack.getAmount(), fluidStack.getHoverName().getString());
 
                             componentList
                                     .add(Component.translatable(str));
@@ -105,15 +109,16 @@ public class ItemFluidDrawer extends BlockItem {
                         }
                     }
                 }
-                if (stack.getOrCreateTag().contains("Lock")) {
-                    Byte b = stack.getOrCreateTag().getByte("Lock");
+                if (tag.contains("Lock")) {
+                    Byte b = tag.getByte("Lock");
                     EnumSet<LockAttribute> attrs = LockAttribute.getEnumSet(b);
                     if (attrs.contains(LockAttribute.LOCK_EMPTY)) {
                         String fluidNameShow = "";
                         if (!hasFluid) {
-                            if (stack.getOrCreateTag().contains("tank") && stack.getOrCreateTag().getCompound("tank").contains("cache")) {
-                                FluidStack fluidStack = FluidStack.loadFluidStackFromNBT(stack.getOrCreateTag().getCompound("tank").getCompound("cache"));
-                                fluidNameShow = fluidStack.getDisplayName().getString() + " ";
+                            if (tag.contains("tank") && tag.getCompound("tank").contains("cache")) {
+                                FluidStack fluidStack = FluidStack.parseOptional(pContext.registries(), (CompoundTag) tag.getCompound("tank").getCompound("cache"));
+
+                                fluidNameShow = fluidStack.getHoverName().getString() + " ";
                             }
                         }
 
@@ -124,4 +129,5 @@ public class ItemFluidDrawer extends BlockItem {
             }
         }
     }
+
 }

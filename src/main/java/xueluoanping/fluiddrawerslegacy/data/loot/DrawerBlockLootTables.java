@@ -1,39 +1,25 @@
 package xueluoanping.fluiddrawerslegacy.data.loot;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import net.minecraft.advancements.critereon.StatePropertiesPredicate;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.loot.BlockLootSubProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.StemBlock;
-import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.ApplyBonusCount;
-import net.minecraft.world.level.storage.loot.functions.CopyNbtFunction;
-import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
-import net.minecraft.world.level.storage.loot.predicates.*;
+import net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction;
 import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
-import net.minecraft.world.level.storage.loot.providers.nbt.NbtProvider;
-import net.minecraft.world.level.storage.loot.providers.number.BinomialDistributionGenerator;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class DrawerBlockLootTables extends BlockLootSubProvider {
@@ -44,9 +30,9 @@ public class DrawerBlockLootTables extends BlockLootSubProvider {
     // so now you need override add,accept method yourself. Don't be lazy.
     private final Map<ResourceLocation, LootTable.Builder> map = Maps.newHashMap();
 
-    public DrawerBlockLootTables() {
-        super(Set.of(), FeatureFlags.REGISTRY.allFlags());
 
+    public DrawerBlockLootTables(HolderLookup.Provider provider) {
+        super(Set.of(), FeatureFlags.REGISTRY.allFlags(), provider);
     }
 
     private Block getDrawerWith(String countString) {
@@ -70,22 +56,22 @@ public class DrawerBlockLootTables extends BlockLootSubProvider {
 
     @Override
     protected Iterable<Block> getKnownBlocks() {
-        return ModContents.DREntityBlocks.getEntries().stream().map(RegistryObject::get).collect(Collectors.toList());
+        return ModContents.DREntityBlocks.getEntries().stream().map(DeferredHolder::get).collect(Collectors.toList());
     }
 
 
     public LootTable.Builder createSingleDrawerTable(ItemLike item) {
         return LootTable.lootTable()
                 .withPool(
-                this.applyExplosionCondition(item.asItem(), LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(item))
-                )).apply(CopyNbtFunction
+                        this.applyExplosionCondition(item.asItem(), LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                                .add(LootItem.lootTableItem(item))
+                        )).apply(CopyCustomDataFunction
                         .copyData(ContextNbtProvider.BLOCK_ENTITY)
-                        .copy("tanks","tanks")
-                        .copy("Upgrades","Upgrades")
-                        .copy("Lock","Lock")
-                        .copy("Shr","Shr")
-                        .copy("Qua","Qua")
+                        .copy("tanks", "tanks")
+                        .copy("Upgrades", "Upgrades")
+                        .copy("Lock", "Lock")
+                        .copy("Shr", "Shr")
+                        .copy("Qua", "Qua")
                 );
     }
 

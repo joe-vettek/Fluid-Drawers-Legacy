@@ -9,12 +9,15 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -36,7 +39,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
 
     @Override
     public void renderByItem(ItemStack stack, ItemDisplayContext transformType, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLightIn, int combinedOverlay) {
-//        FluidDrawersLegacyMod.logger(stack.getOrCreateTag().toString());
+//        FluidDrawersLegacyMod.logger(tag.toString());
 
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         BakedModel ibakedmodel = itemRenderer.getModel(stack,(Level) null, (LivingEntity) null, 0);
@@ -103,20 +106,21 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
     }
 
     private void renderFluid(ItemStack stack, PoseStack matrixStackIn, MultiBufferSource bufferIn, int combinedLight, double animationTime) {
-        if (!stack.getOrCreateTag().contains("tank")&&!stack.getOrCreateTag().contains("tanks"))
+        var tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        if (!tag.contains("tank")&&!tag.contains("tanks"))
             return;
         FluidStack fluidStackDown = new FluidStack(Fluids.EMPTY, 0);
-        if (stack.getOrCreateTag().contains("tank")) {
+        if (tag.contains("tank")) {
             ListTag tanklist = new ListTag();
-            tanklist.add(stack.getOrCreateTag().getCompound("tank"));
-            stack.getOrCreateTag().put("tanks",tanklist);
+            tanklist.add(tag.getCompound("tank"));
+            tag.put("tanks",tanklist);
         }
         var flist = new ArrayList<TankHolder>();
-        if (stack.getOrCreateTag().contains("tanks")) {
-            for (Tag tank : stack.getOrCreateTag().getList("tanks", ListTag.TAG_COMPOUND)) {
-                FluidStack fluidStack = FluidStack.loadFluidStackFromNBT((CompoundTag) tank);
-                int capacity = BlockEntityFluidDrawer.calculateTankCapacityFromStack(stack);
-                if (!fluidStack.isEmpty()&& stack.getOrCreateTag().toString().contains("storagedrawers:creative_vending_upgrade"))
+        if (tag.contains("tanks")) {
+            for (Tag tank : tag.getList("tanks", ListTag.TAG_COMPOUND)) {
+                FluidStack fluidStack = FluidStack.parseOptional(Minecraft.getInstance().level.registryAccess(),((CompoundTag) tank));
+                int capacity = BlockEntityFluidDrawer.calculateTankCapacityFromStack(Minecraft.getInstance().level.registryAccess(),stack);
+                if (!fluidStack.isEmpty()&& tag.toString().contains("storagedrawers:creative_vending_upgrade"))
                     fluidStack.setAmount(capacity);
                 flist.add(TankRenderUtil.of(fluidStack,capacity));
             }

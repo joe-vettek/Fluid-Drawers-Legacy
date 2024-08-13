@@ -19,13 +19,19 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.ItemFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
+
+import java.util.function.Supplier;
 
 
 // import static xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod.CREATIVE_TAB;
@@ -71,7 +77,7 @@ public class ModContents {
     // public static final RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register("fluiddrawer",
     //         () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(1, pos, state), fluiddrawer.get()).build(null));
 
-    public static final RegistryObject<MenuType<ContainerFluiDrawer>> containerType = DRMenuType.register("fluid_drawer_container_1", () -> IForgeMenuType.create(ContainerFluiDrawer::new));
+    public static final Supplier<MenuType<ContainerFluiDrawer>> containerType = DRMenuType.register("fluid_drawer_container_1", () -> IMenuTypeExtension.create(ContainerFluiDrawer::new));
 
 
     private static boolean predFalse(BlockState p_235436_0_, BlockGetter p_235436_1_, BlockPos p_235436_2_) {
@@ -104,5 +110,17 @@ public class ModContents {
         else if (s == 2) return path + "_2";
         else return path;
     }
+
+    // Create the DeferredRegister for attachment types
+    public static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, FluidDrawersLegacyMod.MOD_ID);
+
+    // Serialization via INBTSerializable
+    public static final Supplier<AttachmentType<CapabilityProvider_FluidDrawerController>> HANDLER = ATTACHMENT_TYPES.register(
+            "fluid_ctrl", () -> AttachmentType.serializable(() -> new CapabilityProvider_FluidDrawerController()).build()
+    );
+    //
+    // public static final Supplier<AttachmentType<CapabilityProvider_FluidControllerProxy>> HANDLER_2 = ATTACHMENT_TYPES.register(
+    //         "fluid_proxy", () -> AttachmentType.serializable(() -> new CapabilityProvider_FluidControllerProxy()).build()
+    // );
 }
 

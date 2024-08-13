@@ -1,6 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -9,8 +10,9 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.storage.DimensionDataStorage;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.NotNull;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -23,12 +25,13 @@ public class FluidDrawerControllerSave extends SavedData {
     public FluidDrawerControllerSave() {
     }
 
-    public FluidDrawerControllerSave(CompoundTag tag) {
+
+    public FluidDrawerControllerSave(HolderLookup.Provider provider,CompoundTag tag) {
         ListTag list = tag.getList("fluid", Tag.TAG_COMPOUND);
         for (Tag t : list) {
             CompoundTag manaTag = (CompoundTag) t;
             BlockPos chunkPos = new BlockPos(manaTag.getInt("x"), manaTag.getInt("y"), manaTag.getInt("z"));
-            chunkPosData.put(chunkPos, FluidStack.loadFluidStackFromNBT(manaTag));
+            chunkPosData.put(chunkPos, FluidStack.parseOptional(provider,manaTag));
         }
     }
 
@@ -49,33 +52,34 @@ public class FluidDrawerControllerSave extends SavedData {
     }
 
     @Override
-    public @NotNull CompoundTag save(CompoundTag tag) {
+    public CompoundTag save(CompoundTag tag, HolderLookup.Provider pRegistries) {
         ListTag list = new ListTag();
-        chunkPosData.forEach((chunkPos, mana) -> {
-            CompoundTag manaTag = new CompoundTag();
-            manaTag.putInt("x", chunkPos.getX());
-            manaTag.putInt("y", chunkPos.getY());
-            manaTag.putInt("z", chunkPos.getZ());
-            mana.writeToNBT(manaTag);
-            list.add(manaTag);
+        chunkPosData.forEach((chunkPos, fluidStack) -> {
+            CompoundTag fluidPosTag = new CompoundTag();
+            fluidPosTag.putInt("x", chunkPos.getX());
+            fluidPosTag.putInt("y", chunkPos.getY());
+            fluidPosTag.putInt("z", chunkPos.getZ());
+            fluidStack.save(pRegistries,fluidPosTag);
+            list.add(fluidPosTag);
         });
         tag.put("fluid", list);
         return tag;
     }
 
-    public static FluidDrawerControllerSave get(Level worldIn) {
-        if (!(worldIn instanceof ServerLevel)) {
-            throw new RuntimeException("Attempted to get the data from a client world. This is wrong.");
-        }
-        // ServerLevel world = worldIn.getServer().getLevel(Level.OVERWORLD);
-        ServerLevel world = (ServerLevel) worldIn;
-        /***
-         *   如果你需要每个纬度都有一个自己的World Saved Data。
-         *  用 ServerWorld world = (ServerWorld)world; 代替上面那句。
-         */
-        DimensionDataStorage storage = world.getDataStorage();
-        return storage.computeIfAbsent(FluidDrawerControllerSave::new, FluidDrawerControllerSave::new, "fluid");
+
+    public static FluidDrawerControllerSave get(ServerLevel serverLevel) {
+        DimensionDataStorage storage = serverLevel.getDataStorage();
+        return storage.computeIfAbsent(
+                new Factory<>(() -> create(serverLevel),
+                        ((compoundTag, provider) -> load(serverLevel, compoundTag, provider))),
+                FluidDrawersLegacyMod.MOD_ID);
     }
 
+    private static FluidDrawerControllerSave load(ServerLevel serverLevel, CompoundTag compoundTag, HolderLookup.Provider provider) {
+        return new FluidDrawerControllerSave(serverLevel.registryAccess(),compoundTag);
+    }
 
+    private static FluidDrawerControllerSave create(ServerLevel serverLevel) {
+        return new FluidDrawerControllerSave();
+    }
 }

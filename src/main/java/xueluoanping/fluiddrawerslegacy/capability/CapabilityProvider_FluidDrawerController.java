@@ -3,33 +3,43 @@ package xueluoanping.fluiddrawerslegacy.capability;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
 // import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+// @EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
+public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider<BlockEntity, Direction, IFluidHandler>, INBTSerializable<CompoundTag> {
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
-public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider, INBTSerializable<CompoundTag> {
-
-    public final betterFluidManager<BlockEntityController> tank;
-    private final LazyOptional<betterFluidManager<BlockEntityController>> tankHandler;
+    public betterFluidManager<BlockEntityController> tank;
+    // private final betterFluidManager<BlockEntityController> tankHandler;
     public static BlockPos tilePos = null;
-    final BlockEntityController tile;
+    BlockEntityController tile;
+
     // private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
+    public CapabilityProvider_FluidDrawerController() {
+
+    }
 
     public CapabilityProvider_FluidDrawerController(final BlockEntityController tile) {
+        setTile(tile);
+    }
+
+    public boolean hasTile() {
+        return this.tile == null;
+    }
+
+    public void setTile(BlockEntityController tile) {
         this.tile = tile;
         tank = createFuildHandler();
-        tankHandler = LazyOptional.of(() -> tank);
+        // tankHandler = LazyOptional.of(() -> tank);
         tilePos = tile.getBlockPos();
         FluidDrawerControllerData fluidDrawerControllerData = new FluidDrawerControllerData();
         fluidDrawerControllerData.setCapabilityProvider(this);
@@ -37,39 +47,32 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
         // tank.setFluid(FluidDrawerControllerSave.fluidDrawerControllerSave.);
     }
 
-    @Override
-    public CompoundTag serializeNBT() {
-        return tank.writeToNBT(new CompoundTag());
-    }
 
-    @Override
-    public void deserializeNBT(CompoundTag nbt) {
-        // FluidDrawersLegacyMod.logger(22554, nbt);
-        // if (nbt.contains("Fluid"))
-        tank.setFluid(FluidStack.loadFluidStackFromNBT(nbt));
-    }
-
-    public void invalidate() {
-        tankHandler.invalidate();
-    }
-
-
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.FLUID_HANDLER) {
-            //            FluidDrawersLegacyMod.LOGGER.info("hello" + tile);
-            return tankHandler.cast();
-        }
-        return LazyOptional.empty();
-    }
-
+    // public void invalidate() {
+    //     tankHandler.invalidate();
+    // }
 
     private betterFluidManager<BlockEntityController> createFuildHandler() {
         return new betterFluidManager<>(tile);
     }
 
+    @Override
+    public @Nullable IFluidHandler getCapability(BlockEntity blockEntity, Direction context) {
+        // if (object== Capabilities.FluidHandler.BLOCK)
+        //     return tank;
+        // return null;
+        return tank;
+    }
+
+    @Override
+    public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
+        return tank.writeToNBT(provider, new CompoundTag());
+    }
+
+    @Override
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
+        tank.setFluid(FluidStack.parseOptional(provider, nbt));
+    }
 
 
     //    private static class FluidSlotRecord implements Comparable<FluidSlotRecord> {

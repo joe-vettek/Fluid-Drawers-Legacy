@@ -34,7 +34,7 @@ public class start {
             generator.addProvider(event.includeServer(),blockTags);
             generator.addProvider(event.includeServer(),new FDLItemTagsProvider(packOutput, lookupProvider, blockTags.contentsGetter()));
 
-            generator.addProvider(event.includeServer(),new LFTLootTableProvider(packOutput));
+            generator.addProvider(event.includeServer(),new LFTLootTableProvider(packOutput, lookupProvider));
             // generator.addProvider(new GLMProvider(generator, MODID));
 
             // generator.addProvider(event.includeServer(),new Lang_EN(packOutput, helper));

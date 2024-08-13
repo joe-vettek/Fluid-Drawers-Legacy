@@ -22,6 +22,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -64,7 +65,7 @@ public class ClientSetup {
         FluidDrawersLegacyMod.logger("Register Client");
         event.enqueueWork(() -> {
             // ItemBlockRenderTypes.setRenderLayer(ModContents.fluiddrawer.get(), ClientSetup::isGlassLanternValidLayer);
-            MenuScreens.register(ModContents.containerType.get(), Screen.Slot1::new);
+            // MenuScreens.register(ModContents.containerType.get(), Screen.Slot1::new);
         });
     }
 
@@ -77,7 +78,10 @@ public class ClientSetup {
                     TESRFluidDrawer::new);
         });
     }
-
+    @SubscribeEvent
+    public static void onModelBaked(RegisterMenuScreensEvent event) {
+        event.register(ModContents.containerType.get(), Screen.Slot1::new);
+    }
 
     @SubscribeEvent
     public static void onModelBaked(ModelEvent.ModifyBakingResult event) {

@@ -2,9 +2,9 @@ package xueluoanping.fluiddrawerslegacy;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerAttributes;
+import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerGroup;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 
 
 public class ModConstants {
@@ -29,11 +29,9 @@ public class ModConstants {
     public static final int PRI_DISABLED = 6;
 
 
-    public static Capability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerAttributes>() {
-    });
+    public static BlockCapability<IDrawerAttributes, Void> DRAWER_ATTRIBUTES_CAPABILITY = CapabilityDrawerAttributes.DRAWER_ATTRIBUTES_CAPABILITY;
 
-    public static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerGroup>() {
-    });
+    public static BlockCapability<IDrawerGroup, Void> DRAWER_GROUP_CAPABILITY = CapabilityDrawerGroup.DRAWER_GROUP_CAPABILITY;
 
 
 }

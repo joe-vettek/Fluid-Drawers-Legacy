@@ -18,7 +18,7 @@ public class BucketExchanger implements ModExchangeHandler {
         // if (General.createPotion.get())
         {
             manager.registerFluidItem(
-                    (item) -> item.getItem() instanceof BucketItem bucketItem &&bucketItem.getFluid()!= Fluids.EMPTY ? new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME) : FluidStack.EMPTY,
+                    (item) -> item.getItem() instanceof BucketItem bucketItem &&bucketItem.content!= Fluids.EMPTY ? new FluidStack(bucketItem.content, FluidType.BUCKET_VOLUME) : FluidStack.EMPTY,
                     (fluidStack) -> Items.BUCKET.getDefaultInstance());
             manager.registerFluidContainer((item) -> item.getItem() == Items.BUCKET,
                     (fluid) -> fluid.getFluid().getBucket()==Items.AIR?0: FluidType.BUCKET_VOLUME,

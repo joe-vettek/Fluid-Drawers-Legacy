@@ -2,10 +2,10 @@ package xueluoanping.fluiddrawerslegacy.capability;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.FluidStack;
+
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
 import java.lang.ref.WeakReference;
@@ -20,29 +20,31 @@ public class FluidDrawerControllerData extends BlockEntityDataShim {
     }
 
     @Override
-    public void read(CompoundTag compoundTag) {
+    public void read(HolderLookup.Provider provider,CompoundTag compoundTag) {
         FluidDrawersLegacyMod.logger("Load",KEY, compoundTag);
         if (capProvider instanceof CapabilityProvider_FluidDrawerController capabilityProviderFluidDrawerController) {
             if (compoundTag.contains(KEY))
-                capabilityProviderFluidDrawerController.deserializeNBT(compoundTag.getCompound(KEY));
+                capabilityProviderFluidDrawerController.deserializeNBT(provider,compoundTag.getCompound(KEY));
         }
     }
 
     @Override
-    public CompoundTag write(CompoundTag compoundTag) {
+    public CompoundTag write(HolderLookup.Provider provider,CompoundTag compoundTag) {
         FluidDrawersLegacyMod.logger("Save",KEY, compoundTag);
         if (capProvider instanceof CapabilityProvider_FluidDrawerController capabilityProviderFluidDrawerController) {
             // return capabilityProviderFluidDrawerController.serializeNBT();
-            compoundTag.put(KEY, capabilityProviderFluidDrawerController.serializeNBT());
+            compoundTag.put(KEY, capabilityProviderFluidDrawerController.serializeNBT(provider));
         }
         return compoundTag;
     }
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        if (capProvider instanceof CapabilityProvider_FluidDrawerController capabilityProviderFluidDrawerController) {
-            capabilityProviderFluidDrawerController.invalidate();
-        }
-    }
+    // @Override
+    // public void invalidateCaps() {
+    //     super.invalidateCaps();
+    //     if (capProvider instanceof CapabilityProvider_FluidDrawerController capabilityProviderFluidDrawerController) {
+    //         capabilityProviderFluidDrawerController.invalidate();
+    //     }
+    // }
+
+
 }

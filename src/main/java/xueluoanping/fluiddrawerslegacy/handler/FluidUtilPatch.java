@@ -108,7 +108,7 @@ public class FluidUtilPatch {
     @NotNull
     public static FluidActionResult tryEmptyContainer(@NotNull ItemStack container, IFluidHandler fluidDestination, FluidStack fluidStack, @Nullable Player player, boolean doDrain)
     {
-        ItemStack containerCopy = ItemHandlerHelper.copyStackWithSize(container, 1); // do not modify the input
+        ItemStack containerCopy = container.copyWithCount(1); // do not modify the input
         return getFluidHandler(containerCopy)
                 .map(containerFluidHandler -> {
                     // Note: FluidUtil just use amount to empty container

@@ -2,6 +2,7 @@ package xueluoanping.fluiddrawerslegacy.api.drawer;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -38,8 +39,8 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
         this.fluid = loadFluidStackFromNBT;
     }
 
-    public CompoundTag writeToNBT(CompoundTag compoundTag) {
-        return this.fluid.writeToNBT(compoundTag);
+    public CompoundTag writeToNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
+        return (CompoundTag) this.fluid.save(provider,compoundTag);
     }
 
 
@@ -55,9 +56,9 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
             List<BlockEntityFluidDrawer.FluidDrawerData> listNew = new ArrayList<>();
             List<DrawerDistanceBook> listW = new ArrayList<>();
             // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent());
-            if (tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent()) {
+            if (Optional.ofNullable(tile.getCapability(DRAWER_GROUP_CAPABILITY)).isPresent()) {
                 // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get().getDrawerCount()+"");
-                IDrawerGroup handler = tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get();
+                IDrawerGroup handler = tile.getCapability(DRAWER_GROUP_CAPABILITY);
                 int size = handler.getDrawerCount();
                 for (int i = 0; i < size; i++) {
 
