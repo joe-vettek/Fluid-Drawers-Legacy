@@ -2,7 +2,7 @@
   "type": "minecraft:block",
   "functions": [
     {
-      "function": "minecraft:copy_nbt",
+      "function": "minecraft:copy_custom_data",
       "ops": [
         {
           "op": "replace",
@@ -44,11 +44,11 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "fluiddrawerslegacy:fluiddrawer_half"
+          "name": "fluiddrawerslegacy:fluiddrawer_4"
         }
       ],
       "rolls": 1.0
     }
   ],
-  "random_sequence": "fluiddrawerslegacy:blocks/fluiddrawer_half"
+  "random_sequence": "fluiddrawerslegacy:blocks/fluiddrawer_4"
 }

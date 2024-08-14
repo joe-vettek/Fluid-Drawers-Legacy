@@ -7,6 +7,7 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -122,7 +123,8 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         var facing = state.getValue(FACING);
         var playerFrom = hit.getDirection();
 
-        if (playerFrom == Direction.UP || playerFrom == Direction.DOWN) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (playerFrom == Direction.UP || playerFrom == Direction.DOWN)
+            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         if (isHalf() && playerFrom != facing) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
 
@@ -193,10 +195,9 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
                 }
             }
         }
-        
+
         return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
-
 
 
     public static int getSlotByVec(Vec3 loc, Direction facing, Direction playerFrom, int slotCount) {
@@ -248,6 +249,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         BlockEntity tileEntity = level.getBlockEntity(pos);
         if (tileEntity instanceof BlockEntityFluidDrawer tile) {
             tile.writePortable(level.registryAccess(), stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
+            stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tile.writePortable(level.registryAccess(), stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag())));
         }
         return stack;
     }

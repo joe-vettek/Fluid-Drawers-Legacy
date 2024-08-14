@@ -3,42 +3,29 @@ package xueluoanping.fluiddrawerslegacy.handler;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.core.ModBlockEntities;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.registries.DeferredHolder;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
 import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
 
 import java.util.ArrayList;
 import java.util.Optional;
 
-import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
-
 @EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
-public class ControllerFluidCapabilityHandler {
+public class InteractWithBlockHandler {
     // public static final ControllerFluidCapabilityHandler instance = new ControllerFluidCapabilityHandler();
     // private static final ResourceLocation CAP_FLUID_CTRL = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluid_ctrl");
     // private static final ResourceLocation CAP_FLUID_PROXY = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluid_proxy");
@@ -89,7 +76,7 @@ public class ControllerFluidCapabilityHandler {
                         if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
                             for (int i = 0; i < handler.getDrawerCount(); i++) {
                                 IDrawer drawer = handler.getDrawer(i);
-                                if (!(drawer instanceof BlockEntityFluidDrawer.FluidDrawerData fluiddrawer)) {
+                                if (!(drawer instanceof BlockEntityFluidDrawer.FluidGroupData fluiddrawer)) {
                                     if (drawer.canItemBeStored(stack)
                                             && drawer.getStoredItemPrototype().is(stack.getItem()))
                                         break;

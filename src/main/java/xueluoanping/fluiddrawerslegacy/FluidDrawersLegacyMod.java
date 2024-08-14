@@ -1,25 +1,18 @@
 package xueluoanping.fluiddrawerslegacy;
 
 
-import com.jaquadro.minecraft.storagedrawers.core.ModBlockEntities;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
-import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawerController;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.data.start;
-import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 
 import java.util.List;
 // import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
@@ -70,7 +63,7 @@ public class FluidDrawersLegacyMod {
 
         // modEventBus.register(ControllerFluidCapabilityHandler.instance);
         modEventBus.addListener(this::gatherData);
-        modEventBus.addListener(this::onTileCapabilities);
+        modEventBus.addListener(ModContents::onTileCapabilities);
         // Register the Deferred Register to the mod event bus so blocks get registered
         ModContents.DREntityBlocks.register(modEventBus);
         ModContents.DREntityBlockItems.register(modEventBus);
@@ -101,33 +94,5 @@ public class FluidDrawersLegacyMod {
     }
 
 
-    public void onTileCapabilities(RegisterCapabilitiesEvent event) {
-        // FluidDrawersLegacyMod.logger(event.getObject().getLevel());
 
-        for (var entry : ModContents.DRBlockEntities.getEntries()) {
-            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, entry.value(), (entity, context) -> {
-                if (entity instanceof BlockEntityFluidDrawer blockEntityFluidDrawer)
-                    return ((BlockEntityFluidDrawer.FluidGroupData)(blockEntityFluidDrawer.getGroup())).tank;
-                else return null;
-            });
-        }
-
-
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CONTROLLER.get(), (entity, context) -> {
-            CapabilityProvider_FluidDrawerController data = entity.getData(ModContents.HANDLER);
-            if (!data.hasTile()) data.setTile(entity);
-            return data.getCapability(entity, context);
-        });
-
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CONTROLLER_IO.get(), (entity, context) -> {
-            CapabilityProvider_FluidDrawerController data = entity.getData(ModContents.HANDLER);
-            boolean isvalid=entity.getController() != null && entity.getController().isValidIO(entity.getBlockPos());
-            if (!isvalid) {
-                entity.removeData(ModContents.HANDLER);
-                return null;
-            }
-            if (!data.hasTile()) data.setTile(entity.getController());
-            return data.getCapability(entity, context);
-        });
-    }
 }

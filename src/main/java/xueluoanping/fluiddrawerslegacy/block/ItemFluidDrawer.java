@@ -90,7 +90,7 @@ public class ItemFluidDrawer extends BlockItem {
                     int slotCouont = 0;
                     for (Tag tank : tag.getList("tanks", ListTag.TAG_COMPOUND)) {
                         slotCouont++;
-                        FluidStack fluidStack = FluidStack.parseOptional(pContext.registries(), (CompoundTag) tank);
+                        FluidStack fluidStack = FluidStack.parseOptional(pContext.registries(), ((CompoundTag) (tank)).getCompound("Fluid"));
                         if (tag.toString().contains("storagedrawers:creative_vending_upgrade"))
                             fluidStack.setAmount(Integer.MAX_VALUE);
                         if (fluidStack.getAmount() > 0) {

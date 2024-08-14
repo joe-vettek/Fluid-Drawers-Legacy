@@ -480,7 +480,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
             // nbt.putString("cache", cacheFluid.getFluidType().toString());
 
-            nbt.put("cache", cacheFluid.save(provider));
+            nbt.put("cache", cacheFluid.saveOptional(provider));
             return writeToNBT(provider, nbt);
         }
 

@@ -3,20 +3,19 @@
   "category": "misc",
   "key": {
     "/": {
-      "tag": "forge:glass_panes"
+      "tag": "c:glass_blocks"
     },
     "X": {
       "item": "minecraft:bucket"
     }
   },
   "pattern": [
-    "/X/",
     "///",
-    "/X/"
+    " X ",
+    "///"
   ],
   "result": {
-    "count": 2,
-    "item": "fluiddrawerslegacy:fluiddrawer_2_half"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "fluiddrawerslegacy:fluiddrawer"
+  }
 }

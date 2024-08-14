@@ -66,12 +66,15 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
 
     @Override
     public @UnknownNullability CompoundTag serializeNBT(HolderLookup.Provider provider) {
-        return tank.writeToNBT(provider, new CompoundTag());
+        if (this.tank != null)
+            return tank.writeToNBT(provider, new CompoundTag());
+        return new CompoundTag();
     }
 
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
-        tank.setFluid(FluidStack.parseOptional(provider, nbt));
+        if (this.tank != null)
+            tank.setFluid(FluidStack.parseOptional(provider, nbt));
     }
 
 

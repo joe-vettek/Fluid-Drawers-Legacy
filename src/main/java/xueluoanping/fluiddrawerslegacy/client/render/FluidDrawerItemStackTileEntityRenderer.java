@@ -118,7 +118,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         var flist = new ArrayList<TankHolder>();
         if (tag.contains("tanks")) {
             for (Tag tank : tag.getList("tanks", ListTag.TAG_COMPOUND)) {
-                FluidStack fluidStack = FluidStack.parseOptional(Minecraft.getInstance().level.registryAccess(),((CompoundTag) tank));
+                FluidStack fluidStack = FluidStack.parseOptional(Minecraft.getInstance().level.registryAccess(),((CompoundTag) tank).getCompound("Fluid"));
                 int capacity = BlockEntityFluidDrawer.calculateTankCapacityFromStack(Minecraft.getInstance().level.registryAccess(),stack);
                 if (!fluidStack.isEmpty()&& tag.toString().contains("storagedrawers:creative_vending_upgrade"))
                     fluidStack.setAmount(capacity);

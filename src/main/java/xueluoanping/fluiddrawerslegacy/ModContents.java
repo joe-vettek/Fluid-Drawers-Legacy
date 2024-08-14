@@ -1,6 +1,8 @@
 package xueluoanping.fluiddrawerslegacy;
 
 
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawers;
+import com.jaquadro.minecraft.storagedrawers.core.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -20,6 +22,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -122,5 +126,44 @@ public class ModContents {
     // public static final Supplier<AttachmentType<CapabilityProvider_FluidControllerProxy>> HANDLER_2 = ATTACHMENT_TYPES.register(
     //         "fluid_proxy", () -> AttachmentType.serializable(() -> new CapabilityProvider_FluidControllerProxy()).build()
     // );
+
+    public static void onTileCapabilities(RegisterCapabilitiesEvent event) {
+        // FluidDrawersLegacyMod.logger(event.getObject().getLevel());
+
+        for (var entry : ModContents.DRBlockEntities.getEntries()) {
+            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, entry.value(), (entity, context) -> {
+                if (entity instanceof BlockEntityFluidDrawer blockEntityFluidDrawer)
+                    return ((BlockEntityFluidDrawer.FluidGroupData)(blockEntityFluidDrawer.getGroup())).tank;
+                else return null;
+            });
+            event.registerBlockEntity(ModConstants.DRAWER_ATTRIBUTES_CAPABILITY, entry.value(), (entity, context) -> {
+                return ((BlockEntityFluidDrawer)entity).getDrawerAttributes();
+            });
+
+            event.registerBlockEntity(ModConstants.DRAWER_GROUP_CAPABILITY, entry.value(), (entity, context) -> {
+                return ((BlockEntityFluidDrawer)entity).getGroup();
+            });
+        }
+
+
+
+
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CONTROLLER.get(), (entity, context) -> {
+            CapabilityProvider_FluidDrawerController data = entity.getData(ModContents.HANDLER);
+            if (!data.hasTile()) data.setTile(entity);
+            return data.getCapability(entity, context);
+        });
+
+        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.CONTROLLER_IO.get(), (entity, context) -> {
+            CapabilityProvider_FluidDrawerController data = entity.getData(ModContents.HANDLER);
+            boolean isvalid=entity.getController() != null && entity.getController().isValidIO(entity.getBlockPos());
+            if (!isvalid) {
+                entity.removeData(ModContents.HANDLER);
+                return null;
+            }
+            if (!data.hasTile()) data.setTile(entity.getController());
+            return data.getCapability(entity, context);
+        });
+    }
 }
 

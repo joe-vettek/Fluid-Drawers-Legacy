@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "minecraft:bucket"
-            ]
+            "items": "minecraft:bucket"
           }
         ]
       },
@@ -15,21 +13,20 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "fluiddrawerslegacy:fluiddrawer"
+        "recipe": "fluiddrawerslegacy:fluiddrawer_4_half"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
   },
   "requirements": [
     [
-      "has_bucket",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_bucket"
     ]
   ],
   "rewards": {
     "recipes": [
-      "fluiddrawerslegacy:fluiddrawer"
+      "fluiddrawerslegacy:fluiddrawer_4_half"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }
