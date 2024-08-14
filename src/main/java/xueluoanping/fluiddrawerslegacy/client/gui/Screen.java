@@ -212,6 +212,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         float v0 = FLUID.getV0();
         Tesselator tessellator = Tesselator.getInstance();
         // BufferBuilder builder = tessellator.getBuilder();
+        var builder= tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         /*
          * 渲染循环
@@ -240,15 +241,14 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 float u1 = j == 0 ? FLUID.getU0() + ((FLUID.getU1() - u0) * ((float) extraWidth / 16f)) : FLUID.getU1();
 
                 // 渲染主代码
-               var builder= tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
                 buildMatrix(matrix, builder, xStart, yStart - yOffset, 0.0f, u0, v0, color);
                 buildMatrix(matrix, builder, xStart, yStart, 0.0f, u0, v1, color);
                 buildMatrix(matrix, builder, xStart + xOffset, yStart, 0.0f, u1, v1, color);
                 buildMatrix(matrix, builder, xStart + xOffset, yStart - yOffset, 0.0f, u1, v0, color);
-                builder.build();
-                // tessellator.clear();
             }
         }
+        BufferUploader.drawWithShader(builder.buildOrThrow());
+        // builder.build();
         RenderSystem.setShaderColor(1, 1, 1, 1);
         RenderSystem.disableBlend();
     }
@@ -303,6 +303,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
                 h0 = 16;
             var geo = SlotGeometry.get(slot, dlis.size(), this.width, this.height, this.imageHeight, this.imageWidth);
+
             if (!fluidStackDown.isEmpty())
                 renderFluidStackInGUI(poseStack.last().pose(), fluidStackDown, 16, h0, geo.left(), geo.top());
 
