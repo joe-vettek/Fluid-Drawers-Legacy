@@ -28,6 +28,21 @@ public class Lang_EN extends LangHelper {
         addJadeConfig();
 
         add("itemGroup.fluiddrawers", "Fluid Drawers Legacy");
+
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.Renderer", "Renderer");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.Display", "Display");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.debugMode", "Debug Mode");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.general", "General");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.compat", "Compat");
+
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.distance", "Distance");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.showlimit", "Show Limit");
+        // add(FluidDrawersLegacyMod.MOD_ID+".configuration.debugMode", "debugMode");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.volume", "Volume");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.retainFluid", "Retain Fluid");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.createPotionInteraction", "Create Potion Interaction");
+        add(FluidDrawersLegacyMod.MOD_ID+".configuration.cauponaSoupBowlInteraction", "Caupona SoupBowl Interaction");
+
     }
     
     private void addJadeConfig() {
