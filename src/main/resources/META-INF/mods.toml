@@ -58,6 +58,6 @@ description='''
 [[dependencies.fluiddrawerslegacy]]
     modId="storagedrawers"
     mandatory=true
-    versionRange="[10.1,)"
+    versionRange="[10.3.0,)"
     ordering="AFTER"
     side="BOTH"

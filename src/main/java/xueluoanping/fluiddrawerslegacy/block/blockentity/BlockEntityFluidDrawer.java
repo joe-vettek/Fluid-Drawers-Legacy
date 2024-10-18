@@ -6,7 +6,7 @@ import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributesModifiable;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
-import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
@@ -43,7 +43,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BlockEntityFluidDrawer extends ChamTileEntity implements IDrawerGroup {
+public class BlockEntityFluidDrawer extends BaseBlockEntity implements IDrawerGroup {
 
     private BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 

@@ -1,16 +1,11 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
-import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.StandardDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.TileDataShim;
+import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.FluidStack;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 
-import java.lang.ref.WeakReference;
-
-public class FluidDrawerControllerData extends TileDataShim {
+public class FluidDrawerControllerData extends BlockEntityDataShim {
     ICapabilityProvider capProvider;
 
     private static final String KEY="FluidDrainCache";

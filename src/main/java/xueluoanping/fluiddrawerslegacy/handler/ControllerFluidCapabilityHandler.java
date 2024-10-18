@@ -1,8 +1,8 @@
 package xueluoanping.fluiddrawerslegacy.handler;
 
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -42,11 +42,11 @@ public class ControllerFluidCapabilityHandler {
     @SubscribeEvent
     public void onTileCapabilities(AttachCapabilitiesEvent<BlockEntity> event) {
         BlockEntity tile = event.getObject();
-        if (tile instanceof TileEntityController
+        if (tile instanceof BlockEntityController
         ) {
-            event.addCapability(CAP_FLUID_CTRL, new CapabilityProvider_FluidDrawerController((TileEntityController) tile));
-        } else if (tile instanceof TileEntitySlave) {
-            event.addCapability(CAP_FLUID_PROXY, new CapabilityProvider_FluidControllerProxy((TileEntitySlave) tile));
+            event.addCapability(CAP_FLUID_CTRL, new CapabilityProvider_FluidDrawerController((BlockEntityController) tile));
+        } else if (tile instanceof BlockEntitySlave) {
+            event.addCapability(CAP_FLUID_PROXY, new CapabilityProvider_FluidControllerProxy((BlockEntitySlave) tile));
         }
 
     }
@@ -71,7 +71,7 @@ public class ControllerFluidCapabilityHandler {
                                                       Player player, InteractionHand hand) {
         AtomicBoolean result = new AtomicBoolean(false);
         if (tile.getLevel().isClientSide()) return new AtomicBoolean(false);
-        if (!(tile instanceof TileEntityController) || !tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, face).isPresent()) {
+        if (!(tile instanceof BlockEntityController) || !tile.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, face).isPresent()) {
             return result;
         }
         ItemStack heldStack = player.getItemInHand(hand);

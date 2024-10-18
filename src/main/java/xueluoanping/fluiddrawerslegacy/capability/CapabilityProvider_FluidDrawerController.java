@@ -1,7 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -12,13 +12,11 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -36,11 +34,11 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     private final LazyOptional<betterFluidHandler> tankHandler;
     public static final int Capacity = 32000;
     public static BlockPos tilePos = null;
-    final TileEntityController tile;
+    final BlockEntityController tile;
     // private List<TileEntityFluidDrawer.StandardDrawerData> drawerDataList = new ArrayList<>();
     private List<FluidStack> fluidRecord = new ArrayList<>();
 
-    public CapabilityProvider_FluidDrawerController(final TileEntityController tile) {
+    public CapabilityProvider_FluidDrawerController(final BlockEntityController tile) {
         this.tile = tile;
         tank = createFuildHandler();
         tankHandler = LazyOptional.of(() -> tank);

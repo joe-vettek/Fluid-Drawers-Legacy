@@ -1,6 +1,6 @@
 package xueluoanping.fluiddrawerslegacy.capability;
 
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
 import net.minecraft.core.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -12,8 +12,8 @@ import javax.annotation.Nullable;
 
 public class CapabilityProvider_FluidControllerProxy implements  ICapabilityProvider {
 
-    private final TileEntitySlave tile;
-    public CapabilityProvider_FluidControllerProxy(TileEntitySlave tile) {
+    private final BlockEntitySlave tile;
+    public CapabilityProvider_FluidControllerProxy(BlockEntitySlave tile) {
         this.tile=tile;
     }
 

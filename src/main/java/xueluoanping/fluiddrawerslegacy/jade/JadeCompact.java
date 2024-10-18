@@ -3,9 +3,9 @@ package xueluoanping.fluiddrawerslegacy.jade;
 
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.BlockSlave;
-import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntitySlave;
+
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
 import mcp.mobius.waila.api.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import xueluoanping.fluiddrawerslegacy.ModContents;
@@ -21,8 +21,8 @@ public class JadeCompact implements IWailaPlugin {
 
     @Override
     public void register(IWailaCommonRegistration registration) {
-        registration.registerBlockDataProvider(ComponentProvider.INSTANCE, TileEntityController.class);
-        registration.registerBlockDataProvider(ComponentProvider.INSTANCE, TileEntitySlave.class);
+        registration.registerBlockDataProvider(ComponentProvider.INSTANCE, BlockEntityController.class);
+        registration.registerBlockDataProvider(ComponentProvider.INSTANCE, BlockEntitySlave.class);
     }
 
     @Override
