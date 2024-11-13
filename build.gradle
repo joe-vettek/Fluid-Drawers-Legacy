@@ -162,7 +162,7 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft "net.minecraftforge:forge:${minecraft_min_version}-${forge_version}"
 
-    implementation fg.deobf("curse.maven:storage-drawers-223852:4668552-deobf-sources-api")
+    implementation fg.deobf("curse.maven:storage-drawers-223852:5889916-deobf-sources-api")
     implementation fg.deobf("curse.maven:jei-238222:4644453")
 //    implementation fg.deobf("curse.maven:jade-324717:4654448")
     implementation fg.deobf("curse.maven:jade-324717:5072729-deobf-sources-api")
@@ -216,11 +216,11 @@ jar {
 // See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
-            minecraft_version: minecraft_version, minecraft_version_range: minecraft_version_range,
-            forge_version: forge_version, forge_version_range: forge_version_range,
-            loader_version_range: loader_version_range,storagedrawers_version_range:storagedrawers_version_range,
-            mod_id: mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
-            mod_authors: mod_authors, mod_description: mod_description,mod_update_json: mod_update_json,mod_url: mod_url,
+            minecraft_version   : minecraft_version, minecraft_version_range: minecraft_version_range,
+            forge_version       : forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range, storagedrawers_version_range: storagedrawers_version_range,
+            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors         : mod_authors, mod_description: mod_description, mod_update_json: mod_update_json, mod_url: mod_url,
     ]
     inputs.properties replaceProperties
 
