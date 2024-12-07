@@ -2,6 +2,7 @@ package xueluoanping.fluiddrawerslegacy.client.gui;
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
 // import com.jaquadro.minecraft.storagedrawers.client.renderer.StorageRenderItem;
+import com.jaquadro.minecraft.storagedrawers.inventory.ContainerDrawers;
 import com.jaquadro.minecraft.storagedrawers.inventory.SlotUpgrade;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -91,7 +92,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                     if (!fluidStackDown.isEmpty()) {
                         List<Component> list = new ArrayList<>();
                         // list.add();
-                        list.add(Component.translatable(new FluidStack(fluidStackDown.getFluidHolder(), fluidStackDown.getAmount()).getHoverName().getString()+" §e"+tank.getFluidAmount() + "mB"));
+                        list.add(Component.translatable(new FluidStack(fluidStackDown.getFluidHolder(), fluidStackDown.getAmount()).getHoverName().getString() + " §e" + tank.getFluidAmount() + "mB"));
                         ModList modList = ModList.get();
                         FluidStack finalFluidStackDown = fluidStackDown;
 
@@ -152,7 +153,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         builder.addVertex(matrix, x, y, z)
                 .setColor(red, green, blue, alpha)
                 .setUv(u, v);
-                // .endVertex();
+        // .endVertex();
 
     }
 
@@ -204,7 +205,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int extraHeight = hFloors == 0 ? height : height % 16;
         extraHeight = Math.max(1, extraHeight);
         // add it to avoid too much
-        if (height==16)extraHeight=0;
+        if (height == 16) extraHeight = 0;
 
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
 
@@ -212,7 +213,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         float v0 = FLUID.getV0();
         Tesselator tessellator = Tesselator.getInstance();
         // BufferBuilder builder = tessellator.getBuilder();
-        var builder= tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        var builder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
 
         /*
          * 渲染循环
@@ -259,6 +260,18 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         graphics.drawString(this.font, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752, false);
         graphics.drawString(this.font, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752, false);
 
+
+        int amount = menu.getTileEntityFluidDrawer().getCapacityTankEffective();
+        String amountLabel;
+        if (amount >= 1000 * 1000 * 1000) {
+            amountLabel = (int) Math.floor(amount / 1000f / 1000f / 1000f) + "M";
+        }else if (amount >= 1000 * 1000) {
+            amountLabel = (int) Math.floor(amount / 1000f / 1000f) + "K";
+        }else {
+            amountLabel = ((int) Math.floor(amount / 1000f)) + "B";
+        }
+        String mult = amountLabel;
+        graphics.drawString(this.font, mult, 161 - mult.length() * 6, 42, 4210752, false);
     }
 
 
@@ -310,36 +323,36 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
             if (!fluidStackDown.isEmpty()) {
                 // int amount = fluidStackDown.getAmount();
                 graphics.pose().pushPose();
-                float scale_x=0.6f;
-                float scale_y=0.6f;
+                float scale_x = 0.6f;
+                float scale_y = 0.6f;
                 graphics.pose().scale(scale_x, scale_y, 1.0F);
-                double roundedAmount = Math.floor(amount * 10/1000f) / 10; // Round down to one decimal place
-                String amountLabel = String.format("%.1f",roundedAmount) + "B";
+                double roundedAmount = Math.floor(amount * 10 / 1000f) / 10; // Round down to one decimal place
+                String amountLabel = String.format("%.1f", roundedAmount) + "B";
                 if (this.menu.getTileEntityFluidDrawer().upgrades().hasVendingUpgrade())
                     amount = Integer.MAX_VALUE;
                 //  one *10 occur 3.0f pixel
-                if(amount>=10000){
-                    amountLabel = ((int)Math.floor(amount/1000f)) + "B";
+                if (amount >= 10000) {
+                    amountLabel = ((int) Math.floor(amount / 1000f)) + "B";
                 }
-                if(amount>=1000*1000){
-                    amountLabel = String.valueOf((int)Math.floor(amount/1000f/1000f)) + "K";
+                if (amount >= 1000 * 1000) {
+                    amountLabel = String.valueOf((int) Math.floor(amount / 1000f / 1000f)) + "K";
                 }
-                if(amount>=1000*1000*1000){
-                    amountLabel = String.valueOf((int)Math.floor(amount/1000f/1000f/1000f)) + "M";
+                if (amount >= 1000 * 1000 * 1000) {
+                    amountLabel = String.valueOf((int) Math.floor(amount / 1000f / 1000f / 1000f)) + "M";
                 }
-                if (amount >= 1000*1000*1000) {
+                if (amount >= 1000 * 1000 * 1000) {
                     amountLabel = "∞";
                 }
-                int   textWidth = font.width(amountLabel);
-                int innerX = (int) ((geo.left()+16 )/scale_x- textWidth+1);
-                int innerY = (int) (geo.top()/scale_y - font.lineHeight +1);
+                int textWidth = font.width(amountLabel);
+                int innerX = (int) ((geo.left() + 16) / scale_x - textWidth + 1);
+                int innerY = (int) (geo.top() / scale_y - font.lineHeight + 1);
                 // (geo.left()+16-textWidth-imageWidth)/2,(geo.top()+16-imageHeight)/2
 
                 // 16777215
                 // 2237562
                 // Color.DARK_GRAY.hashCode()
 
-                int color=Color.YELLOW.hashCode();
+                int color = Color.YELLOW.hashCode();
                 // for (int i = 0; i < FLUID.contents().width(); i++) {
                 //     for (int j = 0; j <FLUID.contents().height(); j++) {
                 //         color=FLUID.getPixelRGBA(0,i,j);
@@ -348,8 +361,8 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
                 // color=color/(FLUID.contents().width()*FLUID.contents().height());
 
 
-                graphics.drawString(font, amountLabel, innerX+0.8f*scale_x, innerY+0.8f*scale_y,  Color.DARK_GRAY.hashCode(), false);
-                graphics.drawString(font, amountLabel, innerX, innerY,  color, false);
+                graphics.drawString(font, amountLabel, innerX + 0.8f * scale_x, innerY + 0.8f * scale_y, Color.DARK_GRAY.hashCode(), false);
+                graphics.drawString(font, amountLabel, innerX, innerY, color, false);
 
                 graphics.pose().popPose();
             }
@@ -417,11 +430,11 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         int s = group.getDrawerCount();
 
         if (s == 4)
-            return StorageDrawers.rl( "textures/gui/drawers_4.png");
+            return StorageDrawers.rl("textures/gui/drawers_4.png");
         else if (s == 2)
-            return StorageDrawers.rl(  "textures/gui/drawers_2.png");
+            return StorageDrawers.rl("textures/gui/drawers_2.png");
         else
-            return StorageDrawers.rl(  "textures/gui/drawers_1.png");
+            return StorageDrawers.rl("textures/gui/drawers_1.png");
     }
 
     public static class Slot1 extends Screen {

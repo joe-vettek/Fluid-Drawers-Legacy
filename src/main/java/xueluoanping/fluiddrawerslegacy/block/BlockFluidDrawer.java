@@ -1,13 +1,12 @@
 package xueluoanping.fluiddrawerslegacy.block;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
-import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
+import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,7 +43,6 @@ import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
@@ -137,7 +135,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             // open GUI when squat
 
             if (facing == playerFrom && heldStack.isEmpty() && player.isShiftKeyDown()) {
-                if (CommonConfig.GENERAL.enableUI.get() && !world.isClientSide()) {
+                if (ModCommonConfig.INSTANCE.GENERAL.enableUI.get() && !world.isClientSide()) {
                     //                    FluidDrawersLegacyMod.logger("hello，screen");
                     ((ServerPlayer) player).openMenu(new MenuProvider() {
                         @Override
@@ -208,7 +206,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             int angle = (int) (facing.toYRot() - playerFrom.toYRot());
             if (angle == 0) {
                 var p = new MathUtils.Point(loc);
-                FluidDrawersLegacyMod.logger(facing, p.x, p.y, p.z);
+                // FluidDrawersLegacyMod.logger(facing, p.x, p.y, p.z);
                 switch (facing) {
                     case EAST -> {
                         p = new MathUtils.Point(p.z, p.y, 0);

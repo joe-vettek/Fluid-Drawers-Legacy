@@ -3,7 +3,6 @@ package xueluoanping.fluiddrawerslegacy.handler;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.capabilities.CapabilityDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -71,7 +70,7 @@ public class InteractWithBlockHandler {
                 return;
             }
 
-            Optional.ofNullable(tile.getCapability(CapabilityDrawerGroup.DRAWER_GROUP_CAPABILITY))
+            Optional.ofNullable(tile.getCapability(com.jaquadro.minecraft.storagedrawers.capabilities.Capabilities.DRAWER_GROUP))
                     .ifPresent((handler -> {
                         if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
                             for (int i = 0; i < handler.getDrawerCount(); i++) {

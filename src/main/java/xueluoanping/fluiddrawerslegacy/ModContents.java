@@ -3,6 +3,7 @@ package xueluoanping.fluiddrawerslegacy;
 
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlockEntities;
+import com.texelsaurus.minecraft.chameleon.capabilities.NeoforgeCapability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -136,13 +137,24 @@ public class ModContents {
                     return ((BlockEntityFluidDrawer.FluidGroupData)(blockEntityFluidDrawer.getGroup())).tank;
                 else return null;
             });
-            event.registerBlockEntity(ModConstants.DRAWER_ATTRIBUTES_CAPABILITY, entry.value(), (entity, context) -> {
-                return ((BlockEntityFluidDrawer)entity).getDrawerAttributes();
-            });
 
-            event.registerBlockEntity(ModConstants.DRAWER_GROUP_CAPABILITY, entry.value(), (entity, context) -> {
-                return ((BlockEntityFluidDrawer)entity).getGroup();
-            });
+            // event.registerBlockEntity(ModConstants.DRAWER_ATTRIBUTES_CAPABILITY, entry.value(), (entity, context) -> {
+            //     return ((BlockEntityFluidDrawer)entity).getDrawerAttributes();
+            // });
+
+            ((NeoforgeCapability) ModConstants.DRAWER_ATTRIBUTES_CAPABILITY).register(
+                    event,entry.value(),(entity, context) -> {
+                        return ((BlockEntityFluidDrawer)entity).getDrawerAttributes();
+                    }
+            );
+           ((NeoforgeCapability) ModConstants.DRAWER_GROUP_CAPABILITY).register(
+                   event,entry.value(),(entity, context) -> {
+                       return ((BlockEntityFluidDrawer)entity).getGroup();
+                   }
+           );
+            // event.registerBlockEntity(ModConstants.DRAWER_GROUP_CAPABILITY, entry.value(), (entity, context) -> {
+            //     return ((BlockEntityFluidDrawer)entity).getGroup();
+            // });
         }
 
 

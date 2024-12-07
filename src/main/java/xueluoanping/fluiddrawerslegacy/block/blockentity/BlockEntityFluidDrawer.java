@@ -1,23 +1,19 @@
 package xueluoanping.fluiddrawerslegacy.block.blockentity;
 
+import com.jaquadro.minecraft.storagedrawers.api.capabilities.IDrawerCapabilityProvider;
+import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
-// import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
-// import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
-// import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawersComp;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
-import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
+import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
-import com.jaquadro.minecraft.storagedrawers.network.CountUpdateMessage;
-import com.jaquadro.minecraft.storagedrawers.network.MessageHandler;
+import com.texelsaurus.minecraft.chameleon.capabilities.ChameleonCapability;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -37,7 +33,6 @@ import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
@@ -47,10 +42,9 @@ import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDrawerGroup {
+public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDrawerGroup, IDrawerCapabilityProvider {
 
     private final BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -190,6 +184,13 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
     //     }
     // }
 
+
+    @Override
+    public <T> T getCapability(ChameleonCapability<T> capability) {
+        return capability != null && this.level != null ?
+                capability.getCapability(this.level, this.getBlockPos()) : null;
+    }
+
     public betterFluidManager<BlockEntityFluidDrawer> getTank() {
         return this.fluidGroupData.tank;
     }
@@ -274,7 +275,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         return getBlockState().getBlock().getDescriptionId().contains("half");
     }
 
-    public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup {
+    public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup, IDrawerCapabilityProvider {
 
         // private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
         public final betterFluidManager<BlockEntityFluidDrawer> tank;
@@ -322,9 +323,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
             return !BlockEntityFluidDrawer.this.isRemoved();
         }
 
-        public <T> T getCapability(@NotNull BlockCapability<T, Void> capability) {
-            return BlockEntityFluidDrawer.this.level == null ? null : BlockEntityFluidDrawer.this.level.getCapability(capability, BlockEntityFluidDrawer.this.getBlockPos(), BlockEntityFluidDrawer.this.getBlockState(), BlockEntityFluidDrawer.this, null);
+        @Override
+        public <T> T getCapability(ChameleonCapability<T> capability) {
+            return capability != null && BlockEntityFluidDrawer.this.level != null ?
+                    capability.getCapability(BlockEntityFluidDrawer.this.level, BlockEntityFluidDrawer.this.getBlockPos()) : null;
         }
+
 
 
         @Override
@@ -365,7 +369,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         public boolean idVoidUpgrade() {
             return getDrawerAttributes().isVoid();
         }
-
     }
 
     // IDrawer,
@@ -429,6 +432,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
         @Override
         public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt) {
             tank.deserializeNBT(provider, nbt);
+        }
+
+        @Override
+        public IDrawer copy() {
+            return new FluidDrawerData(group, slot, tank.getCapacity());
         }
     }
 
@@ -635,7 +643,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
                 ItemStack upgrade = this.getUpgrade(slot);
                 if (upgrade.getItem() instanceof ItemUpgradeStorage) {
                     int storageLevel = ((ItemUpgradeStorage) upgrade.getItem()).level.getLevel();
-                    int storageMult = CommonConfig.UPGRADES.getLevelMult(storageLevel);
+                    int storageMult = ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(storageLevel);
                     int effectiveStorageMult = BlockEntityFluidDrawer.this.upgrades().getStorageMultiplier();
                     //                    单个物品特殊处理，
                     if (effectiveStorageMult == storageMult) {
