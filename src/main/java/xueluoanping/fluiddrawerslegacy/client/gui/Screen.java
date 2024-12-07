@@ -261,6 +261,18 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         graphics.drawString(this.font, I18n.get("container.storagedrawers.upgrades"), 8.0F, 75.0F, 4210752, false);
         graphics.drawString(this.font, this.inventory.getDisplayName().getString(), 8.0F, (float) (this.imageHeight - 96 + 2), 4210752, false);
 
+        int amount = menu.getTileEntityFluidDrawer().getCapacityTankEffective();
+        String amountLabel;
+        if (amount >= 1000 * 1000 * 1000) {
+            amountLabel = (int) Math.floor(amount / 1000f / 1000f / 1000f) + "M";
+        }else if (amount >= 1000 * 1000) {
+            amountLabel = (int) Math.floor(amount / 1000f / 1000f) + "K";
+        }else {
+            amountLabel = ((int) Math.floor(amount / 1000f)) + "B";
+        }
+        String mult = amountLabel;
+        graphics.drawString(this.font, mult, 161 - mult.length() * 6, 42, 4210752, false);
+
     }
 
 
