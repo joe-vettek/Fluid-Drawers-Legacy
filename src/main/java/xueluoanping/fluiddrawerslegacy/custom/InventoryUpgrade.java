@@ -108,7 +108,11 @@ public class InventoryUpgrade extends com.jaquadro.minecraft.storagedrawers.inve
     }
 
     @Override
+    public boolean canRemoveUpgrade(int slot) {
+        return this.tile.upgrades().canRemoveUpgrade(slot);
+    }
 
+    @Override
     public boolean canRemoveStorageUpgrade(int slot) {
         return this.tile.upgrades().canRemoveUpgrade(slot);
     }

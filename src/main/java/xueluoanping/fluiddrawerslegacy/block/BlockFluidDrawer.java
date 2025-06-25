@@ -3,6 +3,7 @@ package xueluoanping.fluiddrawerslegacy.block;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeRemote;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -156,6 +157,17 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             // insert upgrade
             else if (facing == playerFrom && heldStack.getItem() instanceof ItemUpgrade) {
                 if (tile.upgrades().canAddUpgrade(heldStack)) {
+                    // Copy remote binding if remote upgrade already present
+                    if (heldStack.getItem() instanceof ItemUpgradeRemote remote && tile.upgrades().hasRemoteUpgrade()) {
+                        if (remote.isBound()) {
+                            tile.upgrades().updateRemoteUpgradeBinding(heldStack);
+                            BlockPos boundPosition = ItemUpgradeRemote.getBoundPosition(heldStack);
+                            if (boundPosition != null)
+                                player.displayClientMessage(Component.translatable("message.storagedrawers.updated_remote_binding", boundPosition.getX(), boundPosition.getY(), boundPosition.getZ()), true);
+
+                            return InteractionResult.SUCCESS;
+                        }
+                    }
                     if (tile.upgrades().addUpgrade(heldStack)) {
                         if (!player.isCreative()) heldStack.shrink(1);
                         return InteractionResult.SUCCESS;

@@ -1,17 +1,23 @@
 package xueluoanping.fluiddrawerslegacy.block.blockentity;
 
+import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
+import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
+import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
+import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.ControllerData;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
+import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeRemote;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
 import com.jaquadro.minecraft.storagedrawers.network.CountUpdateMessage;
 import com.jaquadro.minecraft.storagedrawers.network.MessageHandler;
@@ -47,7 +53,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDrawerGroup {
+public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworked,IFluidDrawerGroup {
 
     private final BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -55,6 +61,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
     private final UpgradeData upgradeData = new BlockEntityFluidDrawer.DrawerUpgradeData();
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
     //    public static int Capacity = 32000;
+    private final ControllerData controllerData = new ControllerData();
 
     public FluidAnimation fluidAnimation = new FluidAnimation();
 
@@ -68,7 +75,61 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         this.upgradeData.setDrawerAttributes(this.drawerAttributes);
         this.injectPortableData(this.upgradeData);
+        injectPortableData(controllerData);
         //        FluidDrawersLegacyMod.logger("create tile");
+    }
+
+    private void checkBoundController () {
+
+        BlockEntityController controller = controllerData.getController(this);
+        ItemStack remote = upgradeData.getRemoteUpgrade();
+        if (remote == null && controller != null) {
+            controller.invalidateRemoteNode(this);
+            controllerData.bind(null);
+            return;
+        }
+
+        if (remote != null && remote.getItem() instanceof ItemUpgradeRemote itemRemote) {
+            BlockEntityController upgradeController = itemRemote.getBoundController(remote, level);
+            if (controller != null && controller != upgradeController)
+                controller.invalidateRemoteNode(this);
+
+            if (upgradeController != null) {
+                controllerData.bind(upgradeController);
+                if (!upgradeController.addRemoteNode(this))
+                    controllerData.bind(null);
+            }
+
+            if (itemRemote.isBound() && controllerData.getController(this) == null)
+                upgradeData.unbindRemoteUpgrade();
+        }
+    }
+
+    @Override
+    public boolean supportsDirectControllerLink () {
+        return true;
+    }
+
+    @Override
+    public IControlGroup getBoundControlGroup () {
+        return controllerData.getController(this);
+    }
+
+    @Override
+    public boolean canRecurseSearch () {
+        ItemStack upgrade = upgradeData.getRemoteUpgrade();
+        if (upgrade == null)
+            return true;
+
+        if (upgrade.getItem() instanceof ItemUpgradeRemote item)
+            return item.isGroupUpgrade();
+
+        return true;
+    }
+
+    @Override
+    public void unbindControlGroup () {
+        upgradeData.unbindRemoteUpgrade();
     }
 
 
@@ -663,6 +724,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
 
         protected void onUpgradeChanged(ItemStack oldUpgrade, ItemStack newUpgrade) {
             if (BlockEntityFluidDrawer.this.getLevel() != null && !BlockEntityFluidDrawer.this.getLevel().isClientSide) {
+                checkBoundController();
+                if (getBoundControlGroup() != null)
+                    getBoundControlGroup().addRemoteNode(BlockEntityFluidDrawer.this);
+
                 BlockEntityFluidDrawer.this.setChanged();
                 BlockEntityFluidDrawer.this.markBlockForUpdate();
             }
