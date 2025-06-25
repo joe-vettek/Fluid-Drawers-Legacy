@@ -3,13 +3,16 @@ package xueluoanping.fluiddrawerslegacy.api.drawer;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.material.Fluids;
 
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -22,7 +25,7 @@ import java.util.stream.Collectors;
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
 public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements IFluidHandler {
-    private List<FluidStack> fluidRecord = new ArrayList<>();
+    private List<CompoundTag> fluidRecord = new ArrayList<>();
     private FluidStack fluid = FluidStack.EMPTY;
 
     private final T tile;
@@ -40,7 +43,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
     }
 
     public CompoundTag writeToNBT(HolderLookup.Provider provider, CompoundTag compoundTag) {
-        return (CompoundTag) this.fluid.save(provider,compoundTag);
+        return (CompoundTag) (this.fluid.isEmpty() ? compoundTag : this.fluid.save(provider, compoundTag));
     }
 
 
@@ -89,8 +92,9 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
     // Add fluidMap memory mechanism and automatically remove 0 items.
 
     public List<FluidHolder> getFluidMap(List<BlockEntityFluidDrawer.FluidDrawerData> listNew) {
-
-        Map<FluidStack, List<Integer>> fluidMap = new LinkedHashMap<>();
+        RegistryAccess registryAccess = tile.getLevel().registryAccess();
+        // we don't have hashcode of fluidstack any more
+        Map<Tag, List<Integer>> fluidMap = new LinkedHashMap<>();
         long startTime = System.currentTimeMillis();
         listNew.forEach(
                 (ele) -> {
@@ -115,37 +119,47 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                             fluidStackKey.setAmount(1);
                         if (!notEmpty && !isEmptyLockWithFluid)
                             fluidStackKey = FluidStack.EMPTY;
-
-                        if (fluidMap.containsKey(fluidStackKey)) {
-                            integerList = fluidMap.get(fluidStackKey);
+                        Tag fluidStackKeyTag = fluidStackKey.saveOptional(registryAccess);
+                        if (fluidMap.containsKey(fluidStackKeyTag)) {
+                            integerList = fluidMap.get(fluidStackKeyTag);
                             integerList.set(0, integerList.get(0) + fluidStack.getAmount());
                             integerList.set(1, integerList.get(1) + capacity);
-                            fluidMap.replace(fluidStackKey, fluidMap.get(fluidStackKey), integerList);
+                            fluidMap.replace(fluidStackKeyTag, fluidMap.get(fluidStackKeyTag), integerList);
                         } else {
                             integerList.add(fluidStack.getAmount());
                             integerList.add(capacity);
-                            fluidMap.put(fluidStackKey, integerList);
+                            fluidMap.put(fluidStackKeyTag, integerList);
                         }
                     }
                 }
         );
 
-        fluidRecord.removeIf(a -> fluidMap.keySet().stream().noneMatch(b -> b.equals(a)));
-        fluidRecord.addAll(fluidMap.keySet());
-        fluidRecord = new ArrayList<>(fluidMap.keySet());
+        Set<Tag> keySet = fluidMap.keySet();
+        fluidRecord.removeIf(a -> keySet.stream().noneMatch(b -> b.equals(a)));
+        // fluidRecord.addAll(fluidMap.keySet());
+        // fluidRecord = new ArrayList<>(fluidMap.keySet());
+
+        // fluidRecord = new ArrayList<>(keySet.size());
+        for (Tag tag : keySet) {
+            if (tag instanceof CompoundTag compoundTag) {
+                // FluidStack stack = FluidStack.parseOptional(registryAccess, compoundTag);
+                if (!fluidRecord.contains(compoundTag))
+                    fluidRecord.add(compoundTag);
+            }
+        }
         fluidRecord = fluidRecord.stream().distinct().collect(Collectors.toList());
 
 
         // must in the last position
-        boolean removeEmptyKey = fluidRecord.removeIf(FluidStack::isEmpty);
+        boolean removeEmptyKey = fluidRecord.removeIf(CompoundTag::isEmpty);
         if (removeEmptyKey) {
-            fluidRecord.add(FluidStack.EMPTY);
+            fluidRecord.add(new CompoundTag());
         }
-
 
         List<FluidHolder> fluidHolderList = new ArrayList<>();
         fluidRecord.forEach(fluidStack -> {
-            FluidHolder holder = new FluidHolder(fluidStack, fluidMap.get(fluidStack).get(0), fluidMap.get(fluidStack).get(1));
+            List<Integer> integers = fluidMap.get(fluidStack);
+            FluidHolder holder = new FluidHolder(FluidStack.parseOptional(registryAccess,fluidStack), integers.get(0), integers.get(1));
             // holder.fluid = fluidStack;
             // holder.fluidAmount = fluidMap.get(fluidStack).get(0);
             // holder.tankCapacity = fluidMap.get(fluidStack).get(1);
@@ -336,7 +350,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                 int drawerFluidAmount = drawerDataList.get(i).getTank().getFluid().getAmount();
                 if (drawerDataList.get(i).getTank().getFluid().isEmpty())
                     continue;
-                if (FluidStack.isSameFluidSameComponents(drawerDataList.get(i).getTank().getFluid(),resourceCopy) && drawerFluidAmount > 0) {
+                if (FluidStack.isSameFluidSameComponents(drawerDataList.get(i).getTank().getFluid(), resourceCopy) && drawerFluidAmount > 0) {
                     // FluidStack temp = new FluidStack(drawerFluid, Math.min(drawerFluidAmount, resourceCopy.getAmount()));
                     //
                     // // FluidStack temp =
@@ -384,7 +398,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                 if (drawerDataList.get(i).getTank().getFluid().getFluid() == Fluids.EMPTY)
                     continue;
                 if (drawerDataList.get(i).getTank().getFluid().getAmount() > 0) {
-                    if (!result.isEmpty() && !FluidStack.isSameFluidSameComponents(result,drawerDataList.get(i).getTank().getFluid()))
+                    if (!result.isEmpty() && !FluidStack.isSameFluidSameComponents(result, drawerDataList.get(i).getTank().getFluid()))
                         continue;
 
 

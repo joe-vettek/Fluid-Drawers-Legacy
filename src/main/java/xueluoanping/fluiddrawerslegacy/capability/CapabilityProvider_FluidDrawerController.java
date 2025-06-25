@@ -33,7 +33,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     }
 
     public boolean hasTile() {
-        return this.tile == null;
+        return this.tile != null;
     }
 
     public void setTile(BlockEntityController tile) {

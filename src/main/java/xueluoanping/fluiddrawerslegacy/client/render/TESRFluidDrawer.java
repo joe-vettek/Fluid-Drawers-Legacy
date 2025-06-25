@@ -100,7 +100,7 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
         }
 
 
-        render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay);
+        // render(partialTicks, matrixStackIn, bufferIn, combinedLightIn, combinedOverlay);
     }
 
     private void drawText(int line, String label, int slot, int count, BlockEntityFluidDrawer tile, PoseStack matrixStackIn, MultiBufferSource txtBuffer, int combinedLightIn) {

@@ -287,7 +287,9 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         List<Slot> upgradeSlots = this.menu.getUpgradeSlots();
 
         for (Slot slot : upgradeSlots) {
-            if (slot instanceof SlotUpgrade && !((SlotUpgrade) slot).canTakeStack()) {
+            if (slot instanceof SlotUpgrade
+                    && !slot.getItem().isEmpty()
+                    && !((SlotUpgrade) slot).canTakeStack()) {
                 graphics.blit(this.background, guiX + slot.x, guiY + slot.y, 176, 0, 16, 16);
             }
         }
