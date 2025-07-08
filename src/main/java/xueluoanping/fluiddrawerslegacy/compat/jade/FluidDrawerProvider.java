@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.ui.ProgressStyle;
 import snownee.jade.overlay.DisplayHelper;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -43,8 +43,8 @@ public class FluidDrawerProvider implements IBlockComponentProvider {
                         .ifPresent(handler -> {
                             int capacity = tile.getCapacityTankEffective();
                             boolean isLocked = tile.getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY);
-                            if (handler instanceof betterFluidManager) {
-                                var h = (betterFluidManager<BlockEntityFluidDrawer>) handler;
+                            if (handler instanceof BetterFluidManager) {
+                                var h = (BetterFluidManager<BlockEntityFluidDrawer>) handler;
                                 for (BlockEntityFluidDrawer.FluidDrawerData data : h.getFluidDrawerDataList()) {
                                     BlockEntityFluidDrawer.betterFluidHandler betterFluidHandler = data.getTank();
                                     FluidStack fluidStack = betterFluidHandler.getFluid().copy();

@@ -13,12 +13,12 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 
 // @EventBusSubscriber(bus = EventBusSubscriber.Bus.GAME)
 public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider<BlockEntity, Direction, IFluidHandler>, INBTSerializable<CompoundTag> {
 
-    public betterFluidManager<BlockEntityController> tank;
+    public BetterFluidManager<BlockEntityController> tank;
     // private final betterFluidManager<BlockEntityController> tankHandler;
     public static BlockPos tilePos = null;
     BlockEntityController tile;
@@ -52,8 +52,8 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     //     tankHandler.invalidate();
     // }
 
-    private betterFluidManager<BlockEntityController> createFuildHandler() {
-        return new betterFluidManager<>(tile);
+    private BetterFluidManager<BlockEntityController> createFuildHandler() {
+        return new BetterFluidManager<>(tile);
     }
 
     @Override

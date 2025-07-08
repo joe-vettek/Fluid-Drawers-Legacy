@@ -1,6 +1,5 @@
 package xueluoanping.fluiddrawerslegacy.compat.jade;
 
-import cpw.mods.util.Lazy;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -15,7 +14,7 @@ import snownee.jade.api.JadeIds;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElement;
 import xueluoanping.fluiddrawerslegacy.ModTranslateKey;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class JadeFluidHandler {
             Optional<IFluidHandler> a = Optional.ofNullable(accessor.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,accessor.getPosition(),null));
             if (a.isPresent()) {
                 IFluidHandler iFluidHandler = a.get();
-                if (iFluidHandler instanceof betterFluidManager handler) {
+                if (iFluidHandler instanceof BetterFluidManager handler) {
                     int tanks = handler.getTanks();
                     // FluidDrawersLegacyMod.logger(tanks);
                     if (tanks > 0) {

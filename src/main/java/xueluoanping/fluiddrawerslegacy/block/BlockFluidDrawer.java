@@ -161,13 +161,14 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             else if (facing == playerFrom && heldStack.getItem() instanceof ItemUpgrade) {
                 if (tile.upgrades().canAddUpgrade(heldStack)) {
                     // Copy remote binding if remote upgrade already present
-                    if (heldStack.getItem() instanceof ItemUpgradeRemote remote && tile.upgrades().hasRemoteUpgrade()) {
+                    if (heldStack.getItem() instanceof ItemUpgradeRemote remote
+                            && !tile.upgrades().hasRemoteUpgrade()) {
                         if (remote.isBound()) {
                             tile.upgrades().updateRemoteUpgradeBinding(heldStack);
                             BlockPos boundPosition = ItemUpgradeRemote.getBoundPosition(heldStack);
                             if (boundPosition != null)
                                 player.displayClientMessage(Component.translatable("message.storagedrawers.updated_remote_binding", boundPosition.getX(), boundPosition.getY(), boundPosition.getZ()), true);
-                            return ItemInteractionResult.SUCCESS;
+                            // return ItemInteractionResult.SUCCESS;
                         }
                     }
                     if (tile.upgrades().addUpgrade(heldStack)) {

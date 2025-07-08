@@ -12,7 +12,6 @@ import net.minecraft.world.level.material.Fluids;
 
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModConstants;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 
@@ -24,13 +23,13 @@ import java.util.stream.Collectors;
 
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
-public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements IFluidHandler {
-    private List<CompoundTag> fluidRecord = new ArrayList<>();
+public class BetterFluidManager<T extends BlockEntity & IDrawerGroup> implements IFluidHandler {
+    private List<FluidSortKey> fluidRecord = new ArrayList<>();
     private FluidStack fluid = FluidStack.EMPTY;
 
     private final T tile;
 
-    public betterFluidManager(T tile) {
+    public BetterFluidManager(T tile) {
         if (tile == null) {
             throw new RuntimeException("BlockEntity must implement IDrawerGroup");
         }
@@ -94,7 +93,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
     public List<FluidHolder> getFluidMap(List<BlockEntityFluidDrawer.FluidDrawerData> listNew) {
         RegistryAccess registryAccess = tile.getLevel().registryAccess();
         // we don't have hashcode of fluidstack any more
-        Map<Tag, List<Integer>> fluidMap = new LinkedHashMap<>();
+        Map<FluidSortKey, List<Integer>> fluidMap = new LinkedHashMap<>();
         long startTime = System.currentTimeMillis();
         listNew.forEach(
                 (ele) -> {
@@ -119,7 +118,8 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                             fluidStackKey.setAmount(1);
                         if (!notEmpty && !isEmptyLockWithFluid)
                             fluidStackKey = FluidStack.EMPTY;
-                        Tag fluidStackKeyTag = fluidStackKey.saveOptional(registryAccess);
+                        FluidSortKey fluidStackKeyTag=FluidSortKey.of(fluidStackKey);
+                        // Tag fluidStackKeyTag = fluidStackKey.saveOptional(registryAccess);
                         if (fluidMap.containsKey(fluidStackKeyTag)) {
                             integerList = fluidMap.get(fluidStackKeyTag);
                             integerList.set(0, integerList.get(0) + fluidStack.getAmount());
@@ -134,14 +134,14 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                 }
         );
 
-        Set<Tag> keySet = fluidMap.keySet();
+        var keySet = fluidMap.keySet();
         fluidRecord.removeIf(a -> keySet.stream().noneMatch(b -> b.equals(a)));
         // fluidRecord.addAll(fluidMap.keySet());
         // fluidRecord = new ArrayList<>(fluidMap.keySet());
 
         // fluidRecord = new ArrayList<>(keySet.size());
-        for (Tag tag : keySet) {
-            if (tag instanceof CompoundTag compoundTag) {
+        for (var tag : keySet) {
+            if (tag instanceof FluidSortKey compoundTag) {
                 // FluidStack stack = FluidStack.parseOptional(registryAccess, compoundTag);
                 if (!fluidRecord.contains(compoundTag))
                     fluidRecord.add(compoundTag);
@@ -151,15 +151,15 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
 
         // must in the last position
-        boolean removeEmptyKey = fluidRecord.removeIf(CompoundTag::isEmpty);
+        boolean removeEmptyKey = fluidRecord.removeIf(FluidSortKey::isEmpty);
         if (removeEmptyKey) {
-            fluidRecord.add(new CompoundTag());
+            fluidRecord.add(FluidSortKey.EMPTY);
         }
 
         List<FluidHolder> fluidHolderList = new ArrayList<>();
         fluidRecord.forEach(fluidStack -> {
             List<Integer> integers = fluidMap.get(fluidStack);
-            FluidHolder holder = new FluidHolder(FluidStack.parseOptional(registryAccess,fluidStack), integers.get(0), integers.get(1));
+            FluidHolder holder = new FluidHolder(fluidStack.to(integers.get(0)), integers.get(0), integers.get(1));
             // holder.fluid = fluidStack;
             // holder.fluidAmount = fluidMap.get(fluidStack).get(0);
             // holder.tankCapacity = fluidMap.get(fluidStack).get(1);

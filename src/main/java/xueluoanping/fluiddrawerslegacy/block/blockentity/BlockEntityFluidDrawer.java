@@ -36,7 +36,7 @@ import net.neoforged.neoforge.fluids.capability.templates.FluidTank;
 import org.jetbrains.annotations.NotNull;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawerGroup;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 import xueluoanping.fluiddrawerslegacy.config.General;
@@ -247,7 +247,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
                 capability.getCapability(this.level, this.getBlockPos()) : null;
     }
 
-    public betterFluidManager<BlockEntityFluidDrawer> getTank() {
+    public BetterFluidManager<BlockEntityFluidDrawer> getTank() {
         return this.fluidGroupData.tank;
     }
 
@@ -334,7 +334,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
     public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup, IDrawerCapabilityProvider {
 
         // private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
-        public final betterFluidManager<BlockEntityFluidDrawer> tank;
+        public final BetterFluidManager<BlockEntityFluidDrawer> tank;
         // private final LazyOptional<betterFluidManager<BlockEntityFluidDrawer>> tankHandler;
         private final FluidDrawerData[] slots;
 
@@ -349,8 +349,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements IFluidDra
             // tankHandler = LazyOptional.of(() -> tank);
         }
 
-        private betterFluidManager<BlockEntityFluidDrawer> createFuildHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
-            return new betterFluidManager<>(blockEntityFluidDrawer);
+        private BetterFluidManager<BlockEntityFluidDrawer> createFuildHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
+            return new BetterFluidManager<>(blockEntityFluidDrawer);
         }
 
 
