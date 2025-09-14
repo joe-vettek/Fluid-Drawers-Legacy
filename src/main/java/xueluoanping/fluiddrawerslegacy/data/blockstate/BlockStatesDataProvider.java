@@ -14,10 +14,12 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.RegistryObject;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.block.framed.FramedBlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 import javax.annotation.Nullable;
 import java.util.List;
+@SuppressWarnings("removal")
 
 public class BlockStatesDataProvider extends BlockStateProvider {
 
@@ -32,7 +34,10 @@ public class BlockStatesDataProvider extends BlockStateProvider {
 		// simpleBlock(BlockRegister.bamboo_root.get());
 		for (RegistryObject<Block> entry : ModContents.DREntityBlocks.getEntries()) {
 			getVariantBuilder(entry.get()).forAllStatesExcept(state -> ConfiguredModel.builder()
-					.modelFile(models().getExistingFile(resourceBlock(entry.getId().getPath())))
+					.modelFile(
+							entry.get() instanceof FramedBlockFluidDrawer framedBlockFluidDrawer?
+									models().getExistingFile(resourceBlock(blockName(ModContents.getReverse(framedBlockFluidDrawer)))):
+							models().getExistingFile(resourceBlock(entry.getId().getPath())))
 					// .modelFile(models().withExistingParent(blockName(entry.get()), resourceBlock(entry.getId().getPath())))
 					.rotationY(getRotateYByFacing(state))
 					.build());

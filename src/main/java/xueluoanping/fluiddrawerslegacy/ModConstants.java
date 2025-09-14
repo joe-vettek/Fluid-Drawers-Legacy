@@ -2,9 +2,8 @@ package xueluoanping.fluiddrawerslegacy;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import com.jaquadro.minecraft.storagedrawers.capabilities.PlatformCapabilities;
+import com.texelsaurus.minecraft.chameleon.capabilities.IForgeCapability;
 
 
 public class ModConstants {
@@ -29,11 +28,10 @@ public class ModConstants {
     public static final int PRI_DISABLED = 6;
 
 
-    public static Capability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerAttributes>() {
-    });
+    public static IForgeCapability<IDrawerAttributes> DRAWER_ATTRIBUTES_CAPABILITY = (IForgeCapability<IDrawerAttributes>) PlatformCapabilities.DRAWER_ATTRIBUTES;
 
-    public static Capability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = CapabilityManager.get(new CapabilityToken<IDrawerGroup>() {
-    });
+    public static IForgeCapability<IDrawerGroup> DRAWER_GROUP_CAPABILITY = (IForgeCapability<IDrawerGroup>) PlatformCapabilities.DRAWER_GROUP;
 
+    // public final static ForgeCapability<IFluidHandler> FLUID_HANDLER_FORGE_CAPABILITY = new ForgeCapability<>(new ResourceLocation("forge","fluid"),  ForgeCapabilities.FLUID_HANDLER);
 
 }

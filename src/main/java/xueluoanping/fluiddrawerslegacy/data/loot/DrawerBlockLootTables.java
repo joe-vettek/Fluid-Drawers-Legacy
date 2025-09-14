@@ -30,11 +30,14 @@ import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraftforge.registries.RegistryObject;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
+import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.framed.FramedBlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class DrawerBlockLootTables extends BlockLootSubProvider {
@@ -74,19 +77,35 @@ public class DrawerBlockLootTables extends BlockLootSubProvider {
         return ModContents.DREntityBlocks.getEntries().stream().map(RegistryObject::get).collect(Collectors.toList());
     }
 
+    @Override
+    protected void add(Block pBlock, Function<Block, LootTable.Builder> pFactory) {
+        super.add(pBlock, pFactory);
+        super.add(ModContents.get((BlockFluidDrawer) pBlock), pFactory);
+    }
 
     public LootTable.Builder createSingleDrawerTable(ItemLike item) {
+
+        CopyNbtFunction.Builder copy = CopyNbtFunction
+                .copyData(ContextNbtProvider.BLOCK_ENTITY)
+                .copy("tanks", "tanks")
+                .copy("Upgrades", "Upgrades")
+                .copy("Lock", "Lock")
+                .copy("Shr", "Shr")
+                .copy("Qua", "Qua");
+
+        if (Block.byItem(item.asItem()) instanceof FramedBlockFluidDrawer) {
+            copy = copy
+                    .copy("MatB", "MatB")
+                    .copy("MatS", "MatS")
+                    .copy("MatF", "MatF")
+                    .copy("MatT", "MatT");
+        }
+
         return LootTable.lootTable()
                 .withPool(
-                this.applyExplosionCondition(item.asItem(), LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
-                        .add(LootItem.lootTableItem(item))
-                )).apply(CopyNbtFunction
-                        .copyData(ContextNbtProvider.BLOCK_ENTITY)
-                        .copy("tanks","tanks")
-                        .copy("Upgrades","Upgrades")
-                        .copy("Lock","Lock")
-                        .copy("Shr","Shr")
-                        .copy("Qua","Qua")
+                        this.applyExplosionCondition(item.asItem(), LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
+                                .add(LootItem.lootTableItem(item))
+                        )).apply(copy
                 );
     }
 

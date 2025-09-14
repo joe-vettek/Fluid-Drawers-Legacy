@@ -41,7 +41,7 @@ public class FluidDrawerItemStackTileEntityRenderer extends BlockEntityWithoutLe
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         BakedModel ibakedmodel = itemRenderer.getModel(stack,(Level) null, (LivingEntity) null, 0);
         matrixStackIn.pushPose();
-        matrixStackIn = rotateMatrix(matrixStackIn, transformType);
+        // matrixStackIn = rotateMatrix(matrixStackIn, transformType);
 //        FluidDrawersLegacyMod.LOGGER.info(transformType+""+matrixStackIn.last().pose().toString());
         renderFluid(stack, matrixStackIn, bufferIn, combinedLightIn, 0);
         matrixStackIn.translate(0.5F, 0.5F, 0.5F);

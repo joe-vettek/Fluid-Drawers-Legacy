@@ -2,17 +2,17 @@ package xueluoanping.fluiddrawerslegacy.client;
 
 
 // import com.jaquadro.minecraft.storagedrawers.client.renderer.TileEntityDrawersRenderer;
-import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
-import com.mojang.blaze3d.platform.ScreenManager;
+
 import net.minecraft.client.gui.screens.MenuScreens;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 
+import net.minecraft.client.renderer.block.BlockModelShaper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 // import net.minecraftforge.client.ClientRegistry;
@@ -25,8 +25,10 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.framed.FramedBlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.Screen;
 import xueluoanping.fluiddrawerslegacy.client.model.BakedModelFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.client.model.BakedModelFramedFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.TESRFluidDrawer;
 
 import java.util.Map;
@@ -50,13 +52,13 @@ public class ClientSetup {
         });
     }
 
-//    注意static是单次，比如启动类，没有比如右击事件
+    //    注意static是单次，比如启动类，没有比如右击事件
     @SubscribeEvent
     @OnlyIn(Dist.CLIENT)
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         // FluidDrawersLegacyMod.logger("Register Renderer");
         ModContents.DRBlockEntities.getEntries().forEach((reg) -> {
-            event.registerBlockEntityRenderer((BlockEntityType<BlockEntityFluidDrawer>)reg.get(),
+            event.registerBlockEntityRenderer((BlockEntityType<? extends BlockEntityFluidDrawer>) reg.get(),
                     TESRFluidDrawer::new);
         });
     }
@@ -66,6 +68,19 @@ public class ClientSetup {
     public static void onModelBaked(ModelEvent.ModifyBakingResult event) {
         Map<ResourceLocation, BakedModel> modelRegistry = event.getModels();
 
+        ModContents.DREntityBlocks.getEntries().forEach((reg) -> {
+            if (reg.get() instanceof FramedBlockFluidDrawer) {
+                for (BlockState possibleState : reg.get().getStateDefinition().getPossibleStates()) {
+                    ModelResourceLocation modelResourceLocation = BlockModelShaper.stateToModelLocation(possibleState);
+                    BakedModel existingModel = modelRegistry.get(modelResourceLocation);
+                    if (existingModel != null) {
+                        BakedModelFramedFluidDrawer model = new BakedModelFramedFluidDrawer(existingModel);
+                        modelRegistry.put(modelResourceLocation, model);
+                    }
+                }
+            }
+        });
+
         ModContents.DREntityBlockItems.getEntries().forEach((reg) -> {
             ModelResourceLocation location = new ModelResourceLocation(reg.getId(), "inventory");
             BakedModel existingModel = modelRegistry.get(location);
@@ -74,6 +89,9 @@ public class ClientSetup {
             } else if (existingModel instanceof BakedModelFluidDrawer) {
                 throw new RuntimeException("Tried to replace twice");
             } else {
+                if (reg.get() instanceof BlockItem blockItem && blockItem.getBlock() instanceof FramedBlockFluidDrawer) {
+                    existingModel = new BakedModelFramedFluidDrawer(existingModel);
+                }
                 BakedModelFluidDrawer model = new BakedModelFluidDrawer(existingModel);
                 modelRegistry.put(location, model);
             }

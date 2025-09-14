@@ -1,7 +1,10 @@
 package xueluoanping.fluiddrawerslegacy.block;
 
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedBlock;
+import com.jaquadro.minecraft.storagedrawers.api.framing.IFramedSourceBlock;
 import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
-import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
+import com.jaquadro.minecraft.storagedrawers.block.tile.util.FrameHelper;
+import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgrade;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeRemote;
 import net.minecraft.core.BlockPos;
@@ -56,7 +59,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INetworked, EntityBlock {
+public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INetworked, EntityBlock, IFramedSourceBlock {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
 
 
@@ -133,7 +136,7 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
             // open GUI when squat
 
             if (facing == playerFrom && heldStack.isEmpty() && player.isShiftKeyDown()) {
-                if (CommonConfig.GENERAL.enableUI.get() && !world.isClientSide()) {
+                if (ModCommonConfig.INSTANCE.GENERAL.enableUI.get() && !world.isClientSide()) {
                     //                    FluidDrawersLegacyMod.logger("hello，screen");
                     NetworkHooks.openScreen((ServerPlayer) player, new MenuProvider() {
                         @Override
@@ -291,7 +294,6 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
     public void destroy(LevelAccessor level, BlockPos pos, BlockState state) {
         super.destroy(level, pos, state);
         level.playSound(null, pos, Fluids.WATER.getFluidType().getSound(SoundActions.BUCKET_EMPTY), SoundSource.BLOCKS, 1.0F, 1.0F);
-
     }
 
     @Override
@@ -322,7 +324,12 @@ public class BlockFluidDrawer extends HorizontalDirectionalBlock implements INet
         return new BlockEntityFluidDrawer(getSlotCount(), pos, state);
     }
 
-    private int getSlotCount() {
+    protected int getSlotCount() {
         return this.slotCount;
+    }
+
+    @Override
+    public ItemStack makeFramedItem(ItemStack source, ItemStack matSide, ItemStack matTrim, ItemStack matFront) {
+        return FrameHelper.makeFramedItem(ModContents.get(this), source, matSide, matTrim, matFront);
     }
 }

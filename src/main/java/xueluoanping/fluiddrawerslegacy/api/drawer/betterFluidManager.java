@@ -40,7 +40,6 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
     }
 
 
-
     public int getDistance(BlockPos pos1, BlockPos pos2) {
         return Math.abs(pos1.getX() - pos2.getX()) + Math.abs(pos1.getY() - pos2.getY()) + Math.abs(pos1.getZ() - pos2.getZ());
     }
@@ -53,9 +52,9 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
             List<BlockEntityFluidDrawer.FluidDrawerData> listNew = new ArrayList<>();
             List<DrawerDistanceBook> listW = new ArrayList<>();
             // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent());
-            if (tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().isPresent()) {
+            IDrawerGroup handler = DRAWER_GROUP_CAPABILITY.getCapability(tile);
+            if (handler != null) {
                 // FluidDrawersLegacyMod.logger(tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get().getDrawerCount()+"");
-                IDrawerGroup handler = tile.getCapability(DRAWER_GROUP_CAPABILITY, null).resolve().get();
                 int size = handler.getDrawerCount();
                 for (int i = 0; i < size; i++) {
 
@@ -142,7 +141,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
         List<FluidHolder> fluidHolderList = new ArrayList<>();
         fluidRecord.forEach(fluidStack -> {
-            FluidHolder holder = new FluidHolder(fluidStack,fluidMap.get(fluidStack).get(0),fluidMap.get(fluidStack).get(1));
+            FluidHolder holder = new FluidHolder(fluidStack, fluidMap.get(fluidStack).get(0), fluidMap.get(fluidStack).get(1));
             // holder.fluid = fluidStack;
             // holder.fluidAmount = fluidMap.get(fluidStack).get(0);
             // holder.tankCapacity = fluidMap.get(fluidStack).get(1);
@@ -178,7 +177,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
             FluidStack tankFluid = drawerDataList.get(i).getTank().getFluid();
             if (tankFluid.isFluidEqual(resource) || tankFluid.isEmpty()) {
                 if (resource.getAmount() + drawerDataList.get(i).getTank().getFluid().getAmount()
-                        <= drawerDataList.get(i).getTank().getCapacity()||
+                        <= drawerDataList.get(i).getTank().getCapacity() ||
                         drawerDataList.get(i).isVoid()) {
                     if (action.execute())
                         drawerDataList.get(i).getTank().fill(resource, IFluidHandler.FluidAction.EXECUTE);
@@ -201,7 +200,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
     private int getFluidDrawerPriority(BlockEntityFluidDrawer.FluidDrawerData data) {
         if (data.getTank().isFull())
-            return data.isVoid()?ModConstants.PRI_VOID:ModConstants.PRI_DISABLED;
+            return data.isVoid() ? ModConstants.PRI_VOID : ModConstants.PRI_DISABLED;
         if (data.getTank().isEmpty()) {
             if (data.isLock())
                 return ModConstants.PRI_LOCKED_EMPTY;
@@ -407,7 +406,6 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
         return result;
     }
-
 
 
 }

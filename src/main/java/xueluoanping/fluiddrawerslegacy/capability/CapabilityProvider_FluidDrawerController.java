@@ -59,7 +59,6 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (cap == ForgeCapabilities.FLUID_HANDLER) {
-            //            FluidDrawersLegacyMod.LOGGER.info("hello" + tile);
             return tankHandler.cast();
         }
         return LazyOptional.empty();

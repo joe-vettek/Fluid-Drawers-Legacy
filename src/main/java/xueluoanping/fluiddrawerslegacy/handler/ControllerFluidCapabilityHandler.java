@@ -1,6 +1,7 @@
 package xueluoanping.fluiddrawerslegacy.handler;
 
 import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawer;
+import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
 import com.jaquadro.minecraft.storagedrawers.block.BlockController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntitySlave;
@@ -14,12 +15,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.level.LevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-// import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.FluidStack;
-// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
@@ -28,14 +30,18 @@ import xueluoanping.fluiddrawerslegacy.capability.CapabilityProvider_FluidDrawer
 import xueluoanping.fluiddrawerslegacy.api.exchange.FluidExchangeHandlerManager;
 
 import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
-
+@SuppressWarnings("removal")
 public class ControllerFluidCapabilityHandler {
     public static final ControllerFluidCapabilityHandler instance = new ControllerFluidCapabilityHandler();
     private static final ResourceLocation CAP_FLUID_CTRL = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluid_ctrl");
     private static final ResourceLocation CAP_FLUID_PROXY = new ResourceLocation(FluidDrawersLegacyMod.MOD_ID, "fluid_proxy");
+
+    // public static final Map<Level, Map<BlockEntity, ICapabilityProvider>> LEVEL_MAP_IDENTITY_HASH_MAP = new IdentityHashMap<>();
 
     //    the Event need to detect in seconds after
     // If want to subscribe in class ,need static
@@ -45,20 +51,31 @@ public class ControllerFluidCapabilityHandler {
         // FluidDrawersLegacyMod.logger(event.getObject().getLevel());
         BlockEntity tile = event.getObject();
         if (tile instanceof BlockEntityController) {
-            event.addCapability(CAP_FLUID_CTRL, new CapabilityProvider_FluidDrawerController((BlockEntityController) tile));
-            event.addListener(() -> {
-                // listen the remove and if we need use a save
-                // FluidDrawersLegacyMod.logger(tile.getBlockPos(),tile.getLevel());
-                // if (tile.getLevel() instanceof ServerLevel)
-                //     FluidDrawerControllerSave.get(tile.getLevel()).remove(tile.getBlockPos());
-            });
-
+            CapabilityProvider_FluidDrawerController capabilityProviderFluidDrawerController = new CapabilityProvider_FluidDrawerController((BlockEntityController) tile);
+            event.addCapability(CAP_FLUID_CTRL, capabilityProviderFluidDrawerController);
+            // Map<BlockEntity, ICapabilityProvider> map = LEVEL_MAP_IDENTITY_HASH_MAP.computeIfAbsent(tile.getLevel(), (e) -> new IdentityHashMap<>());
+            // map.put(tile, capabilityProviderFluidDrawerController);
         } else if (tile instanceof BlockEntitySlave) {
-            event.addCapability(CAP_FLUID_PROXY, new CapabilityProvider_FluidControllerProxy((BlockEntitySlave) tile));
+            CapabilityProvider_FluidControllerProxy capabilityProviderFluidControllerProxy = new CapabilityProvider_FluidControllerProxy((BlockEntitySlave) tile);
+            event.addCapability(CAP_FLUID_PROXY, capabilityProviderFluidControllerProxy);
+            // Map<BlockEntity, ICapabilityProvider> map = LEVEL_MAP_IDENTITY_HASH_MAP.computeIfAbsent(tile.getLevel(), (e) -> new IdentityHashMap<>());
+            // map.put(tile, capabilityProviderFluidControllerProxy);
         }
-
     }
 
+    // @SubscribeEvent
+    // public void onTileCapabilities(TickEvent.LevelTickEvent event) {
+    //     Map<BlockEntity, ICapabilityProvider> map = LEVEL_MAP_IDENTITY_HASH_MAP.get(event.level);
+    //     if (map != null) {
+    //         map.entrySet().removeIf(next -> next.getKey().isRemoved());
+    //     }
+    // }
+    //
+    // @SubscribeEvent
+    // public void onLevelUnload(LevelEvent.Unload event) {
+    //     if (event.getLevel() instanceof Level level)
+    //         LEVEL_MAP_IDENTITY_HASH_MAP.remove(level);
+    // }
 
     @SubscribeEvent
     public void onInteractWithBlock(PlayerInteractEvent.RightClickBlock event) {
@@ -76,8 +93,8 @@ public class ControllerFluidCapabilityHandler {
             if (fluidStacksList.size() == 0) {
                 return;
             }
-            IFluidHandler fluidHandler=tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
-            FluidStack fluidStack =FluidStack.EMPTY;
+            IFluidHandler fluidHandler = tile.getCapability(ForgeCapabilities.FLUID_HANDLER).resolve().get();
+            FluidStack fluidStack = FluidStack.EMPTY;
             // 必须还要确保存在
             boolean isExist = false;
             for (FluidStack stack1 : fluidStacksList) {
@@ -89,77 +106,31 @@ public class ControllerFluidCapabilityHandler {
             }
 
             if (isExist && (
-                    FluidExchangeHandlerManager.tryHandleClickInputByMod(tile,event.getEntity(),event.getHand())
-                    ||FluidUtilPatch.interactWithFluidHandlerAndEmpty(event.getEntity(), event.getHand(), fluidHandler, fluidStack))) {
+                    FluidExchangeHandlerManager.tryHandleClickInputByMod(tile, event.getEntity(), event.getHand())
+                            || FluidUtilPatch.interactWithFluidHandlerAndEmpty(event.getEntity(), event.getHand(), fluidHandler, fluidStack))) {
                 event.setCanceled(true);
                 event.setCancellationResult(InteractionResult.SUCCESS);
                 return;
             }
 
-            tile.getCapability(DRAWER_GROUP_CAPABILITY, null)
-                    .ifPresent((handler -> {
-                        if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
-                            for (int i = 0; i < handler.getDrawerCount(); i++) {
-                                IDrawer drawer = handler.getDrawer(i);
-                                if (!(drawer instanceof BlockEntityFluidDrawer.FluidDrawerData fluiddrawer)) {
-                                    if (drawer.canItemBeStored(stack)
-                                            && drawer.getStoredItemPrototype().is(stack.getItem()))
-                                        break;
-                                }
-                            }
-
+            IDrawerGroup handler = DRAWER_GROUP_CAPABILITY.getCapability(tile);
+            if (handler != null) {
+                if (handler.isGroupValid() && handler.getDrawerCount() > 0) {
+                    for (int i = 0; i < handler.getDrawerCount(); i++) {
+                        IDrawer drawer = handler.getDrawer(i);
+                        if (!(drawer instanceof BlockEntityFluidDrawer.FluidDrawerData fluiddrawer)) {
+                            if (drawer.canItemBeStored(stack)
+                                    && drawer.getStoredItemPrototype().is(stack.getItem()))
+                                break;
                         }
-                    }));
+                    }
+
+                }
+            }
         }
 
 
     }
-
-
-
-    // public static AtomicBoolean handleTankInteraction(@Nullable BlockEntity tile, @Nullable Direction face,
-    //                                                   Player player, InteractionHand hand) {
-    //     AtomicBoolean result = new AtomicBoolean(false);
-    //     if (tile.getLevel().isClientSide())
-    //         return new AtomicBoolean(false);
-    //     if (!(tile instanceof BlockEntityController) || !tile.getCapability(ForgeCapabilities.FLUID_HANDLER, face).isPresent()) {
-    //         return result;
-    //     }
-    //     ItemStack heldStack = player.getItemInHand(hand);
-    //     if (heldStack.getItem() instanceof BucketItem bucketItem) {
-    //         if (bucketItem.getFluid() == Fluids.EMPTY)
-    //             return result;
-    //         tile.getCapability(ForgeCapabilities.FLUID_HANDLER, face).ifPresent(
-    //                 (handler) -> {
-    //                     if (FluidType.BUCKET_VOLUME ==
-    //                             handler.fill(new FluidStack(bucketItem.getFluid(), FluidType.BUCKET_VOLUME)
-    //                                     , IFluidHandler.FluidAction.EXECUTE))
-    //                         if (!player.isCreative())
-    //                             player.setItemInHand(hand, heldStack.getCraftingRemainingItem());
-    //                     result.set(true);
-    //                 }
-    //         );
-    //         return result;
-    //     }
-    //     tile.getCapability(ForgeCapabilities.FLUID_HANDLER, face).ifPresent(
-    //             (handler) -> {
-    //                 //                    FluidDrawersLegacyMod.LOGGER.info(""+heldStack);
-    //                 betterFluidHandlerManager betterFluidHandler =
-    //                         (betterFluidHandlerManager) handler;
-    //                 heldStack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-    //                         .ifPresent((itemFluidHandler) -> {
-    //                             //                                FluidDrawersLegacyMod.logger(""+itemFluidHandler.getFluidInTank(0).writeToNBT(new CompoundNBT()));
-    //                             //                                if(itemFluidHandler.drain(1, IFluidHandler.FluidAction.SIMULATE).getAmount()>0)
-    //                             if (betterFluidHandler.fill(itemFluidHandler.getFluidInTank(0), IFluidHandler.FluidAction.EXECUTE) > 0)
-    //                                 result.set(true);
-    //                             //                                FluidDrawersLegacyMod.logger(""+itemFluidHandler.getFluidInTank(0).writeToNBT(new CompoundNBT())+betterFluidHandler.fill(itemFluidHandler.getFluidInTank(0), IFluidHandler.FluidAction.EXECUTE));
-    //                         });
-    //
-    //             });
-    //
-    //
-    //     return result;
-    // }
 
 
 }

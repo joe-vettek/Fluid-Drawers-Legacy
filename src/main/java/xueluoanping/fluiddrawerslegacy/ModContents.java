@@ -6,6 +6,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +29,13 @@ import net.minecraftforge.registries.RegistryObject;
 import xueluoanping.fluiddrawerslegacy.block.BlockFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.ItemFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.framed.FramedBlockFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.framed.FramedItemFluidDrawer;
+import xueluoanping.fluiddrawerslegacy.block.framed.blockentity.FramedBlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.gui.ContainerFluiDrawer;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 
 // import static xueluoanping.fluiddrawerslegacy.FluidDrawersLegacyMod.CREATIVE_TAB;
@@ -45,6 +52,7 @@ public class ModContents {
 
     private static CreativeModeTab MAIN;
 
+    @SuppressWarnings("removal")
     @SubscribeEvent
     public static void creativeModeTabRegister(RegisterEvent event) {
         event.register(Registries.CREATIVE_MODE_TAB, helper -> {
@@ -53,6 +61,7 @@ public class ModContents {
                             .title(Component.translatable("itemGroup.fluiddrawers"))
                             .displayItems((params, output) -> {
                                 DREntityBlockItems.getEntries().forEach((reg) -> {
+                                    if (reg.get() instanceof BlockItem blockItem && blockItem.getBlock() instanceof FramedBlockFluidDrawer) return;
                                     output.accept(new ItemStack(reg.get()));
                                 });
                             })
@@ -82,14 +91,19 @@ public class ModContents {
     }
 
 
+    public static final Map<Block, Block> blockMappings = new IdentityHashMap<>();
+    public static final Map<Block, Block> blockMappings2 = new IdentityHashMap<>();
+
+    public static final Map<RegistryObject<Block>, RegistryObject<Block>> blockMappingsSupplier = new IdentityHashMap<>();
+
     public static void init() {
         int[] sizeclist = {1, 2, 4};
         String withhalf = "_half";
         for (int count : sizeclist) {
             String path = getend(count);
             for (int i = 0; i < 2; i++) {
-                var isHalf=i==1;
-                if(isHalf)path+=withhalf;
+                var isHalf = i == 1;
+                if (isHalf) path += withhalf;
                 RegistryObject<Block> fluiddrawer = DREntityBlocks.register(path, () -> new BlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
                         .sound(SoundType.GLASS).strength(5.0F)
                         .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), count, isHalf));
@@ -97,8 +111,35 @@ public class ModContents {
                 RegistryObject<BlockEntityType<BlockEntityFluidDrawer>> tankTileEntityType = DRBlockEntities.register(path,
                         () -> BlockEntityType.Builder.of((pos, state) -> new BlockEntityFluidDrawer(count, pos, state), fluiddrawer.get()).build(null));
 
+                String s = "framed_" + path;
+                RegistryObject<Block> framed_fluiddrawer = DREntityBlocks.register(s, () -> new FramedBlockFluidDrawer(BlockBehaviour.Properties.copy(Blocks.GLASS)
+                        .sound(SoundType.GLASS).strength(5.0F)
+                        .noOcclusion().isSuffocating(ModContents::predFalse).isRedstoneConductor(ModContents::predFalse), count, isHalf));
+                RegistryObject<Item> framed_itemBlock = DREntityBlockItems.register(s, () -> new FramedItemFluidDrawer(framed_fluiddrawer.get(), new Item.Properties()));
+                RegistryObject<BlockEntityType<FramedBlockEntityFluidDrawer>> framed_tankTileEntityType = DRBlockEntities.register(s,
+                        () -> BlockEntityType.Builder.of((pos, state) -> new FramedBlockEntityFluidDrawer(count, pos, state), framed_fluiddrawer.get()).build(null));
+
+                blockMappingsSupplier.put(fluiddrawer, framed_fluiddrawer);
             }
         }
+    }
+
+    public static FramedBlockFluidDrawer get(BlockFluidDrawer orginial) {
+        if (blockMappings.isEmpty()) {
+            blockMappingsSupplier.forEach(
+                    (bo, bo2) -> blockMappings.put(bo.get(), bo2.get())
+            );
+        }
+        return (FramedBlockFluidDrawer) blockMappings.get(orginial);
+    }
+
+    public static BlockFluidDrawer getReverse(FramedBlockFluidDrawer orginial) {
+        if (blockMappings2.isEmpty()) {
+            blockMappingsSupplier.forEach(
+                    (bo, bo2) -> blockMappings2.put(bo2.get(), bo.get())
+            );
+        }
+        return (BlockFluidDrawer) blockMappings2.get(orginial);
     }
 
     public static String getend(int s) {

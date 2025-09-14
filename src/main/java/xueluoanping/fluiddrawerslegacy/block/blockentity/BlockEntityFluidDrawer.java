@@ -1,26 +1,21 @@
 package xueluoanping.fluiddrawerslegacy.block.blockentity;
 
-import com.jaquadro.minecraft.storagedrawers.api.storage.IControlGroup;
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerAttributes;
-import com.jaquadro.minecraft.storagedrawers.api.storage.IDrawerGroup;
-import com.jaquadro.minecraft.storagedrawers.api.storage.INetworked;
+import com.jaquadro.minecraft.storagedrawers.api.storage.*;
 import com.jaquadro.minecraft.storagedrawers.api.storage.attribute.LockAttribute;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BaseBlockEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.ChamTileEntity;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawers;
 // import com.jaquadro.minecraft.storagedrawers.block.tile.TileEntityDrawersStandard;
 import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityController;
-import com.jaquadro.minecraft.storagedrawers.block.tile.BlockEntityDrawers;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.BlockEntityDataShim;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.ControllerData;
 import com.jaquadro.minecraft.storagedrawers.block.tile.tiledata.UpgradeData;
 import com.jaquadro.minecraft.storagedrawers.capabilities.BasicDrawerAttributes;
-import com.jaquadro.minecraft.storagedrawers.config.CommonConfig;
+import com.jaquadro.minecraft.storagedrawers.config.ModCommonConfig;
 import com.jaquadro.minecraft.storagedrawers.core.ModItems;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeRemote;
 import com.jaquadro.minecraft.storagedrawers.item.ItemUpgradeStorage;
-import com.jaquadro.minecraft.storagedrawers.network.CountUpdateMessage;
-import com.jaquadro.minecraft.storagedrawers.network.MessageHandler;
+import com.texelsaurus.minecraft.chameleon.capabilities.ChameleonCapability;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,12 +30,10 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fluids.FluidStack;
-// import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.FluidType;
 import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
-import xueluoanping.fluiddrawerslegacy.ModConstants;
+import org.jetbrains.annotations.Nullable;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawerGroup;
 import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
@@ -50,10 +43,9 @@ import xueluoanping.fluiddrawerslegacy.config.General;
 import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.EnumSet;
 
-public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworked,IFluidDrawerGroup {
+public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworked, IFluidDrawerGroup {
 
     private final BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
 
@@ -79,7 +71,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         //        FluidDrawersLegacyMod.logger("create tile");
     }
 
-    private void checkBoundController () {
+    private void checkBoundController() {
 
         BlockEntityController controller = controllerData.getController(this);
         ItemStack remote = upgradeData.getRemoteUpgrade();
@@ -106,17 +98,17 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     }
 
     @Override
-    public boolean supportsDirectControllerLink () {
+    public boolean supportsDirectControllerLink() {
         return true;
     }
 
     @Override
-    public IControlGroup getBoundControlGroup () {
+    public IControlGroup getBoundControlGroup() {
         return controllerData.getController(this);
     }
 
     @Override
-    public boolean canRecurseSearch () {
+    public boolean canRecurseSearch() {
         ItemStack upgrade = upgradeData.getRemoteUpgrade();
         if (upgrade == null)
             return true;
@@ -128,7 +120,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     }
 
     @Override
-    public void unbindControlGroup () {
+    public void unbindControlGroup() {
         upgradeData.unbindRemoteUpgrade();
     }
 
@@ -170,18 +162,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     }
 
 
-    @Nonnull
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-        IDrawerGroup group = this.getGroup();
-        if (capability == ModConstants.DRAWER_GROUP_CAPABILITY) {
-            return this.capabilityGroup.cast();
-        } else {
-            if (getGroup() == null) {
-                return super.getCapability(capability, facing);
-            }
-            LazyOptional<T> cap = this.getGroup().getCapability(capability, facing);
-            return cap.isPresent() ? cap : super.getCapability(capability, facing);
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction side) {
+        if (capability == ForgeCapabilities.FLUID_HANDLER) {
+            return fluidGroupData.tankHandler.cast();
         }
+        return super.getCapability(capability, side);
     }
 
     @Override
@@ -235,14 +221,14 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         return this.drawerAttributes;
     }
 
-    protected void syncClientCount(int slot, int count) {
-        if (this.getLevel() == null || !this.getLevel().isClientSide) {
-            PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double) this.getBlockPos().getX(), (double) this.getBlockPos().getY(), (double) this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
-            MessageHandler.INSTANCE.send(PacketDistributor.NEAR.with(() -> {
-                return point;
-            }), new CountUpdateMessage(this.getBlockPos(), slot, count));
-        }
-    }
+    // protected void syncClientCount(int slot, int count) {
+    //     if (this.getLevel() == null || !this.getLevel().isClientSide) {
+    //         PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double) this.getBlockPos().getX(), (double) this.getBlockPos().getY(), (double) this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
+    //         CountUpdateMessageHandler.send(PacketDistributor.NEAR.with(() -> {
+    //             return point;
+    //         }), new CountUpdateMessage(this.getBlockPos(), slot, count));
+    //     }
+    // }
 
     public betterFluidManager<BlockEntityFluidDrawer> getTank() {
         return this.fluidGroupData.tank;
@@ -268,6 +254,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     public int getCapacityTankEffective() {
         return getCapacityEffective() / getDrawerCount();
     }
+
     public int getCapacityTankStandard() {
         return getCapacityStandard() / getDrawerCount();
     }
@@ -291,8 +278,9 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                     tankCapacity /= size;
             }
             var up = new UpgradeData(7);
-            // up.setDrawerAttributes(new IDrawerAttributesModifiable() {
-            // });
+            up.setDrawerAttributes(new IDrawerAttributesModifiable() {
+            });
+            // up.setDrawerAttributes(new BasicDrawerAttributes());
             up.read(tag);
             int mul = up.getStorageMultiplier();
             tankCapacity *= mul;
@@ -376,24 +364,11 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             return !BlockEntityFluidDrawer.this.isRemoved();
         }
 
-        @Nonnull
         @Override
-        public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> capability, @Nullable Direction facing) {
-
-            if (capability == ModConstants.DRAWER_ATTRIBUTES_CAPABILITY)
-                return attributesHandler.cast();
-            if (capability == ForgeCapabilities.FLUID_HANDLER) {
-                //                inventoryChanged();
-                if (facing == null) {
-                    //                    FluidDrawersLegacyMod.LOGGER.info(getLevel().toString() + facing+tank.serializeNBT());
-                }
-                return tankHandler.cast();
-
-            }
-            //            return super.getCapability(capability, facing);
-            return LazyOptional.empty();
+        public <T> T getCapability(ChameleonCapability<T> capability) {
+            return capability != null && BlockEntityFluidDrawer.this.level != null ?
+                    capability.getCapability(BlockEntityFluidDrawer.this.level, BlockEntityFluidDrawer.this.getBlockPos()) : null;
         }
-
 
         @Override
         public CompoundTag write(CompoundTag tag) {
@@ -684,7 +659,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                         return false;
 
                     for (int i = 0; i < getDrawerCount(); i++) {
-                        var tank=getDrawer(i).getTank();
+                        var tank = getDrawer(i).getTank();
                         if (tank.getFluidAmount() >= tank.getCapacity() / 32)
                             return false;
                     }
@@ -702,7 +677,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                 ItemStack upgrade = this.getUpgrade(slot);
                 if (upgrade.getItem() instanceof ItemUpgradeStorage) {
                     int storageLevel = ((ItemUpgradeStorage) upgrade.getItem()).level.getLevel();
-                    int storageMult = CommonConfig.UPGRADES.getLevelMult(storageLevel);
+                    int storageMult = ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(storageLevel);
                     int effectiveStorageMult = BlockEntityFluidDrawer.this.upgrades().getStorageMultiplier();
                     //                    单个物品特殊处理，
                     if (effectiveStorageMult == storageMult) {

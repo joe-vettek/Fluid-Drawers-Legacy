@@ -2,7 +2,9 @@ package xueluoanping.fluiddrawerslegacy;
 
 
 import com.jaquadro.minecraft.storagedrawers.StorageDrawers;
+import com.jaquadro.minecraft.storagedrawers.core.ModBlockEntities;
 import com.jaquadro.minecraft.storagedrawers.core.ModBlocks;
+import com.texelsaurus.minecraft.chameleon.service.ForgeCapabilities;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -10,13 +12,17 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.data.event.GatherDataEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import xueluoanping.fluiddrawerslegacy.block.blockentity.BlockEntityFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.ClientSetup;
 import xueluoanping.fluiddrawerslegacy.config.ClientConfig;
 import xueluoanping.fluiddrawerslegacy.config.General;
@@ -25,7 +31,7 @@ import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 import xueluoanping.fluiddrawerslegacy.handler.Levelhandler;
 
 import java.util.List;
-//import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
+// import xueluoanping.fluiddrawerslegacy.handler.ControllerFluidCapabilityHandler;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod(FluidDrawersLegacyMod.MOD_ID)
@@ -35,7 +41,7 @@ public class FluidDrawersLegacyMod {
     public static final Logger LOGGER = LogManager.getLogger(FluidDrawersLegacyMod.MOD_ID);
 
     public static void logger(String x) {
-        if (!FMLEnvironment.production||General.bool.get()) {
+        if (!FMLEnvironment.production || General.bool.get()) {
 //            LOGGER.debug(x);
             LOGGER.info(x);
         }
@@ -43,7 +49,7 @@ public class FluidDrawersLegacyMod {
 
     public static void logger(Object... x) {
 
-        if (!FMLEnvironment.production||General.bool.get()) {
+        if (!FMLEnvironment.production || General.bool.get()) {
             StringBuilder output = new StringBuilder();
 
             for (Object i : x) {
@@ -69,6 +75,7 @@ public class FluidDrawersLegacyMod {
     }
 
 
+    @SuppressWarnings("removal")
     public FluidDrawersLegacyMod() {
 
         // Register ourselves for server and other game events we are interested in
@@ -88,14 +95,31 @@ public class FluidDrawersLegacyMod {
         ModContents.init();
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::gatherData);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onFMLCommonSetupEvent);
     }
 
-
+    @SuppressWarnings("removal")
     public static ResourceLocation rl(String id) {
         return new ResourceLocation(MOD_ID, id);
     }
 
     public void gatherData(final GatherDataEvent event) {
         start.dataGen(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onFMLCommonSetupEvent(final FMLCommonSetupEvent event) {
+        // ForgeCapabilities.reigsterCapability(ModConstants.FLUID_HANDLER_FORGE_CAPABILITY);
+
+        for (var entry : ModContents.DRBlockEntities.getEntries()) {
+            ModConstants.DRAWER_ATTRIBUTES_CAPABILITY.register(entry.get(),
+                    (entity) -> ((BlockEntityFluidDrawer) entity).getDrawerAttributes());
+            (ModConstants.DRAWER_GROUP_CAPABILITY).register(
+                    entry.get(), (entity) -> ((BlockEntityFluidDrawer) entity).getGroup()
+            );
+        }
+        // ModConstants.FLUID_HANDLER_FORGE_CAPABILITY
+        //         .register(ModBlockEntities.CONTROLLER.get(),
+        //                 e->e.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER).resolve().get());
     }
 }

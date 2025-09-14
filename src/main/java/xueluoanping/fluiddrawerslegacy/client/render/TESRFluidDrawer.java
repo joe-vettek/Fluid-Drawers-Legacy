@@ -35,6 +35,8 @@ import java.awt.*;
 import java.util.ArrayList;
 
 // Thanks to WaterSource
+@SuppressWarnings("removal")
+
 public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDrawer> {
 
     public static final Material BELL_RESOURCE_LOCATION = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("entity/bell/bell_body"));
@@ -255,6 +257,9 @@ public class TESRFluidDrawer implements BlockEntityRenderer<BlockEntityFluidDraw
                 fluidStackDown.setAmount(capacity);
             flist.add(TankRenderUtil.of(fluidStackDown, capacity));
         }
+
+        // matrixStackIn.translate(0.2f,0.2f,0.2f);
+        // matrixStackIn.scale(0.5f,0.5f,0.5f);
 
         TankRenderUtil.renderFluid(flist, matrixStackIn, bufferIn, combinedLight, animationTime, tile.isHalf(), tile.getBlockState().getValue(BlockFluidDrawer.FACING));
     }

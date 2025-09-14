@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class JadeFluidHandler {
 
-
+    @SuppressWarnings("removal")
     public static void appendServerDataIfWithNotEmpty(CompoundTag compoundTag, BlockAccessor accessor) {
         if (compoundTag.contains("JadeFluidStorage")) {
             ListTag list =

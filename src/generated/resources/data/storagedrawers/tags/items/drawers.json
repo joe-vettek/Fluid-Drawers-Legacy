@@ -1,10 +1,16 @@
 {
   "values": [
     "fluiddrawerslegacy:fluiddrawer",
+    "fluiddrawerslegacy:framed_fluiddrawer",
     "fluiddrawerslegacy:fluiddrawer_half",
+    "fluiddrawerslegacy:framed_fluiddrawer_half",
     "fluiddrawerslegacy:fluiddrawer_2",
+    "fluiddrawerslegacy:framed_fluiddrawer_2",
     "fluiddrawerslegacy:fluiddrawer_2_half",
+    "fluiddrawerslegacy:framed_fluiddrawer_2_half",
     "fluiddrawerslegacy:fluiddrawer_4",
-    "fluiddrawerslegacy:fluiddrawer_4_half"
+    "fluiddrawerslegacy:framed_fluiddrawer_4",
+    "fluiddrawerslegacy:fluiddrawer_4_half",
+    "fluiddrawerslegacy:framed_fluiddrawer_4_half"
   ]
 }

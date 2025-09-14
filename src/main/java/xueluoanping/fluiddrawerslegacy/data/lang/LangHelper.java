@@ -33,6 +33,10 @@ public abstract class LangHelper extends LanguageProvider {
 		add(RegisterFinderUtil.getBlock(FluidDrawersLegacyMod.rl("fluiddrawer"+countString)), hint);
 	}
 
+	public void addFramedDrawer(String countString, String hint) {
+		add(RegisterFinderUtil.getBlock(FluidDrawersLegacyMod.rl("framed_fluiddrawer"+countString)), hint);
+	}
+
 	// There is a lot of code here that is redundant, but indispensable. In order to make corrections
 	protected abstract void addTranslations();
 

@@ -428,6 +428,7 @@ public class Screen extends AbstractContainerScreen<ContainerFluiDrawer> {
         }
     }
 
+    @SuppressWarnings("removal")
     public static ResourceLocation getBgByType(IFluidDrawerGroup group) {
         int s = group.getDrawerCount();
 
