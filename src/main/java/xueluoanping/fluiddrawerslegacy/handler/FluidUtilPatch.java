@@ -1,7 +1,6 @@
 package xueluoanping.fluiddrawerslegacy.handler;
 
 import com.google.common.base.Preconditions;
-import cpw.mods.util.Lazy;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -19,6 +18,8 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
+
 // It's a patch for FluidUtil, because it can't specify the fluid
 public class FluidUtilPatch {
 
@@ -29,7 +30,7 @@ public class FluidUtilPatch {
 
         ItemStack heldItem = player.getItemInHand(hand);
         if (!heldItem.isEmpty()) {
-            return Lazy.of( player.getCapability(Capabilities.ItemHandler.ENTITY))
+            return Optional.ofNullable( player.getCapability(Capabilities.ItemHandler.ENTITY))
                     .map(playerInventory -> {
                         // FluidActionResult fluidActionResult = FluidUtil.tryFillContainerAndStow(heldItem, handler, playerInventory, Integer.MAX_VALUE, player, true);
                         // if (!fluidActionResult.isSuccess())
@@ -138,9 +139,9 @@ public class FluidUtilPatch {
                 .orElse(FluidActionResult.FAILURE);
     }
 
-    public static @Nullable Lazy<IFluidHandlerItem> getFluidHandler(@NotNull ItemStack itemStack)
+    public static Optional<IFluidHandlerItem> getFluidHandler(@NotNull ItemStack itemStack)
     {
-        return Lazy.of(itemStack.getCapability(Capabilities.FluidHandler.ITEM));
+        return Optional.ofNullable(itemStack.getCapability(Capabilities.FluidHandler.ITEM));
     }
 
 }
