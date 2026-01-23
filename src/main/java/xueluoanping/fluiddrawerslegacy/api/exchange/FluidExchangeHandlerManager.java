@@ -33,7 +33,7 @@ public class FluidExchangeHandlerManager {
             if (!$.annotationType().getClassName().equals(ExchangeHandlerAno.class.getName())) {
                 return false;
             } else {
-                List<String> required = (ArrayList<String>) $.annotationData().getOrDefault("mods", new ArrayList<>());
+                Collection<String> required = (Collection<String>) $.annotationData().getOrDefault("mods", new ArrayList<>());
                 return new HashSet<>(ModList.get().getMods().stream().map(IModInfo::getModId).toList()).containsAll(required);
             }
         }).map(ModFileScanData.AnnotationData::memberName).toList();
