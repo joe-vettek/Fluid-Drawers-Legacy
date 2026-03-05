@@ -8,7 +8,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.common.Mod;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,8 +16,8 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class CapabilityProvider_FluidDrawerController implements ICapabilityProvider {
 
-    public final betterFluidManager<BlockEntityController> tank;
-    private final LazyOptional<betterFluidManager<BlockEntityController>> tankHandler;
+    public final BetterFluidManager<BlockEntityController> tank;
+    private final LazyOptional<BetterFluidManager<BlockEntityController>> tankHandler;
     public static BlockPos tilePos = null;
     final BlockEntityController tile;
 
@@ -46,7 +46,7 @@ public class CapabilityProvider_FluidDrawerController implements ICapabilityProv
     }
 
 
-    private betterFluidManager<BlockEntityController> createFluidHandler() {
-        return new betterFluidManager<>(tile);
+    private BetterFluidManager<BlockEntityController> createFluidHandler() {
+        return new BetterFluidManager<>(tile);
     }
 }

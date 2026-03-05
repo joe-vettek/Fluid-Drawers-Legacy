@@ -13,11 +13,11 @@ import java.util.*;
 
 import static xueluoanping.fluiddrawerslegacy.ModConstants.DRAWER_GROUP_CAPABILITY;
 
-public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements IFluidHandler {
+public class BetterFluidManager<T extends BlockEntity & IDrawerGroup> implements IFluidHandler {
 
     private final T tile;
 
-    public betterFluidManager(T tile) {
+    public BetterFluidManager(T tile) {
         if (tile == null) {
             throw new RuntimeException("BlockEntity must implement IDrawerGroup");
         }
@@ -53,7 +53,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
 
     public List<FluidHolder> getFluidMap(List<BlockEntityFluidDrawer.FluidDrawerData> listNew) {
 
-        Map<FluidStack, Long> fluidMap = new LinkedHashMap<>();
+        Map<FluidType, Long> fluidMap = new LinkedHashMap<>();
 
         listNew.forEach(ele -> {
             FluidStack fluidStack = ele.getTank().getFluid();
@@ -68,15 +68,16 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                 fluidStack = FluidStack.EMPTY;
             }
 
-            Long packed = fluidMap.get(fluidStack);
+            FluidType fluidType = FluidType.of(fluidStack);
+            Long packed = fluidMap.get(fluidType);
             if (packed != null) {
                 int amount = (int) (packed >> 32) + fluidStack.getAmount();
                 int cap = packed.intValue() + capacity;
                 packed = ((long) amount << 32) | cap;
-                fluidMap.put(fluidStack, packed);
+                fluidMap.put(fluidType, packed);
             } else {
                 packed = ((long) fluidStack.getAmount() << 32) | capacity;
-                fluidMap.put(fluidStack, packed);
+                fluidMap.put(fluidType, packed);
             }
         });
 
@@ -93,6 +94,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
                 emptyHolderList.add(fluidHolder);
         });
         fluidHolderList.addAll(emptyHolderList);
+
 
         return fluidHolderList;
     }
@@ -130,7 +132,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
         if (!resource.isEmpty()) {
             List<BlockEntityFluidDrawer.FluidDrawerData> drawerDataList = getFluidDrawerDataList();
 
-            for (BlockEntityFluidDrawer.FluidDrawerData drawer: drawerDataList) {
+            for (BlockEntityFluidDrawer.FluidDrawerData drawer : drawerDataList) {
                 if (remaining.isEmpty())
                     break;
 
@@ -165,7 +167,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
         List<FluidHolder> fluidHolderList = getFluidMap(drawerDataList);
         if (fluidHolderList.size() > tank) {
             FluidHolder holder = fluidHolderList.get(tank);
-            return new FluidStack(holder.fluid(), holder.fluidAmount());
+            return new FluidStack(holder.fluid().fluid(), holder.fluidAmount(), holder.fluid().tag());
         } else {
             return FluidStack.EMPTY;
         }
@@ -188,7 +190,7 @@ public class betterFluidManager<T extends BlockEntity & IDrawerGroup> implements
         List<FluidHolder> fluidHolderList = getFluidMap(drawerDataList);
         if (fluidHolderList.size() > tank) {
             FluidHolder holder = fluidHolderList.get(tank);
-            return stack.isFluidEqual(holder.fluid()) &&
+            return FluidType.isFluidEqual(stack, holder.fluid()) &&
                     stack.getAmount() + holder.fluidAmount() <= holder.tankCapacity();
         } else {
             return false;

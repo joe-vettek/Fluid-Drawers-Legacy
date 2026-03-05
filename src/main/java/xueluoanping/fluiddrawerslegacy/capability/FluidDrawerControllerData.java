@@ -15,12 +15,12 @@ public class FluidDrawerControllerData extends BlockEntityDataShim {
 
     @Override
     public void read(CompoundTag compoundTag) {
-        FluidDrawersLegacyMod.logger("Load Drawer", compoundTag);
+        //FluidDrawersLegacyMod.logger("Load Drawer", compoundTag);
     }
 
     @Override
     public CompoundTag write(CompoundTag compoundTag) {
-        FluidDrawersLegacyMod.logger("Save Drawer", compoundTag);
+        //FluidDrawersLegacyMod.logger("Save Drawer", compoundTag);
         return compoundTag;
     }
 

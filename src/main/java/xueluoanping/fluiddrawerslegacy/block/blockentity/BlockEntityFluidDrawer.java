@@ -36,7 +36,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xueluoanping.fluiddrawerslegacy.ModContents;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawerGroup;
-import xueluoanping.fluiddrawerslegacy.api.drawer.betterFluidManager;
+import xueluoanping.fluiddrawerslegacy.api.drawer.BetterFluidManager;
 import xueluoanping.fluiddrawerslegacy.api.drawer.IFluidDrawer;
 import xueluoanping.fluiddrawerslegacy.client.render.FluidAnimation;
 import xueluoanping.fluiddrawerslegacy.config.General;
@@ -217,7 +217,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         return this.drawerAttributes;
     }
 
-    public betterFluidManager<BlockEntityFluidDrawer> getTank() {
+    public BetterFluidManager<BlockEntityFluidDrawer> getTank() {
         return this.fluidGroupData.tank;
     }
 
@@ -302,8 +302,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     public class FluidGroupData extends BlockEntityDataShim implements IFluidDrawerGroup {
 
         private final LazyOptional<?> attributesHandler = LazyOptional.of(BlockEntityFluidDrawer.this::getDrawerAttributes);
-        public final betterFluidManager<BlockEntityFluidDrawer> tank;
-        private final LazyOptional<betterFluidManager<BlockEntityFluidDrawer>> tankHandler;
+        public final BetterFluidManager<BlockEntityFluidDrawer> tank;
+        private final LazyOptional<BetterFluidManager<BlockEntityFluidDrawer>> tankHandler;
         private final FluidDrawerData[] slots;
 
         public FluidGroupData(int slotCount, BlockEntityFluidDrawer blockEntityFluidDrawer) {
@@ -318,8 +318,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
         }
 
-        private betterFluidManager<BlockEntityFluidDrawer> createFluidHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
-            return new betterFluidManager<>(blockEntityFluidDrawer);
+        private BetterFluidManager<BlockEntityFluidDrawer> createFluidHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
+            return new BetterFluidManager<>(blockEntityFluidDrawer);
         }
 
 
