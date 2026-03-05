@@ -45,6 +45,7 @@ import xueluoanping.fluiddrawerslegacy.util.RegisterFinderUtil;
 import javax.annotation.Nonnull;
 import java.util.EnumSet;
 
+@SuppressWarnings("unused")
 public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworked, IFluidDrawerGroup {
 
     private final BasicDrawerAttributes drawerAttributes = new DrawerAttributes();
@@ -52,23 +53,24 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     private final FluidGroupData fluidGroupData;
     private final UpgradeData upgradeData = new BlockEntityFluidDrawer.DrawerUpgradeData();
     private final LazyOptional<?> capabilityGroup = LazyOptional.of(this::getGroup);
-    //    public static int Capacity = 32000;
+
     private final ControllerData controllerData = new ControllerData();
 
     public FluidAnimation fluidAnimation = new FluidAnimation();
 
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public BlockEntityFluidDrawer(int slotCount, BlockPos pos, BlockState state) {
-        super(ModContents.DRBlockEntities.getEntries().stream().filter(blockEntityTypeRegistryObject -> blockEntityTypeRegistryObject.getId().equals(RegisterFinderUtil.getBlockKey(state.getBlock()))).findFirst().get().get(), pos, state);
+        super(ModContents.DRBlockEntities.getEntries().stream().filter(
+                blockEntityTypeRegistryObject -> RegisterFinderUtil.getBlockKey(state.getBlock()).equals(blockEntityTypeRegistryObject.getId())
+        ).findFirst().get().get(), pos, state);
         this.fluidGroupData = new FluidGroupData(slotCount, this);
 
-        // this.fluidGroupData.setCapabilityProvider(this);
         this.injectPortableData(fluidGroupData);
 
         this.upgradeData.setDrawerAttributes(this.drawerAttributes);
         this.injectPortableData(this.upgradeData);
         injectPortableData(controllerData);
-        //        FluidDrawersLegacyMod.logger("create tile");
     }
 
     private void checkBoundController() {
@@ -82,7 +84,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         }
 
         if (remote != null && remote.getItem() instanceof ItemUpgradeRemote itemRemote) {
-            BlockEntityController upgradeController = itemRemote.getBoundController(remote, level);
+            BlockEntityController upgradeController = ItemUpgradeRemote.getBoundController(remote, level);
             if (controller != null && controller != upgradeController)
                 controller.invalidateRemoteNode(this);
 
@@ -125,18 +127,13 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     }
 
 
-    //    @Override
     public IDrawerGroup getGroup() {
         return this.fluidGroupData;
     }
 
-    //    @Override
     protected void onAttributeChanged() {
-        //        super.onAttributeChanged();
         this.requestModelDataUpdate();
-        // fluidGroupData.syncAttributes();
     }
-
 
     public void inventoryChanged() {
         super.setChanged();
@@ -152,7 +149,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
     @NotNull
     @Override
-    public IFluidDrawer getDrawer(int i) {
+    public FluidDrawerData getDrawer(int i) {
         return fluidGroupData.getDrawer(i);
     }
 
@@ -199,7 +196,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             if (attrs != null) {
                 this.drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, attrs.contains(LockAttribute.LOCK_EMPTY));
                 this.drawerAttributes.setItemLocked(LockAttribute.LOCK_POPULATED, attrs.contains(LockAttribute.LOCK_POPULATED));
-                //                    FluidDrawersLegacyMod.logger( attrs.contains(LockAttribute.LOCK_POPULATED)+""+ attrs.contains(LockAttribute.LOCK_EMPTY));
             }
         } else {
             this.drawerAttributes.setItemLocked(LockAttribute.LOCK_EMPTY, false);
@@ -216,19 +212,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
     }
 
-    //    @Override
+    // @Override
     public IDrawerAttributes getDrawerAttributes() {
         return this.drawerAttributes;
     }
-
-    // protected void syncClientCount(int slot, int count) {
-    //     if (this.getLevel() == null || !this.getLevel().isClientSide) {
-    //         PacketDistributor.TargetPoint point = new PacketDistributor.TargetPoint((double) this.getBlockPos().getX(), (double) this.getBlockPos().getY(), (double) this.getBlockPos().getZ(), 500.0D, this.getLevel().dimension());
-    //         CountUpdateMessageHandler.send(PacketDistributor.NEAR.with(() -> {
-    //             return point;
-    //         }), new CountUpdateMessage(this.getBlockPos(), slot, count));
-    //     }
-    // }
 
     public betterFluidManager<BlockEntityFluidDrawer> getTank() {
         return this.fluidGroupData.tank;
@@ -278,9 +265,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                     tankCapacity /= size;
             }
             var up = new UpgradeData(7);
-            up.setDrawerAttributes(new IDrawerAttributesModifiable() {
-            });
-            // up.setDrawerAttributes(new BasicDrawerAttributes());
+            up.setDrawerAttributes(new IDrawerAttributesModifiable() {});
             up.read(tag);
             int mul = up.getStorageMultiplier();
             tankCapacity *= mul;
@@ -295,18 +280,17 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
     }
 
 
-    //    @Override
+
     public int getRedstoneLevel() {
-        //        FluidDrawersLegacyMod.logger(getLevel().toString()+this.isRedstone());
         return (int) (((float) getCapacityUsed() / (float) getCapacityEffective()) * 15);
     }
 
-    //    @Override
+
     public boolean isRedstone() {
         return upgrades().getRedstoneType() != null;
     }
 
-    //    @Override
+
     public UpgradeData upgrades() {
         return this.upgradeData;
     }
@@ -329,12 +313,12 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             for (int i = 0; i < slotCount; ++i) {
                 this.slots[i] = this.createDrawer(i);
             }
-            tank = createFuildHandler(blockEntityFluidDrawer);
+            tank = createFluidHandler(blockEntityFluidDrawer);
             tankHandler = LazyOptional.of(() -> tank);
 
         }
 
-        private betterFluidManager<BlockEntityFluidDrawer> createFuildHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
+        private betterFluidManager<BlockEntityFluidDrawer> createFluidHandler(BlockEntityFluidDrawer blockEntityFluidDrawer) {
             return new betterFluidManager<>(blockEntityFluidDrawer);
         }
 
@@ -349,7 +333,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         }
 
         @Override
-        public @NotNull IFluidDrawer getDrawer(int i) {
+        public @NotNull FluidDrawerData getDrawer(int i) {
             return this.slots[i];
         }
 
@@ -360,7 +344,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
         @Override
         public boolean isGroupValid() {
-            //            return TileEntityFluidDrawer.this.isGroupValid();
             return !BlockEntityFluidDrawer.this.isRemoved();
         }
 
@@ -374,35 +357,35 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         public CompoundTag write(CompoundTag tag) {
             upgradeData.write(tag);
 
-            ListTag tanklist = new ListTag();
+            ListTag tankList = new ListTag();
             for (FluidDrawerData data : this.slots) {
-                tanklist.add(data.serializeNBT());
+                tankList.add(data.serializeNBT());
             }
-            tag.put("tanks", tanklist);
+            tag.put("tanks", tankList);
 
-            //            inventoryChanged();
-            //            If want to camouflage, pay attention to setting the capacity first, but we don't need it.
+            // inventoryChanged();
+            // If want to camouflage, pay attention to setting the capacity first, but we don't need it.
             return tag;
         }
 
 
         @Override
         public void read(CompoundTag nbt) {
-            //            if(!getLevel().isClientSide())
-            //            FluidDrawersLegacyMod.logger(getLevel().isClientSide()+"");
-            //            upgrades must first,to adjust the capacity
+            // if(!getLevel().isClientSide())
+            //     FluidDrawersLegacyMod.logger(getLevel().isClientSide()+"");
+            // upgrades must first,to adjust the capacity
             upgrades().read(nbt);
-            //            FluidDrawersLegacyMod.logger("read"+nbt.toString());
+            // FluidDrawersLegacyMod.logger("read"+nbt.toString());
 
             if (nbt.contains("tank")) {
                 this.slots[0].deserializeNBT(nbt.getCompound("tank"));
             } else if (nbt.contains("tanks")) {
-                var tanklist = nbt.getList("tanks", ListTag.TAG_COMPOUND);
-                for (int i = 0; i < tanklist.size(); i++) {
-                    this.slots[i].deserializeNBT(tanklist.getCompound(i));
+                var tankList = nbt.getList("tanks", ListTag.TAG_COMPOUND);
+                for (int i = 0; i < tankList.size(); i++) {
+                    this.slots[i].deserializeNBT(tankList.getCompound(i));
                 }
             }
-            //            inventoryChanged();
+            // inventoryChanged();
         }
 
         public boolean idVoidUpgrade() {
@@ -413,8 +396,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
     // IDrawer,
     public class FluidDrawerData implements IFluidDrawer<betterFluidHandler>, INBTSerializable<CompoundTag> {
-        private int slot;
-        //        private FluidStack fluid = new FluidStack(Fluids.EMPTY, 0);
+        private final int slot;
         private final FluidGroupData group;
         private final betterFluidHandler tank;
         public FluidAnimation fluidAnimation = new FluidAnimation();
@@ -459,7 +441,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         }
 
 
-        // @Override
         public int getMaxTankCapacity() {
             return getCapacityTankEffective();
         }
@@ -498,8 +479,6 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
         @Override
         public FluidStack getFluid() {
             if (upgrades().hasVendingUpgrade() && this.fluid.getFluid() != Fluids.EMPTY) {
-                //                FluidStack stack = fluid.copy();
-                //                stack.setAmount(Integer.MAX_VALUE);
                 return new FluidStack(super.getFluid(), Integer.MAX_VALUE);
             }
             return super.getFluid();
@@ -510,18 +489,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             if (this.getCapacity() != BlockEntityFluidDrawer.this.getCapacityTankEffective())
                 this.setCapacity(BlockEntityFluidDrawer.this.getCapacityTankEffective());
             CompoundTag nbt = new CompoundTag();
-            if (getCacheFluid().getRawFluid() != Fluids.EMPTY &&
-                    fluid.getFluid() != Fluids.EMPTY &&
-                    getCacheFluid().getRawFluid() != fluid.getFluid()) {
-                setCacheFluid(getFluid());
-            }
-            if (getCacheFluid().getRawFluid() == Fluids.EMPTY &&
-                    getFluid().getAmount() > 0) {
-                setCacheFluid(getFluid());
 
-            }
-
-            // nbt.putString("cache", cacheFluid.getFluidType().toString());
             nbt.put("cache", cacheFluid.writeToNBT(new CompoundTag()));
             return writeToNBT(nbt);
         }
@@ -536,7 +504,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             readFromNBT(tank);
         }
 
-        //        need to override ,or not sync
+        // need to override ,or not sync
         @Override
         protected void onContentsChanged() {
 
@@ -555,18 +523,8 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             if (upgrades().hasVendingUpgrade())
                 return 0;
             if (getDrawerAttributes().isItemLocked(LockAttribute.LOCK_EMPTY)) {
-                if (getCacheFluid().getRawFluid() != Fluids.EMPTY
-                        && !getCacheFluid().isFluidEqual(resource)) {
+                if (getCacheFluid().getRawFluid() == Fluids.EMPTY || !getCacheFluid().isFluidEqual(resource)) {
                     return 0;
-                }
-                if (getCacheFluid().getRawFluid() == Fluids.EMPTY) {
-                    if (resource.getAmount() > 0) {
-                        if (action.execute())
-                            setCacheFluid(resource);
-                        return super.fill(resource, action);
-                    } else
-                        return 0;
-
                 }
             }
             if ((this.getCapacity() - fluid.getAmount() - resource.getAmount()) < 0
@@ -579,6 +537,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                 }
                 if (fluid.isEmpty()) {
                     fluid = new FluidStack(resource, Math.min(capacity, resource.getAmount()));
+                    setCacheFluid(resource);
                     onContentsChanged();
                     return fluid.getAmount();
                 }
@@ -588,15 +547,21 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                 fluid.setAmount(capacity);
                 onContentsChanged();
                 return resource.getAmount();
+            } else {
+                boolean wasEmpty = fluid.isEmpty();
+                int filled = super.fill(resource, action);
+                if (wasEmpty && filled > 0) {
+                    setCacheFluid(resource);
+                }
+                return filled;
             }
-            return super.fill(resource, action);
         }
 
         @Nonnull
         @Override
         public FluidStack drain(FluidStack resource, FluidAction action) {
             if (upgrades().hasVendingUpgrade())
-                return resource.getFluid() == fluid.getFluid() ?
+                return resource.isFluidEqual(fluid) ?
                         new FluidStack(fluid.getFluid(), resource.getAmount()) :
                         FluidStack.EMPTY;
             return super.drain(resource, action);
@@ -609,12 +574,10 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                 return new FluidStack(fluid.getFluid(), maxDrain);
             return super.drain(maxDrain, action);
         }
-
-
     }
 
 
-    //    extra attributes, not very useful
+    // extra attributes, not very useful
     private class DrawerAttributes extends BasicDrawerAttributes {
         private DrawerAttributes() {
         }
@@ -638,8 +601,7 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
 
         @Override
         public boolean setItemLocked(LockAttribute attr, boolean isLocked) {
-            boolean result = super.setItemLocked(attr, isLocked);
-            return result;
+            return super.setItemLocked(attr, isLocked);
         }
     }
 
@@ -677,17 +639,17 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
                 ItemStack upgrade = this.getUpgrade(slot);
                 if (upgrade.getItem() instanceof ItemUpgradeStorage) {
                     int storageLevel = ((ItemUpgradeStorage) upgrade.getItem()).level.getLevel();
-                    int storageMult = ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(storageLevel);
-                    int effectiveStorageMult = BlockEntityFluidDrawer.this.upgrades().getStorageMultiplier();
-                    //                    单个物品特殊处理，
-                    if (effectiveStorageMult == storageMult) {
-                        --storageMult;
+                    int storageMulti = ModCommonConfig.INSTANCE.UPGRADES.getLevelMult(storageLevel);
+                    int effectiveStorageMulti = BlockEntityFluidDrawer.this.upgrades().getStorageMultiplier();
+                    // 单个物品特殊处理
+                    if (effectiveStorageMulti == storageMulti) {
+                        --storageMulti;
                     }
 
                     for (int i = 0; i < getDrawerCount(); i++) {
                         int amount = getDrawer(i).getTank().getFluidAmount();
                         int standardCapacity = getCapacityTankStandard();
-                        int afterCapacity = standardCapacity * (effectiveStorageMult - storageMult);
+                        int afterCapacity = standardCapacity * (effectiveStorageMulti - storageMulti);
                         if (afterCapacity < amount)
                             return false;
                     }
@@ -708,16 +670,5 @@ public class BlockEntityFluidDrawer extends BaseBlockEntity implements INetworke
             }
 
         }
-
-        //        private boolean stackCapacityCheck(int stackCapacity) {
-        //            return false;
-        //        }
-        //
-        //        @Override
-        //        public int getStorageMultiplier() {
-        ////            if(hasOneStackUpgrade())return super.getStorageMultiplier()/32;
-        //            return super.getStorageMultiplier();
-        //        }
-
     }
 }
